@@ -1,42 +1,41 @@
 const frequencyMath = require('./frequencyMath.js');
 
-const buflen 									= 1024,
-			GOOD_ENOUGH_CORRELATION = 0.98; // Correlation degree
+const buflen                  = 1024,
+      GOOD_ENOUGH_CORRELATION = 0.98; // Correlation degree
 
-let		audioContext 						= null,
-			gainNode 								= null,
-			analyser 								= null;
-
-let buf = new Float32Array( buflen );
-let MIN_SAMPLES = 0;
+let audioContext = null,
+    gainNode 	 = null,
+    analyser 	 = null,
+    buf          = new Float32Array( buflen ),
+    MIN_SAMPLES  = 0;
 
 window.onload = function() {
 	soundData.init();																						// Initialize all the data storing arrays etc.
 
-	audioContext 					 = new(window.AudioContext || window.webkitAudioContext)();
-	MAX_SIZE 							 = Math.max(4,Math.floor(audioContext.sampleRate));	// corresponds to a 5kHz signal
-	gainNode 							 = audioContext.createGain();
+	audioContext 	       = new(window.AudioContext || window.webkitAudioContext)();
+	MAX_SIZE 	       = Math.max(4,Math.floor(audioContext.sampleRate));
+	gainNode 	       = audioContext.createGain();
 	gainNode.gain.minValue = 0.7;
 	gainNode.gain.maxValue = 0.85;
 
 	navigator.mediaDevices.getUserMedia({audio:true}).then(function(localStream){
-	  const input 					= audioContext.createMediaStreamSource(localStream);
-		const scriptProcessor = audioContext.createScriptProcessor();
-	  analyser 							= audioContext.createAnalyser();
+	  const input           = audioContext.createMediaStreamSource(localStream);
+	  const scriptProcessor = audioContext.createScriptProcessor();
+	  analyser              = audioContext.createAnalyser();
 
-		// Some analyser setup
+	  // Some analyser setup
 	  analyser.smoothingTimeConstant = 0.9;
-		analyser.fftSize 							 = 32768;	// Max possible size
+	  analyser.fftSize               = 32768;	// Max possible size
 
-		//console.log(analyser.fftSize);
-		//console.log(audioContext.sampleRate);
+	  //console.log(analyser.fftSize);
+	  //console.log(audioContext.sampleRate);
 
 	  input.connect(analyser);
 	  analyser.connect(scriptProcessor);
 	  scriptProcessor.connect(audioContext.destination);
 
 	  var onAudio = function(){
-			updatePitch();
+	      updatePitch();
 	  };
 
 	  scriptProcessor.onaudioprocess = onAudio;
@@ -44,15 +43,15 @@ window.onload = function() {
 }
 
 function autoCorrelate( buf, sampleRate ) {
-	const SIZE 							 = buf.length,
-				MAX_SAMPLES 			 = Math.floor(SIZE/2),
-				rms 							 = Math.sqrt(buf.reduce((total, curVal) => { return total += curVal * curVal }, 0) / SIZE);
+	const SIZE 	  = buf.length,
+	      MAX_SAMPLES = Math.floor(SIZE/2),
+	      rms 	  = Math.sqrt(buf.reduce((total, curVal) => { return total += curVal * curVal }, 0) / SIZE);
 
-	let best_offset 				 = -1,
-			best_correlation 		 = 0,
-			foundGoodCorrelation = false,
-			correlations 				 = new Array(MAX_SAMPLES),
-			lastCorrelation			 = 1;
+	let best_offset          = -1,
+	    best_correlation 	 = 0,
+	    foundGoodCorrelation = false,
+	    correlations 	 = new Array(MAX_SAMPLES),
+	    lastCorrelation	 = 1;
 
 	if (rms<0.01) // not enough signal
 		return -1;
@@ -84,12 +83,12 @@ function autoCorrelate( buf, sampleRate ) {
 }
 
 let soundData = {
-	sounds: [...frequencyMath.soundArray],
-	freqArr: [],
-	soundSamples: null,
-	soundCount: null,
-	add: function(fx){
-		fx 				= Number((fx).toFixed(2));
+    sounds: [...frequencyMath.soundArray],
+    freqArr: [],
+    soundSamples: null,
+    soundCount: null,
+    add: function(fx){
+		fx        = Number((fx).toFixed(2));          //Round the frequency value
 		const res = frequencyMath.getSoundInfo(fx);
 
 		this.soundSamples++;
@@ -107,22 +106,22 @@ let soundData = {
 		console.log(this.freqArr);
 
 		const most = this.freqArr.sort((a,b) =>
-          this.freqArr.filter(v => v===a).length
-        - this.freqArr.filter(v => v===b).length
-    ).pop();
+                      this.freqArr.filter(v => v===a).length
+                    - this.freqArr.filter(v => v===b).length
+                ).pop();
 		//const most = roundFreq.indexOf(Math.max(...roundFreq));
 
-		const bias = most * 0.03; 				   					   // 0.3 is just a random bias for similarity check
-		let it 		 = 0; 										 						 // Number of samples that passed the similarity
+		const bias = most * 0.03; 			       // 0.3 is just a random bias for similarity check
+		let it 		 = 0; 				       // Number of samples that passed the similarity
 																										 // check for the result to be divided by
 
 		let res 	 = this.freqArr.reduce((sum, val) => { // Summing all the values that pass the "similarity check"
-			let tmpMost = most;								 						 // Temporary copy of the most frequeny value (possibility of swapping variables)
+			let tmpMost = most;			       // Temporary copy of the most frequeny value (possibility of swapping variables)
 
 			if(val > tmpMost)
-				[tmpMost, val] = [val, tmpMost];  					 // Swapping variables
+				[tmpMost, val] = [val, tmpMost];       // Swapping variables
 
-			if(tmpMost - val <= bias){				 						 // Checking if the current value is "similar" enough to the most frequent value
+			if(tmpMost - val <= bias){		       // Checking if the current value is "similar" enough to the most frequent value
 				//console.log(most, val, tmpMost - val, bias);
 				it++;
 				return val + sum;
@@ -132,7 +131,7 @@ let soundData = {
 			}
 		}, 0);
 
-		return res / it; 										 						 // Returning the average of all the data that passed the similarity check
+		return res / it; 				       // Returning the average of all the data that passed the similarity check
 	},
 	selfCheck: function(){
 		//console.log(this.soundCount.some(x => x !== 0));
@@ -140,8 +139,8 @@ let soundData = {
 	},
 	init: function(){
 		this.soundSamples = 0;
-		this.soundCount 	= new Array(12).fill(0);
-		this.freqArr 			= [];
+		this.soundCount   = new Array(12).fill(0);
+		this.freqArr 	  = [];
 	},
 	show: function(){
 		this.sounds.forEach((entry, i) => {
@@ -154,18 +153,18 @@ function updatePitch( time ) {
 	analyser.getFloatTimeDomainData( buf );
 	const ac = autoCorrelate( buf, audioContext.sampleRate );
 
-	if(ac > -1){ 							               // Add data to object as long as the correlation and signal are good
+	if(ac > -1){ 				 // Add data to object as long as the correlation and signal are good
 		soundData.add(ac);
 	}
 	else if(soundData.soundSamples !== 0){	 // If correlation/signal aren't good enough check the number of collected samples
-		if(soundData.soundSamples > 3){				 // If there's 3 or more frequencies saved in object then calculate recent note
-																				   // and update the displayed info
+		if(soundData.soundSamples > 3){	 // If there's 3 or more frequencies saved in object then calculate recent note
+						 // and update the displayed info
 
 			const result = frequencyMath.getSoundInfo(soundData.diyTest());
 			//console.log(resutlt);
 			document.getElementById('lastNote').innerHTML = result.note;
 		}
 
-		soundData.init();											 // Empty the whole data storage object
+		soundData.init();		 // Empty the whole data storage object
 	}
 }
