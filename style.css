@@ -1,0 +1,11 @@
+body{
+  background-color: #444;
+}
+#lastNote{
+  height: 50%;
+  width: 50%;
+  color: white;
+  font-weight: bolder;
+  font-size: 5em;
+  margin-left: 40%;
+}
