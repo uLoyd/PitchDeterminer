@@ -160,7 +160,7 @@ function updatePitch( time ) {
 						 // and update the displayed info
 
 			const result = frequencyMath.getSoundInfo(soundData.diyTest());
-			//console.log(resutlt);
+			//console.log(result);
 			document.getElementById('lastNote').innerHTML = result.note;
 		}
 
