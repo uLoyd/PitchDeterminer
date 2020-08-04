@@ -112,10 +112,9 @@ let soundData = {
 		//const most = roundFreq.indexOf(Math.max(...roundFreq));
 
 		const bias = most * 0.03; 			       // 0.3 is just a random bias for similarity check
-		let it 		 = 0; 				       // Number of samples that passed the similarity
-																										 // check for the result to be divided by
-
-		let res 	 = this.freqArr.reduce((sum, val) => { // Summing all the values that pass the "similarity check"
+		let it 	   = 0; 				       // Number of samples that passed the similarity
+								       // check for the result to be divided by
+		let res   = this.freqArr.reduce((sum, val) => {        // Summing all the values that pass the "similarity check"
 			let tmpMost = most;			       // Temporary copy of the most frequeny value (possibility of swapping variables)
 
 			if(val > tmpMost)
