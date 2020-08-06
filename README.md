@@ -1,4 +1,6 @@
 # PitchDeterminer
 ## **WIP**
 Electron App to determine note based on the signal received from mic.  
-Determines sound from E2 up. Anything below E2 (~86Hz) will output incorrect results.
+  
+Currently tested determining sounds down to C1 ~ 32.7Hz. (Less than 2Hz difference between C#1 and B0)  
+Accurate enough down to 2Hz differences.
