@@ -26,13 +26,14 @@ const frequencyMath = {
                                              // fx = f0 * r ^ x
                                              // x = ln(fx / f0) / ln(r)
 
-    return (fx < 90 ? Math.floor(result) : Math.round(result)); //Rounds down the results if the frequency is low compensating lack of
-                                                                //accuracy determining the low frequencies as the "distance" between
-                                                                //notes gets smaller the lower the frequency
-    //return Math.round(result);
+    //return (fx < 90 ? Math.floor(result) : Math.round(result)); // Rounds down the results if the frequency is low compensating lack of
+                                                                  // accuracy determining the low frequencies as the "distance" between
+                                                                  // notes gets smaller the lower the frequency. Accurate only from E2 up.
+                                                                  // Useful ONLY with buffer size ("buflen" variable) in frequency.js under 2048 
+    return Math.round(result);
   },
-  getSoundId: (step) => {                                       //Returns index of a note based on the distance from A4 note
-    let id = (step > 11 || step < -11 ? step % 12 : step);      //passed in the parameter
+  getSoundId: (step) => {                                         //Returns index of a note based on the distance from A4 note
+    let id = (step > 11 || step < -11 ? step % 12 : step);        //passed in the parameter
     id = (id < 0 ? 12 + id : id);
 
     return id;
