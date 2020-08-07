@@ -8,11 +8,16 @@
 
    <body>
       <audio autoplay></audio>
+      <header>
+        <div id="volumeMeter" class='volume'>
+          <div id="volume" class="volume"></div>
+        </div>
+      </header>
       <div id='lastNote'>
         N/A
       </div>
       <script>
-        require('./frequency.js');
+        require('./render.js');
       </script>
    </body>
 </html>
