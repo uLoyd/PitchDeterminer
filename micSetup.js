@@ -1,23 +1,23 @@
-const buflen 									= 4096,
-			GOOD_ENOUGH_CORRELATION = 0.98; // Correlation degree
+const buflen                  = 4096,
+      GOOD_ENOUGH_CORRELATION = 0.98; // Correlation degree
 
-let	audioContext 						= null,
-		gainNode 								= null,
-		analyser 								= null,
-		sampleRate							= null,
-    buf 										= new Float32Array( buflen ),
-    MIN_SAMPLES 						= 0,
-		BIN_COUNT								= null;
+let audioContext = null,
+    gainNode 	 = null,
+    analyser 	 = null,
+    sampleRate	 = null,
+    buf 	 = new Float32Array( buflen ),
+    MIN_SAMPLES  = 0,
+    BIN_COUNT	 = null;
 
 
 function autoCorrelate( buf ) {
-	const MAX_SAMPLES 			 = Math.floor(buflen/2),
-				rms 							 = Math.sqrt(buf.reduce((total, curVal) => { return total += curVal * curVal }, 0) / buflen);
+	const MAX_SAMPLES = Math.floor(buflen/2),
+	      rms 	  = Math.sqrt(buf.reduce((total, curVal) => { return total += curVal * curVal }, 0) / buflen);
 
-	let best_offset 				 = -1,
-			best_correlation 		 = 0,
-			correlations 				 = new Array(MAX_SAMPLES),
-			lastCorrelation			 = 1;
+	let best_offset      = -1,
+	    best_correlation = 0,
+	    correlations     = new Array(MAX_SAMPLES),
+	    lastCorrelation  = 1;
 
 	if (rms<0.01) // not enough signal
 		return -1;
@@ -58,27 +58,27 @@ const options = {
 
 		console.log({ minGain, maxGain, smoothing, fftSize, minDec, maxDec });
 
-		audioContext 					 = new(window.AudioContext || window.webkitAudioContext)();
-		MAX_SIZE 							 = Math.max(4,Math.floor(audioContext.sampleRate));	// corresponds to a 5kHz signal
-		gainNode 							 = audioContext.createGain();
+		audioContext 	       = new(window.AudioContext || window.webkitAudioContext)();
+		MAX_SIZE 	       = Math.max(4,Math.floor(audioContext.sampleRate));
+		gainNode 	       = audioContext.createGain();
 		gainNode.gain.minValue = (minGain !== null ? minGain : 0.7);
 		gainNode.gain.maxValue = (maxGain !== null ? maxGain : 0.85);
 
 		navigator.mediaDevices.getUserMedia({audio:true}).then(function(localStream){
-		  const input 					= audioContext.createMediaStreamSource(localStream);
-			const scriptProcessor = audioContext.createScriptProcessor();
-		  analyser 							= audioContext.createAnalyser();
-			sampleRate 						= audioContext.sampleRate;
-			BIN_COUNT							= analyser.frequencyBinCount;
+		  const input 		= audioContext.createMediaStreamSource(localStream);
+		  const scriptProcessor = audioContext.createScriptProcessor();
+		  analyser 		= audioContext.createAnalyser();
+		  sampleRate 		= audioContext.sampleRate;
+		  BIN_COUNT		= analyser.frequencyBinCount;
 
-			// Analyser setup
-		  analyser.smoothingTimeConstant = (smoothing ? smoothing : 0.9	);
-			analyser.fftSize 							 = (fftSize   ? fftSize 	: 32768);	// Max possible size (will be decreased later)
-			analyser.minDecibels 					 = (minDec 	  ? minDec 	  : -90	);
-		  analyser.maxDecibels 					 = (maxDec 	  ? maxDec 	  : -10	);
+		  // Analyser setup
+		  analyser.smoothingTimeConstant = (smoothing ? smoothing : 0.9	 );
+		  analyser.fftSize 		 = (fftSize   ? fftSize   : 32768); // Max possible size (will be decreased later)
+		  analyser.minDecibels 		 = (minDec    ? minDec 	  : -90	 );
+		  analyser.maxDecibels 		 = (maxDec    ? maxDec 	  : -10	 );
 
-			//console.log(analyser.fftSize);
-			//console.log(audioContext.sampleRate);
+		  //console.log(analyser.fftSize);
+		  //console.log(audioContext.sampleRate);
 
 		  input.connect(analyser);
 		  analyser.connect(scriptProcessor);
@@ -91,7 +91,7 @@ const options = {
 		const data = new Uint8Array(BIN_COUNT);
 		analyser.getByteFrequencyData(data);
 
-		return data.reduce((sum, val) => { return sum + val }, 0) / data.length;
+		return data.reduce((sum, val) => { return sum + val }, 0) / data.length; //Counts average volume
 	},
 	correlate: () => {
 		analyser.getFloatTimeDomainData( buf );
