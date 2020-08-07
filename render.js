@@ -95,7 +95,7 @@ window.onload = function() {
 }
 
 async function updateVolume(){
-  const volume = mic.getVolume();
+  	const volume = mic.getVolume();
 	const color  = (volume < 70 ? 'green' : (volume < 90 ? 'orange' : 'red'));
 
 	elements.volume.style([{key: 'background-color', value: color}, {key: 'width', value: `${volume}%`}]);
