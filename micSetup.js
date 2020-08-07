@@ -54,7 +54,7 @@ function autoCorrelate( buf ) {
 
 const options = {
 	init: (initData, callback) => {
-		const { minGain, maxGain, smoothing, fftSize, minDec, maxDec } = initData;
+		const { minGain, maxGain, smoothing, fftSize, minDec, maxDec } = initData; // Destructuring passed initData object
 
 		console.log({ minGain, maxGain, smoothing, fftSize, minDec, maxDec });
 
