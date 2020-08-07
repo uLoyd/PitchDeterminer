@@ -29,7 +29,7 @@ const frequencyMath = {
     //return (fx < 90 ? Math.floor(result) : Math.round(result)); // Rounds down the results if the frequency is low compensating lack of
                                                                   // accuracy determining the low frequencies as the "distance" between
                                                                   // notes gets smaller the lower the frequency. Accurate only from E2 up.
-                                                                  // Useful ONLY with buffer size ("buflen" variable) in frequency.js under 2048 
+                                                                  // Useful ONLY with buffer size ("buflen" variable) in micSetup.js under 2048 
     return Math.round(result);
   },
   getSoundId: (step) => {                                         //Returns index of a note based on the distance from A4 note
@@ -39,11 +39,10 @@ const frequencyMath = {
     return id;
   },
   getSoundInfo: function(fx){
-    const res = this.getStep(fx);
-
+    const res     = this.getStep(fx);
     const soundId = this.getSoundId(res);
 
-    console.log(`fx: ${fx}, res: ${res}, soundId: ${soundId}, sound: ${this.soundArray[soundId]}`);
+    //console.log(`fx: ${fx}, res: ${res}, soundId: ${soundId}, sound: ${this.soundArray[soundId]}`);
     return {note: this.soundArray[soundId], step: res, soundId: soundId};
   }
 }
