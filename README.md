@@ -7,4 +7,4 @@ At the moment it's accurate enough down to 2Hz differences.
   
 - Added volume measuring  
 - Still ~~a lot~~ a little bit of garbage left in methods waiting for removal
-- Added possibility to change input audio device
+- Added possibility to change input audio device (+ automatically changes when current device gets disconnected)
