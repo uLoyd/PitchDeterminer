@@ -94,7 +94,7 @@ function autoCorrelate( buf ) {
 }
 
 const options = {
-	setupStream: function(callback){
+	setupStream: function(){
 		navigator.mediaDevices.getUserMedia({
 			audio:
 			{
