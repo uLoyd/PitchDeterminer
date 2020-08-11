@@ -1,5 +1,5 @@
 const frequencyMath = require('./frequencyMath.js'),
-      mic           = require('./micSetupTest2.js');
+      mic           = require('./micSetup.js');
 
 const elements = {
 	lastNote: null,
