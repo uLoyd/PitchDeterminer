@@ -6,4 +6,5 @@ Currently tested determining sounds down to C1 ~ 32.7Hz (Less than 2Hz differenc
 At the moment it's accurate enough down to 2Hz differences.  
   
 - Added volume measuring  
-- Still a lot of garbage left in methods waiting for removal
+- Still ~~a lot~~ a little bit of garbage left in methods waiting for removal
+- Added possibility to change input device
