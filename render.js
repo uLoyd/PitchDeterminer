@@ -1,5 +1,5 @@
 const frequencyMath = require('./frequencyMath.js'),
-      mic           = require('./micSetup.js');
+      mic           = require('./micSetupTest2.js');
 
 const elements = {
 	lastNote: null,
@@ -10,9 +10,13 @@ class htmlElement {
 	constructor(name) {
 		this.element = document.getElementById(name);
 	}
-	text(content) {
-		this.element.innerHTML = content;
+	content(cont) {
+    		//console.log(cont, this.element);
+		this.element.innerHTML = cont;
 	}
+ 	append(cont){
+    		this.element.innerHTML += cont;
+  	}
 	style(data){
 		data.forEach((entry) => {
 			this.element.style[entry.key] = entry.value;
@@ -23,40 +27,39 @@ class htmlElement {
 let soundData = {
 	sounds: [...frequencyMath.soundArray],
 	freqArr: [],
-	soundSamples: null,
-	soundCount: null,
 	add: function(fx){
-		fx 	  = Number((fx).toFixed(2));
-		const res = frequencyMath.getSoundInfo(fx);
-
-		this.soundSamples++;
-		this.soundCount[res.soundId]++;
+		fx = Number((fx).toFixed(2));   // Rounds frequency to two points
 		this.freqArr.push(fx);
 	},
 	average: function(){
-		return Math.round(this.freqArr.reduce((sum, val) => {return sum + val}, 0) / this.soundSamples);
+		return Math.round(this.freqArr.reduce((sum, val) => {return sum + val}, 0) / this.freqArr.length);
 	},
-	most: function(){
-		return this.soundCount.indexOf(Math.max(...this.soundCount));
+	most: function(arr){                    // Returns most frequent value in given array
+		return arr.sort((a,b) =>
+          		arr.filter(v => v===a).length -
+        		  arr.filter(v => v===b).length
+    		   ).pop();
 	},
 	determine: function(){
-		const most = this.freqArr.sort((a,b) =>
-          		this.freqArr.filter(v => v===a).length -
-        		this.freqArr.filter(v => v===b).length
-    		).pop();
-		//const most = roundFreq.indexOf(Math.max(...roundFreq));
+    		if(!this.freqArr.length)
+      			return null;
 
-		const bias = most * 0.03; 			 // 0.03 is just a random bias for similarity check
-		let it 	   = 0; 				 // Number of samples that passed the similarity
-								 // check for the result to be divided by
+		const most = this.most(this.freqArr); 		  // Most frequent value (frequency) stored in "freqArr" array
+		const bias = most * 0.03; 			  // 0.03 is just a random bias for similarity check. Works alright.
 
-		let res    = this.freqArr.reduce((sum, val) => { // Summing all the values that pass the "similarity check"
-			let tmpMost = most;			 // Temporary copy of the most frequeny value (possibility of swapping variables)
+    		let it 	   = 0; 				  // Number of samples that passed the similarity check
+								  // by which the result ("res" variable) value will be divided
 
-			if(val > tmpMost)
-				[tmpMost, val] = [val, tmpMost]; // Swapping variables
+		let res    = this.freqArr.reduce((sum, val) => {  // Summing all the values that pass the "similarity check"
 
-			if(tmpMost - val <= bias){		 // Checking if the current value is "similar" enough to the most frequent value
+			let tmpMost = most;			  // Temporary copy of the most frequent value in array
+                                                     		  // (possibility of swapping variables)
+
+			if(val > tmpMost)                         // Swapping variables. Could use Math.abs() to prevent negative
+				[tmpMost, val] = [val, tmpMost];  // results but this is cool as well
+
+			if(tmpMost - val <= bias){		  // Checking if the current value is "similar"
+                                                     		  // enough to the most frequent value
 				it++;
 				return val + sum;
 			}
@@ -65,40 +68,85 @@ let soundData = {
 			}
 		}, 0);
 
-		return res / it; 				 // Returning the average of all the data that passed the similarity check
+		return res / it; 				  // Returning the average of all the data that passed the similarity check
 	},
 	selfCheck: function(){
-		//console.log(this.soundCount.some(x => x !== 0));
-		return this.soundCount.some(x => x !== 0);
+		return this.freqArr.length;
 	},
 	init: function(){
-		this.soundSamples = 0;
-		this.soundCount   = new Array(12).fill(0);
-		this.freqArr 	  = [];
-	},
-	show: function(){
-		this.sounds.forEach((entry, i) => {
-			console.log([entry, this.soundCount[i]]);
-		});
+		this.freqArr = [];
 	}
 }
 
 window.onload = function() {
-	soundData.init();				  // Initialize all the data storing arrays etc.
+	soundData.init();				    	  // Initialize all the data storing arrays etc.
 
-        mic.init({  }, updatePitch);                      // Leaving the object empty for the method to assign default values by itself
-                                                          // Initializes mediaContex, analasyer, input, gainNode and scriptProcessor
-                                                          // Also contains autocorrelation and volume measuring functions
+  	const devChange = (arr, currentInput, currentOutput) => { // Function used as callback for mic.init to respond to device changes
+    		elements.audioIn.content('');                     // Empties devices list
+    		elements.audioOut.content('');                    // Empties devices list
 
-	elements.lastNote = new htmlElement('lastNote');  // Initialize html elements data
-	elements.volume   = new htmlElement('volume');    // All the stuff there is just for own convenience
+    		//console.log(`Current input: ${currentInput}\nCurrent output: ${currentOutput}`);
+
+    		const create = async(target, id, dir, label) => { // Adds device to list
+      			const elem = id + dir;
+      			const add  = `<button id="${elem}" class='deviceButton'">${label}</button>`;
+      			target.append(add);
+
+      			return elem;
+    		}
+
+    		arr.forEach((entry) => {
+      			const target = (entry.dir === 'input' ? elements.audioIn : elements.audioOut);
+
+      			create(target, entry.id, entry.dir, entry.label)    // Creates element corresponding to found audio device inside list in DOM
+      			.then((elem) => {
+        			const retElem = document.getElementById(elem);
+        			if(entry.dir === 'input'){                  // Adds onclick event to given element
+          				retElem.addEventListener('click', function(){
+        					mic.changeInput(entry.id);  // changeInput method as name states... changes currently used input
+        				});
+        			}
+        			else{
+          				retElem.addEventListener('click', function(){
+        					mic.changeOutput(entry.id); // not ready yet
+        				});
+        			}
+      			});
+   		});
+  	}
+
+  	mic.init({ deviceChange: devChange }, updatePitch); // Leaving the object empty for the method assigns default values by itself
+                                                      	    // Init method initializes mediaContex, analasyer, input, gainNode and scriptProcessor.
+                                                      	    // Additionally it contains autocorrelation and volume measuring functions
+                                                      	    // init object structure:
+                                                      	    // {
+                                                      	    //    minGain:        (default = -90)
+                                                      	    //    maxGain:        (default = -10)
+                                                      	    //    smoothing:      (default = 0.9)
+                                                      	    //    fftSize:        (default = 32768 (max possible value. Temporary))
+                                                      	    //    minDec:         (default = 0.7)
+                                                      	    //    maxDec:         (default = 0.85)
+                                                      	    //    deviceChange:   callback (optional. If not specified only default devices for input and output will be used.
+                                                      	    //                              the callback has acces to array of objects:
+                                                      	    //                              [{deviceId, deviceLabel, deviceDirection}] and current input and output device names)
+                                                      	    // }
+                                                      	    //
+                                                      	    // Changing minGain and maxGain values to other than default might cause problems with
+                                                      	    // volume measurment in updateVolume function for the audio bar going higher than 100% (not tested much yet)
+
+
+
+	elements.lastNote    = new htmlElement('lastNote'); // Initialize html elements data
+	elements.volume      = new htmlElement('volume');   // All the stuff there is just for own convenience
+	elements.audioIn     = new htmlElement('audioIn');
+	elements.audioOut    = new htmlElement('audioOut');
 }
 
 async function updateVolume(){
-  	const volume = mic.getVolume();
-	const color  = (volume < 70 ? 'green' : (volume < 90 ? 'orange' : 'red'));
+  const volume = mic.getVolume();
+  const color  = (volume < 70 ? 'green' : (volume < 90 ? 'orange' : 'red'));
 
-	elements.volume.style([{key: 'background-color', value: color}, {key: 'width', value: `${volume}%`}]);
+  elements.volume.style([{key: 'background-color', value: color}, {key: 'width', value: `${volume}%`}]);
 }
 
 async function updatePitch( time ){
@@ -106,17 +154,17 @@ async function updatePitch( time ){
 
 	const ac = mic.correlate();
 
-	if(ac > -1){                                                           // Add data to object as long as the correlation and signal are good
+	if(ac > -1){                                		     // Add data to object as long as the correlation and signal are good
 		soundData.add(ac);
 	}
-	else{ 								       // If correlation/signal aren't good enough check the number of collected samples
-		if(soundData.soundSamples > 3 || soundData.soundSamples < 50){ // If there's 3 or more frequencies saved in object then calculate recent note
-			const res = frequencyMath.getSoundInfo(soundData.determine());
+	else{
+    		if(soundData.selfCheck()){
+      			const res = frequencyMath.getSoundInfo(soundData.determine());
 
-			if(res.note)
-				elements.lastNote.text(res.note);              // and update the displayed info
-		}
+  			if(res.note)
+  				elements.lastNote.content(res.note); // and update the displayed info
+    		}
 
-		soundData.init();				               // Empty the whole data storage object
+		soundData.init();				     // Empty the whole data storage object
 	}
 }
