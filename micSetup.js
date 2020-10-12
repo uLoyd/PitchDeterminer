@@ -35,9 +35,9 @@ function updateDeviceList() {
 
 				if(!currentInput && direction === 'input')	// If current output isn't set then set up the default one
 					currentInput = device.deviceId;		// currentInput is used in constraint for getUserMedia
-																											 // On users device change currentInput is being changed to
-																											 // the deviceId and getUserMedia is called again using the
-																											 // constraint with updated input device id
+										// On users device change currentInput is being changed to
+										// the deviceId and getUserMedia is called again using the
+										// constraint with updated input device id
 
 				if(!currentOutput && direction === 'output') 	// Output won't be useful until adding backing tracks.
 					currentOutput = device.deviceId;	// Good to have a base code as a reminder tho.
