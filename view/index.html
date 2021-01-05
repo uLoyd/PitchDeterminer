@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+   <head>
+     <meta charset = "UTF-8">
+     <meta name='viewport' content='width=device-width, initial-scale=1'>
+     <title>Audio</title>
+     <link rel="stylesheet" href="style.css">
+     <script src='https://kit.fontawesome.com/a076d05399.js'></script>
+     <script>
+       require('./../controllers/render.js');
+     </script>
+   </head>
+
+   <body>
+      <audio autoplay></audio>
+      <header>
+        <div id="volumeMeter" class='volume'>
+          <div id="volume" class="volume"></div>
+        </div>
+
+        <div class="dropdown">
+          <button class="dropbtn">Audio input
+            <i class="fa fa-caret-down"></i>
+          </button>
+          <div id="audioIn" class="dropdown-content"></div>
+        </div>
+
+        <div class="dropdown">
+          <button class="dropbtn">Audio output
+            <i class="fa fa-caret-down"></i>
+          </button>
+          <div id="audioOut" class="dropdown-content"></div>
+        </div>
+
+        <button id="micBut" type="button" name="button">
+          <i class='mic fas fa-microphone-alt'></i>
+        </button>
+      </header>
+      <div id='lastNote'>
+        N/A
+      </div>
+   </body>
+</html>
