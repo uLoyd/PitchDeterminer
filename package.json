@@ -1,16 +1,29 @@
 {
-  "name": "electronapp",
-  "version": "0.2.0",
-  "description": "",
+  "name": "pitchdeterminer",
+  "version": "0.2.1",
+  "description": "Electron app determining pitch using web audio api",
   "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "electron ."
   },
-  "author": "",
-  "license": "ISC",
-  "devDependencies": {
-    "electron": "^9.1.0"
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DawidPartyka/PitchDeterminer.git"
   },
-  "dependencies": {}
+  "keywords": [
+    "electron",
+    "web_audio_api",
+    "pitch",
+    "audio"
+  ],
+  "author": "Dawid Partyka",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/DawidPartyka/PitchDeterminer/issues"
+  },
+  "homepage": "https://github.com/DawidPartyka/PitchDeterminer#readme",
+  "devDependencies": {
+    "electron": "^11.1.1"
+  }
 }
