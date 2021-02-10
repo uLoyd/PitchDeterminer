@@ -18,7 +18,7 @@ class frequencyMath {
     soundArray = ["A", "A#", "B", "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#"];
 
     // Function returns amount of steps from the A4 note by passing the frequency in the parameter
-    getStep(fx) {
+    getDistanceFromFrequency(fx) {
         const result = Math.log(fx / this.A4) / this.logr; // Formula to find "x" reversed from the "fx" finding formula
                                                            // fx = f0 * r ^ x
                                                            // x = ln(fx / f0) / ln(r)
@@ -30,17 +30,40 @@ class frequencyMath {
         return Math.round(result);
     }
 
+    getFrequencyFromDistance(distance){
+      // Will be here later
+    }
+
+    getDistanceFromNote(note, octave){
+      // Will be here later
+    }
+
+    getDistanceFromNote(note){
+      // Will be here later
+    }
+
     // Returns index of a note passed in the parameter based on the distance from A4 note
-    getSoundId(step) {
+    getNoteFromDistance(step) {
         let id = (step > 11 || step < -11 ? step % 12 : step); //
         id = (id < 0 ? 12 + id : id);
 
         return id;
     }
+
+    getOctaveFromDistance(distance){
+      const arrLength = 12;
+      const A4dist = 48;
+      return Math.round((A4dist + distance) / arrLength);
+    }
+
+    getFrequencyError(frequency){
+
+    }
+
     getSoundInfo(fx) {
-        const res = this.getStep(fx);
-        const octave = Math.round((48 + res) / 12);
-        const soundId = this.getSoundId(res);
+        const res = this.getDistanceFromFrequency(fx);
+        const octave = this.getOctaveFromDistance(res);
+        const soundId = this.getNoteFromDistance(res);
 
         //console.log(`fx: ${fx}, res: ${res}, soundId: ${soundId}, sound: ${this.soundArray[soundId]}`);
         return {

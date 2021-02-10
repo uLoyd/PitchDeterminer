@@ -5,7 +5,7 @@ const frequencyMath = require('./../customModules/audioModules/frequencyMath.js'
 
 window.onload = function() {
     let mic; //Placeholder for audioHandler instance
-    
+
     const soundData = new soundStorage(); // soundData instance
     const freqMath = new frequencyMath(); // frequencyMath instance
 
@@ -30,19 +30,37 @@ window.onload = function() {
 
     // callback passed to audioHandler initialization for device change purposes
     function devChange(arr, currentInput, currentOutput) {
+        console.log("Updating device list");
         test.emptyDevices();
 
         arr.forEach((entry) => test.devChange(entry, mic));
     }
 
-    // callback passed to audioHandleTest to close/initialize audioHandler when mic button is clicked
-    const micSwitch = (state) => {
+    async function startMic() {
+        mic = new audioHandler({
+            deviceChange: devChange
+        }, dataProcess);
+    }
+
+    function enableMic() {
+        mic ? mic.resume() : startMic().then(() => mic.setupStream());
+        console.log("Mic enabled");
+        mic.deviceHandler.updateDeviceList();
+    }
+
+    async function pauseMic() {
+        await mic.pause();
+        console.log("Mic disabled");
+
+        test.clearData();
+    }
+
+    // callback passed to audioHandleTest to pause/resume audioHandlers AudioContext when mic button is clicked
+    const micSwitch = async (state) => {
         if (state)
-            mic = new audioHandler({
-                deviceChange: devChange
-            }, dataProcess);
+            enableMic();
         else
-            mic.end().then(console.log("Mic disabled"));
+            pauseMic();
     }
 
     // adding callback after creating an instance handling switching mic on and off

@@ -4,7 +4,6 @@ class deviceHandler {
     deviceChangeCallback = null;
 
     // callback -> deviceChangeCallback
-    // updateList (bool) = true if update device list on initialization
     constructor(callback) {
         this.deviceChangeCallback = callback;
 
@@ -39,7 +38,7 @@ class deviceHandler {
                                                                  // the deviceId and getUserMedia is called again using the
                                                                  // constraint with updated input device id
 
-                            if (!curOut && direction === 'output') // Output won't be useful until adding backing tracks.
+                            if (!curOut && direction === 'output') // Output won't be useful for now so it's just here doing nothing in particular.
                                 curOut = device.deviceId;          // Good to have this code here as a reminder tho.
                         }
                     }

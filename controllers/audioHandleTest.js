@@ -36,7 +36,7 @@ class audioHandleTest {
 
         let self = this;
         this.elements.micBut.element.addEventListener('click', function() {
-            self.toggleMic(self);
+            self.toggleMic(self); // Works for now ¯\_(ツ)_/¯
         });
     }
 
@@ -49,7 +49,7 @@ class audioHandleTest {
             value: (self.micState ? '#555' : 'red')
         }]);
 
-        self.micState = !this.micState; // Change the state of mic
+        self.micState = !self.micState; // Change the state of mic
 
         self.micCallback(self.micState);
     }
@@ -85,7 +85,7 @@ class audioHandleTest {
     }
 
     async updateVolume(vol) {
-        let volume = vol / 5; // Why divided by 5? It's a random value that works fine for now.
+        let volume = vol / 5; // Why divided by 5? It's a random value that works fine for now. Don't put too much attention to it.
         volume = volume < 100 ? volume : 100; // Stops the bar at 100 even if result is higher
 
         const color = (volume < 70 ? 'green' : (volume < 90 ? 'orange' : 'red'));
@@ -102,6 +102,14 @@ class audioHandleTest {
     async updatePitch(res) {
         if (res.note) // NaN can be passed here therefore a sanity check is needed
             this.elements.lastNote.content(`${res.note}${res.octave}`); // Update the displayed note
+    }
+
+    clearData() {
+        this.updateVolume(0); // Clears volume bar
+        this.updatePitch({    // Passing dummy object to don't show note
+            note: "N/A",
+            octave: ""
+        });
     }
 }
 

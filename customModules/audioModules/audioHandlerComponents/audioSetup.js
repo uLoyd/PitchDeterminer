@@ -39,6 +39,20 @@ class audioSetup {
         scriptProcessor.onaudioprocess = this.callback;
     }
 
+    async streamClose() {
+        await this.gainNode.disconnect();
+        await this.analyser.disconnect();
+        await this.audioContext.close();
+    }
+
+    async streamPause() {
+        await this.audioContext.suspend();
+    }
+
+    async streamResume() {
+        await this.audioContext.resume();
+    }
+
     gainSettingsUpdate(settings) {
         const { minGain, maxGain } = settings;
 
@@ -46,7 +60,7 @@ class audioSetup {
         this.default.gain.maxGain = maxGain ? maxGain : this.errors(6);
     }
 
-		// Analyser setup
+    // Analyser setup
     analyserSetup() {
         this.analyser = this.audioContext.createAnalyser();
         this.analyser.smoothingTimeConstant = this.default.analyser.smoothing;
