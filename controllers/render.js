@@ -1,15 +1,14 @@
 const frequencyMath = require('./../customModules/audioModules/frequencyMath.js'),
-      audioHandler = require('./../customModules/audioModules/audioHandler'),
-      soundStorage = require('./helpers/soundStorage'),
-      audioTest = require('./audioHandleTest');
+    audioHandler = require('./../customModules/audioModules/audioHandler'),
+    soundStorage = require('./helpers/soundStorage'),
+    audioTest = require('./audioHandleTest');
 
-window.onload = function() {
-    let mic; //Placeholder for audioHandler instance
-
+window.onload = async function() {
     const soundData = new soundStorage(); // soundData instance
     const freqMath = new frequencyMath(); // frequencyMath instance
 
-    function dataProcess(time) { // callback passed to audioHandler receiving audio data
+    // callback passed to audioHandler that will be receiving audio data to process
+    function dataProcess(time) {
         let volume = mic.getVolume();
         test.updateVolume(volume);
 
@@ -18,51 +17,51 @@ window.onload = function() {
         if (ac > -1) { // Add data to object as long as the correlation and signal are good
             soundData.add(ac);
         } else {
-            if (soundData.selfCheck()) // if soundData not empty
-                test.updatePitch(freqMath.getSoundInfo(soundData.determine())); // send data to controller and udpate displayed note
+            if (soundData.selfCheck())                                          // if soundData not empty
+                test.updatePitch(freqMath.getSoundInfo(soundData.determine())); // send data to controller and update displayed note
 
-            soundData.emptyData(); // Empty the whole data storage object
+            soundData.emptyData();                                              // Empty the whole data storage object
         }
     }
 
-    // audioHandleTest - updates data in window
-    let test = new audioTest();
 
-    // callback passed to audioHandler initialization for device change purposes
-    function devChange(arr, currentInput, currentOutput) {
-        console.log("Updating device list");
-        test.emptyDevices();
+    async function changeInput(e) {
+        mic.changeInput(e);
 
-        arr.forEach((entry) => test.devChange(entry, mic));
-    }
+        // No need to restart if it's not running
+        if (!mic.running)
+            return;
 
-    async function startMic() {
-        mic = new audioHandler({
-            deviceChange: devChange
-        }, dataProcess);
-    }
-
-    function enableMic() {
-        mic ? mic.resume() : startMic().then(() => mic.setupStream());
-        console.log("Mic enabled");
-        mic.deviceHandler.updateDeviceList();
-    }
-
-    async function pauseMic() {
-        await mic.pause();
-        console.log("Mic disabled");
-
+        // "Have you tried turning it off and on again?"
+        await mic.end();
         test.clearData();
+        console.log("Restarting with new settings");
+        await mic.setupStream();
     }
 
-    // callback passed to audioHandleTest to pause/resume audioHandlers AudioContext when mic button is clicked
-    const micSwitch = async (state) => {
-        if (state)
-            enableMic();
-        else
-            pauseMic();
+    async function micToggleEvent() {
+        const state = mic.running;
+
+        if (state) {
+            await mic.pause();
+            test.clearData();
+        } else {
+            mic.streamReady ? await mic.resume() : await mic.setupStream();
+        }
+
+        test.micState(!state); //Returning opposite state to change icon color
     }
 
-    // adding callback after creating an instance handling switching mic on and off
-    test.addCallback(micSwitch);
+    // callback that will be passed to deviceHandler from audioHandlers constructor
+    function deviceChangeAction(deviceArray, currentInput, currentOutput) {
+        test?.updateDeviceList(deviceArray);
+    }
+
+    // audioHandler instance
+    let mic = new audioHandler({
+        deviceChange: deviceChangeAction
+    }, dataProcess);
+
+    // audioHandleTest instance - shows data in window
+    let test = new audioTest(changeInput, micToggleEvent);
 }

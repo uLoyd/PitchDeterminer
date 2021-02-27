@@ -1,8 +1,8 @@
-const electron      = require('electron');
-const path          = require('path');
-const url           = require('url');
+const electron = require('electron');
+const path = require('path');
+const url = require('url');
 
-const app           = electron.app;
+const app = electron.app;
 const browserWindow = electron.BrowserWindow;
 
 let win;

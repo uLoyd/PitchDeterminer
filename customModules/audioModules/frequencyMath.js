@@ -10,7 +10,6 @@
   x = -------------       that's    x = ln(fx / f0) / ln(r)
          ln (r)           therefore x = ln(fx / 440) / ln(2^(1/12))
 */
-
 class frequencyMath {
     r = Math.pow(2, 1 / 12);
     logr = Math.log(this.r);
@@ -24,22 +23,22 @@ class frequencyMath {
                                                            // x = ln(fx / f0) / ln(r)
 
         //return (fx < 90 ? Math.floor(result) : Math.round(result)); // Rounds down the results if the frequency is low compensating lack of
-                                                                      // accuracy determining the low frequencies as the "distance" between
-                                                                      // notes gets smaller the lower the frequency. Accurate only from E2 up.
-                                                                      // Useful ONLY with buffer size ("buflen" variable) in audioHandler.js under 2048
+        // accuracy determining the low frequencies as the "distance" between
+        // notes gets smaller the lower the frequency. Accurate only from E2 up.
+        // Useful ONLY with buffer size ("buflen" variable) in audioHandler.js under 2048
         return Math.round(result);
     }
 
-    getFrequencyFromDistance(distance){
-      // Will be here later
+    getFrequencyFromDistance(distance) {
+        // Will be here later
     }
 
-    getDistanceFromNote(note, octave){
-      // Will be here later
+    getDistanceFromNote(note, octave) {
+        // Will be here later
     }
 
-    getDistanceFromNote(note){
-      // Will be here later
+    getDistanceFromNote(note) {
+        // Will be here later
     }
 
     // Returns index of a note passed in the parameter based on the distance from A4 note
@@ -50,14 +49,14 @@ class frequencyMath {
         return id;
     }
 
-    getOctaveFromDistance(distance){
-      const arrLength = 12;
-      const A4dist = 48;
-      return Math.round((A4dist + distance) / arrLength);
+    getOctaveFromDistance(distance) {
+        const arrLength = 12;
+        const A4dist = 48;
+        return Math.round((A4dist + distance) / arrLength);
     }
 
-    getFrequencyError(frequency){
-
+    getFrequencyError(frequency) {
+        // Will be here later
     }
 
     getSoundInfo(fx) {

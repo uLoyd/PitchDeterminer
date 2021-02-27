@@ -1,6 +1,6 @@
 {
   "name": "pitchdeterminer",
-  "version": "0.2.3",
+  "version": "0.3.2",
   "description": "Electron app determining pitch using web audio api",
   "main": "app.js",
   "scripts": {
@@ -24,6 +24,6 @@
   },
   "homepage": "https://github.com/DawidPartyka/PitchDeterminer#readme",
   "devDependencies": {
-    "electron": "^11.1.1"
+    "electron": "^11.3.0"
   }
 }

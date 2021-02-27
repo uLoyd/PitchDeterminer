@@ -1,3 +1,22 @@
+class device {
+    constructor(id, label, dir) {
+        if (typeof id === 'object' && id !== null) {
+            this.constructorForDeviceObject(id, label);
+        }
+        else {
+            this.id = id;
+            this.label = label;
+            this.dir = dir;
+        }
+    }
+
+    constructorForDeviceObject(dev, dir) {
+        this.id = dev.deviceId;
+        this.label = dev.label;
+        this.dir = dir;
+    }
+}
+
 class deviceHandler {
     currentInput = null;
     currentOutput = null;
@@ -5,74 +24,82 @@ class deviceHandler {
 
     // callback -> deviceChangeCallback
     constructor(callback) {
-        this.deviceChangeCallback = callback;
+        if (callback)
+            this.deviceChangeCallback = callback;
 
-        const self = this; // copy of this to use inside the navigator
+        navigator.mediaDevices.ondevicechange = this.deviceChangeEvent();
+    }
 
-        navigator.mediaDevices.ondevicechange = function(event) {
-            self.updateDeviceList();
+    async deviceChangeEvent() {
+        console.log("Change of device occured");
+
+        if (this.deviceChangeCallback)
+            this.deviceChangeCallback(await this.getDeviceList(), this.currentInput, this.currentOutput);
+    }
+
+    async getDeviceList() {
+        const idArr = [];
+
+        await navigator.mediaDevices.enumerateDevices(this.currentInput)
+            .then(function(devices) {
+                devices.forEach(function(dev) {
+                    const [kind, type, direction] = dev.kind.match(/(\w+)(input|output)/i);
+
+                    if (type === "audio") // Checks only audio input. No use for video
+                        idArr.push(new device(dev, direction));
+                });
+            });
+
+        return idArr;
+    }
+
+    // Returns currently set i/o devices or first matching device from device list
+    async getCurrentOrFirst() {
+        const devices = await this.getDeviceList();
+
+        return {
+            in: this.currentInput ? this.currentInput : devices.find(x => x.dir = 'input'),
+            out: this.currentOutput ? this.currentOutput : devices.find(x => x.dir = 'output')
         }
     }
 
-    updateDeviceList() {
-        let idArr = [];
-        let curIn = this.currentInput;
-        let curOut = this.currentOutput;
+    async changeInput(e) {
+        const devList = await this.getDeviceList();
+        let inDevice;
 
-        const dev = navigator.mediaDevices.enumerateDevices(this.currentInput)
-            .then(function(devices) {
-                devices.forEach(function(device) {
-                    const [kind, type, direction] = device.kind.match(/(\w+)(input|output)/i);
+        if (!e) // If no parameter passed device will be changed to first in the list
+            inDevice = await devList.find(x => x.dir === 'input');               // first input device
+        else
+            inDevice = await devList.find(x => x.id === e && x.dir === 'input'); // first input device with given id
 
-                    if (type === "audio") { // Checks only audio input. No use for video
-                        if (direction === 'input' || direction === 'output') {
-                            idArr.push({
-                                id: device.deviceId,
-                                label: device.label,
-                                dir: direction
-                            })
-
-                            if (!curIn && direction === 'input') // If current output isn't set then set up the default one
-                                curIn = device.deviceId;         // currentInput is used in constraint for getUserMedia
-                                                                 // On users device change currentInput is being changed to
-                                                                 // the deviceId and getUserMedia is called again using the
-                                                                 // constraint with updated input device id
-
-                            if (!curOut && direction === 'output') // Output won't be useful for now so it's just here doing nothing in particular.
-                                curOut = device.deviceId;          // Good to have this code here as a reminder tho.
-                        }
-                    }
-                });
-            })
-            .then(() => {
-                return {
-                    in: curIn,
-                    out: curOut
-                };
-            });
-
-        // Save currently used devices and use callback
-        dev.then((value) => {
-            this.changeInput(value.in);
-            this.changeOutput(value.out);
-            this.deviceChangeCallback(idArr, curIn, curOut);
-        });
+        this.currentInput = inDevice;
     }
 
-    changeInput(e) {
+    async changeOutput(e) {
         //console.log(e);
-        this.currentInput = e;
+        let outDevice = e;
+
+        if (!e) // If no parameter passed device will be changed to first in the list
+            outDevice = await this.getDeviceList().find(x => x.dir === 'output');               // first output device
+        else
+            outDevice = await this.getDeviceList().find(x => x.id === e && x.dir === 'output'); // first output device with given id
+
+        this.currentOutput = outDevice;
     }
-    changeOutput(e) {
-        //console.log(e);
-        this.currentOutput = e;
+
+    // Returns bool. True - there's at least 1 input device available
+    async checkForInput() {
+        const devList = await this.getDeviceList();
+
+        return devList.some(x => x.dir == "input");
     }
 
     // Return constrain for setting up the stream
-    navigatorInput() {
-        //console.log(this.currentInput ? { exact: this.currentInput } : undefined);
-        return this.currentInput ? {
-            exact: this.currentInput
+    async navigatorInput() {
+        const device = await this.getCurrentOrFirst();
+
+        return device.in ? {
+            exact: device.in.id
         } : undefined;
     }
 }

@@ -8,32 +8,31 @@ class audioHandler {
     audioTools = null;    // Placeholder for audioSetup class instance
     deviceHandler = null; // Placeholder for deviceHandler class instance
     buflen = null;        // Placeholder for buffor size
+    streamReady = false;  // Tells if setupStream method has been executed. Switched back to false on "end" method call
+    running = false;      // State (is it running) defined here as at the start AudioContext.state can
+                          // be set to "running" before invocation of setupStream method
 
     constructor(initData, callback) {
         const {
             general,
-            correlationSettings,
             gainSettings,
             analyserSettings,
-            deviceChange /*, outputAudio*/
+            deviceChange
         } = initData;
 
         // set this.buflen value from parameter passed / defaultValues or throw error
         general ? this.buflen = general.buflen : defaultValues.buflen ? this.buflen = defaultValues.buflen : errors(0);
 
         // Initialize deviceHandling and update device list
-        if (deviceChange) {
-            this.deviceHandler = new deviceHandler(deviceChange);
+        this.deviceHandler = new deviceHandler(deviceChange);
 
-            this.changeInput = (e) => {
-                this.deviceHandler.changeInput(e);
-                this.setupStream();
-            }
+        this.changeInput = (e) => {
+            this.deviceHandler.changeInput(e);
+        }
 
-            this.changeOutput = (e) => {
-                //this.deviceHandler.changeOutput(e);
-                console.log("I don't exist yet");
-            }
+        this.changeOutput = (e) => {
+            //this.deviceHandler.changeOutput(e);
+            console.log("I don't exist yet");
         }
 
         // Sets up audioContext and settings for gainNode and analyserNode
@@ -44,10 +43,21 @@ class audioHandler {
     }
 
     async setupStream() {
-        // Constrain specifing audio device
-        const audioConstrain = this.deviceHandler ? this.deviceHandler.navigatorInput() : undefined;
+        // Checking if there're any available input devices (await is a must)
+        if (!(await this.deviceHandler.checkForInput()))
+            throw ('No input audio devices available');
 
-        // audioTools thrown into audio variable to use inside navigator
+        // If stream was being restarted few times audioContext might remain in "closed" state
+        // so this method will restart the audioContext itself
+        this.audioTools.selfCheckAudioContext();
+
+        // Constrain specifing audio device
+        // if value here will be "undefined" then something's not right
+        // but the stream will start up with default avaible device (await is a must)
+        const audioConstrain = await this.deviceHandler.navigatorInput();
+        console.log(`Stream setting up using device: ${audioConstrain.exact}`);
+
+        // audioTools thrown into "audio" variable to use inside navigator
         let audio = this.audioTools;
 
         const userMedia = navigator.mediaDevices.getUserMedia({
@@ -71,11 +81,19 @@ class audioHandler {
         // assign returned audioSetup instance to audioHandler and setup Correlation
         userMedia.then((value) => {
             this.audioTools = value;
-            this.Correlation = new Correlation({
+            this.correlation = new Correlation({
                 buflen: this.buflen,
                 sampleRate: this.audioTools.sampleRate
             });
+            this.running = true;
+            this.streamReady = true;
         });
+    }
+
+    // Returns True when the AudioContext is working
+    // In state "suspended" & "closed" returns false
+    getState() {
+        return this.audioTools.audioContext.state === 'running';
     }
 
     getVolume() { // not tested, might not work well. Volume will be relative after all ¯\_(ツ)_/¯
@@ -94,21 +112,29 @@ class audioHandler {
 
         //console.log(this.Correlation.perform( buf ));
 
-        return this.Correlation.perform(buf);
+        return this.correlation.perform(buf);
+    }
+
+    async getDeviceList() {
+        return this.deviceHandler.getDeviceList();
     }
 
     async end() {
         await this.audioTools.streamClose();
+        this.running = false;
+        this.streamReady = false;
     }
 
     async pause() {
         await this.audioTools.streamPause();
         console.log("Stream paused");
+        this.running = false;
     }
 
     async resume() {
         await this.audioTools.streamResume();
         console.log("Stream resumed");
+        this.running = true;
     }
 
     errors(e) {
@@ -123,7 +149,7 @@ class audioHandler {
                 break;
         }
 
-        msg += "' value passed in object containing initializadion data and object containing default values";
+        msg += "' value passed in object containing initialization data and object containing default values";
         throw (msg);
     }
 }

@@ -36,7 +36,7 @@ class soundStorage {
 
         let res = this.freqArr.reduce((sum, val) => { // Summing all the values that pass the "similarity check"
 
-            if (Math.abs(most - val) <= bias) {       // Checking if the current value is "similar"
+            if (Math.abs(most - val) <= bias) {    // Checking if the current value is "similar"
                 it++;                                 // enough to the most frequent value
                 return val + sum;
             } else {
