@@ -33,10 +33,6 @@ class frequencyMath {
         return this.A4 * Math.pow(2, distance / 12); // Returns a perfect frequency of note x steps from A4
     }
 
-    getDistanceFromNote(note){
-        // Will be here later
-    }
-
     getIntervalCents(f1, f2){
         return 1200 * Math.log2(f1 / f2); // Returns amount of cents between two frequencies
     }
