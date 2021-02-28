@@ -40,13 +40,14 @@ class frequencyMath {
     getFrequencyError(frequency){
         const targetNoteDist = this.getDistanceFromFrequency(frequency);
         const targetFrequency = this.getFrequencyFromDistance(targetNoteDist);
+        const nextNote = frequency > targetFrequency ? targetNoteDist + 1 : targetNoteDist - 1;
 
         return {
             frequency: frequency,
             perfectPitch: this.getSoundInfo(targetFrequency),
             error: frequency - targetFrequency, // Negative result - pitch too low, positive - too high, 0 - perfect pitch
             centsError: this.getIntervalCents(frequency, targetFrequency),
-            totalCentsBetweenNotes: this.getIntervalCents(targetFrequency, this.getFrequencyFromDistance(targetNoteDist - 1))
+            totalCentsBetweenNotes: this.getIntervalCents(targetFrequency, this.getFrequencyFromDistance(nextNote))
         };
     }
 
