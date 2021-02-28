@@ -30,15 +30,36 @@ class frequencyMath {
     }
 
     getFrequencyFromDistance(distance) {
+        return this.A4 * Math.pow(2, distance / 12); // Returns a perfect frequency of note x steps from A4
+    }
+
+    getDistanceFromNote(note){
         // Will be here later
+    }
+
+    getIntervalCents(f1, f2){
+        return 1200 * Math.log2(f1 / f2); // Returns amount of cents between two frequencies
+    }
+
+    getFrequencyError(frequency){
+        const targetNoteDist = this.getDistanceFromFrequency(frequency);
+        const targetFrequency = this.getFrequencyFromDistance(targetNoteDist);
+
+        return {
+            frequency: frequency,
+            perfectPitch: this.getSoundInfo(targetFrequency),
+            error: frequency - targetFrequency, // Negative result - pitch too low, positive - too high, 0 - perfect pitch
+            centsError: this.getIntervalCents(frequency, targetFrequency),
+            totalCentsBetweenNotes: this.getIntervalCents(targetFrequency, this.getFrequencyFromDistance(targetNoteDist - 1))
+        };
     }
 
     getDistanceFromNote(note, octave) {
-        // Will be here later
-    }
-
-    getDistanceFromNote(note) {
-        // Will be here later
+        const basePos = this.soundArray.indexOf(note);
+        const multiplyOctave = octave - 4; // minus 4 because we're counting from A4
+        let pos = 12 * multiplyOctave + basePos;
+        if(basePos > 2) pos -= 12;         // offset made because in music the scale starts at C not A
+        return pos;
     }
 
     // Returns index of a note passed in the parameter based on the distance from A4 note
@@ -46,13 +67,28 @@ class frequencyMath {
         let id = (step > 11 || step < -11 ? step % 12 : step); //
         id = (id < 0 ? 12 + id : id);
 
-        return id;
+        return Math.round(id);
     }
 
     getOctaveFromDistance(distance) {
-        const arrLength = 12;
-        const A4dist = 48;
-        return Math.round((A4dist + distance) / arrLength);
+        let octaves = 4; // Distance is relative to A4
+
+        while(true){
+            if(distance < -11){     // Checking if offset is needed as scale starts at C and not A
+                --octaves;
+                distance += 12;
+            }
+            else if(distance > 11){ // Checking if offset is needed as scale starts at C and not A
+                ++octaves;
+                distance -= 12;
+            }
+            else
+                break;
+        }
+
+        if(distance < -9) octaves--;
+        if(distance > 2) octaves++;
+        return octaves;
     }
 
     getFrequencyError(frequency) {
