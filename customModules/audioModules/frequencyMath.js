@@ -88,10 +88,6 @@ class frequencyMath {
         return octaves;
     }
 
-    getFrequencyError(frequency) {
-        // Will be here later
-    }
-
     getSoundInfo(fx) {
         const res = this.getDistanceFromFrequency(fx);
         const octave = this.getOctaveFromDistance(res);
