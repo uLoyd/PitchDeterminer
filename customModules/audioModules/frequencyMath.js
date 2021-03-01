@@ -10,6 +10,7 @@
   x = -------------       that's    x = ln(fx / f0) / ln(r)
          ln (r)           therefore x = ln(fx / 440) / ln(2^(1/12))
 */
+
 class frequencyMath {
     r = Math.pow(2, 1 / 12);
     logr = Math.log(this.r);
@@ -27,6 +28,10 @@ class frequencyMath {
         // notes gets smaller the lower the frequency. Accurate only from E2 up.
         // Useful ONLY with buffer size ("buflen" variable) in audioHandler.js under 2048
         return Math.round(result);
+    }
+
+    AweightFrequency(frequency){
+
     }
 
     getFrequencyFromDistance(distance) {

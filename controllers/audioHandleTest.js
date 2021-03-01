@@ -74,10 +74,15 @@ class audioHandleTest {
     }
 
     async updateVolume(vol) {
-        let volume = vol / 5;                 // Why divided by 5? It's a random value that works fine for now. Don't put too much attention to it.
+        let volume = vol / 200 * (vol / 2); // Takes 200dB as max value reference and than "* vol / 2"
+                                            // basically casts it into +- 0-100 range
+                                            // It's completely empirical but the results are comparable
+                                            // to my audio interface therefore I'll stick to that
+
+
         volume = volume < 100 ? volume : 100; // Stops the bar at 100 even if result is higher
 
-        const color = (volume < 70 ? 'green' : (volume < 90 ? 'orange' : 'red'));
+        const color = (volume < 65 ? 'green' : (volume < 80 ? 'orange' : 'red'));
 
         this.elements.volume.style([{
             key: 'background-color',

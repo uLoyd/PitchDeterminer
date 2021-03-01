@@ -2,6 +2,7 @@ const Correlation = require('./audioHandlerComponents/Correlation');
 const audioSetup = require('./audioHandlerComponents/audioSetup');
 const defaultValues = require('./audioHandlerComponents/defaultAudioValues').general;
 const deviceHandler = require('./audioHandlerComponents/deviceHandler');
+const Weight = require('./weights').all;
 
 class audioHandler {
     correlation = null;   // Placeholder for Correlation class instance
@@ -9,6 +10,7 @@ class audioHandler {
     deviceHandler = null; // Placeholder for deviceHandler class instance
     buflen = null;        // Placeholder for buffor size
     streamReady = false;  // Tells if setupStream method has been executed. Switched back to false on "end" method call
+    soundCurve = null;    // Placeholder for weighting class object (used for noise volume measurement)
     running = false;      // State (is it running) defined here as at the start AudioContext.state can
                           // be set to "running" before invocation of setupStream method
 
@@ -17,8 +19,31 @@ class audioHandler {
             general,
             gainSettings,
             analyserSettings,
-            deviceChange
+            deviceChange,
+            soundCurveAlgorithm,
         } = initData;
+
+        const curveChoose = (x) =>{
+            switch (x.toUpperCase()){
+                case 'A':
+                    return new Weight.Aweight();
+                case 'B':
+                    return new Weight.Bweight();
+                case 'C':
+                    return new Weight.Cweight();
+                case 'D':
+                    return new Weight.Dweight();
+            }
+        }
+
+        // Creates instance of class responsible for weighting sound levels
+        if(!soundCurveAlgorithm){
+            const def = defaultValues.curveAlgorithm;
+            console.log(`No sound curve algortihm specified. Initializing with ${def}-weight`)
+            this.soundCurve = curveChoose(def);
+        }
+        else
+            this.soundCurve = curveChoose(soundCurveAlgorithm);
 
         // set this.buflen value from parameter passed / defaultValues or throw error
         general ? this.buflen = general.buflen : defaultValues.buflen ? this.buflen = defaultValues.buflen : errors(0);
@@ -96,21 +121,36 @@ class audioHandler {
         return this.audioTools.audioContext.state === 'running';
     }
 
-    getVolume() { // not tested, might not work well. Volume will be relative after all ¯\_(ツ)_/¯
-        const data = new Uint8Array(this.audioTools.binCount);
-        this.audioTools.BFD(data);
+    nyquistFrequency(){
+        return this.audioTools.sampleRate / 2;
+    }
 
-        // Basically returns average value multiplied by highest value in buffer... it's quite random
-        return data.reduce((sum, val) => {
-            return sum + val
-        }, 0) / this.audioTools.binCount * Math.max(...data);
+    bandRange(){
+        return this.nyquistFrequency() / this.audioTools.binCount;
+    }
+
+    getVolume(accuracy){
+        const data = new Uint8Array(this.audioTools.binCount);
+        const nyquist = this.nyquistFrequency();                            // Max possible frequency
+        const band = parseFloat(this.bandRange().toFixed(accuracy)); // Calculates a frequency band range
+
+        let currentFrequency = band / 2;                                    // Takes the middle frequency of a band
+
+        this.audioTools.BFD(data);                                          // Get's byte frequency data from audioSetup instance
+
+        const vol = data.reduce((result, level) => {
+            const dbw = this.soundCurve.dbLevel(currentFrequency, accuracy, level);
+            currentFrequency += band;    // Move to next frequency band
+
+            return result + dbw.dblevel; // Sums dbLevels
+        }, 0);
+
+        return (Math.log10(vol) * 10).toFixed(accuracy);
     }
 
     correlate() {
         let buf = new Float32Array(this.buflen);
         this.audioTools.FTD(buf);
-
-        //console.log(this.Correlation.perform( buf ));
 
         return this.correlation.perform(buf);
     }

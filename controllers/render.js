@@ -9,7 +9,8 @@ window.onload = async function() {
 
     // callback passed to audioHandler that will be receiving audio data to process
     function dataProcess(time) {
-        let volume = mic.getVolume();
+        let volume = mic.getVolume(2);
+
         test.updateVolume(volume);
 
         const ac = mic.correlate();

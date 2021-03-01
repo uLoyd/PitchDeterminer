@@ -31,7 +31,7 @@ class deviceHandler {
     }
 
     async deviceChangeEvent() {
-        console.log("Change of device occured");
+        console.log("Change of device occurred");
 
         if (this.deviceChangeCallback)
             this.deviceChangeCallback(await this.getDeviceList(), this.currentInput, this.currentOutput);
