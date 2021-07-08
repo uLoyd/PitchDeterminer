@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="eng">
+   <head>
+     <meta charset = "UTF-8">
+     <meta name='viewport' content='width=device-width, initial-scale=1'>
+     <title>Audio</title>
+     <link rel="stylesheet" href="style.css">
+     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+     <script>
+       require('./../controllers/render.js');
+     </script>
+   </head>
+
+   <body>
+      <audio autoplay></audio>
+      <header>
+        <div id="volumeMeter" class='volume'>
+          <div id="volume" class="volume"></div>
+        </div>
+
+        <div class="dropdown">
+          <button class="dropbtn">Audio input
+            <i class="fa fa-caret-down"></i>
+          </button>
+          <div id="audioIn" class="dropdown-content"></div>
+        </div>
+
+        <div class="dropdown">
+          <button class="dropbtn">Audio output
+            <i class="fa fa-caret-down"></i>
+          </button>
+          <div id="audioOut" class="dropdown-content"></div>
+        </div>
+
+        <button id="micBut" type="button" name="button">
+          <i class="fa fa-microphone" style="font-size:48px"></i>
+        </button>
+      </header>
+      <div id='lastNote' class="example">
+        N/A
+      </div>
+      <div id="tuner" class="example">
+          <div id="pitcherror">
+              <div id="goodpitch">
+              </div>
+              <div id="accuracy">
+              </div>
+          </div>
+          <span id="freq"></span>
+          <span id="note"></span>
+          <span id="cents"></span>
+      </div>
+   </body>
+</html>
