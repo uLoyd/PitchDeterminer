@@ -25,25 +25,28 @@ class soundStorage {
     }
 
     determine() {
+        //console.log(this.freqArr.length);
         if (!this.freqArr.length)
             return null;
 
-        const most = this.most(this.freqArr); // Most frequent value (frequency) stored in "freqArr" array
+        const arrCopy = [...this.freqArr];
+
+        const most = this.most(arrCopy); // Most frequent value (frequency) stored in "freqArr" array
         const bias = most * this.biasThreshold;
 
         let it = 0; // Number of samples that passed the similarity check
                     // by which the result ("res" variable) value will be divided
 
-        let res = this.freqArr.reduce((sum, val) => { // Summing all the values that pass the "similarity check"
+        let res = arrCopy.reduce((sum, val) => { // Summing all the values that pass the "similarity check"
 
-            if (Math.abs(most - val) <= bias) {       // Checking if the current value is "similar"
+            if (Math.abs(most - val) <= bias) {    // Checking if the current value is "similar"
                 it++;                                 // enough to the most frequent value
                 return val + sum;
             } else {
                 return sum;
             }
         }, 0);
-
+        //console.log(this.freqArr.length);
         return res / it; // Returning the average of all the data that passed the similarity check
     }
 

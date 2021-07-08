@@ -18,6 +18,7 @@ const defaultAudioValues = {
     }
   },
   general: {
+    curveAlgorithm: 'A',
     buflen: 4096 // Going lower than 2048 results in really low accuracy in determining frequencies
   }
 }

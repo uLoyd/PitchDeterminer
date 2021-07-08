@@ -1,5 +1,7 @@
 body{
   background-color: #444;
+  min-height: 700px;
+  min-width: 1300px;
   height: 95vh;
   width: 95vw;
 }
@@ -65,6 +67,10 @@ button{
   background-color: #949494;
 }
 
+.dropdown-content button .selected {
+  background-color: #821e1e !important;
+}
+
 /* Add a grey background color to dropdown links on hover */
 .dropdown-content button:hover {
   background-color: #BFB6B6;
@@ -103,11 +109,53 @@ button{
   height: 30%;
 }
 
-#lastNote{
+.example{
   height: 50%;
-  width: 50%;
+  width: 49%;
   color: white;
   font-weight: bolder;
+  float: left;
+  margin-top: 1%;
+  text-align: center;
+  background-color: #333;
+}
+
+#lastNote{
   font-size: 5em;
-  margin-left: 40%;
+}
+
+#tuner{
+  font-size: 3em;
+  margin-left: 2%;
+}
+
+#pitcherror{
+  width: 100%;
+  height: 50%;
+  background-color: #821e1e;
+}
+
+#accuracy{
+  height: 5vh;
+  width: 5vh;
+  position: relative;
+  background-color: #333;
+  border: 3px solid #444;
+  border-radius: 50%;
+  z-index: 2;
+  margin-top: -15vh;
+  margin-left: 47.5%;
+}
+
+#goodpitch{
+  width: 15%;
+  height: 100%;
+  margin-left: 43.5%;
+  background-color: #3da93d;
+  z-index: 1;
+}
+
+span{
+  float: left;
+  clear: left;
 }

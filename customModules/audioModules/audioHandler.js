@@ -2,60 +2,99 @@ const Correlation = require('./audioHandlerComponents/Correlation');
 const audioSetup = require('./audioHandlerComponents/audioSetup');
 const defaultValues = require('./audioHandlerComponents/defaultAudioValues').general;
 const deviceHandler = require('./audioHandlerComponents/deviceHandler');
+const Weight = require('./weights').all;
 
 class audioHandler {
     correlation = null;   // Placeholder for Correlation class instance
     audioTools = null;    // Placeholder for audioSetup class instance
     deviceHandler = null; // Placeholder for deviceHandler class instance
-    buflen = null;        // Placeholder for buffor size
+    buflen = null;        // Placeholder for buffer size
+    streamReady = false;  // Tells if setupStream method has been executed. Switched back to false on "end" method call
+    soundCurve = null;    // Placeholder for weighting class object (used for noise volume measurement)
+    running = false;      // State (is it running) defined here as at the start AudioContext.state can
+                          // be set to "running" before invocation of setupStream method
 
     constructor(initData, callback) {
         const {
             general,
-            correlationSettings,
             gainSettings,
             analyserSettings,
-            deviceChange /*, outputAudio*/
+            deviceChange,
+            soundCurveAlgorithm,
+            outputElement
         } = initData;
 
+        const curveChoose = (x) =>{
+            switch (x.toUpperCase()){
+                case 'A':
+                    return new Weight.Aweight();
+                case 'B':
+                    return new Weight.Bweight();
+                case 'C':
+                    return new Weight.Cweight();
+                case 'D':
+                    return new Weight.Dweight();
+            }
+        }
+
+        // Creates instance of class responsible for weighting sound levels
+        if(!soundCurveAlgorithm){
+            const def = defaultValues.curveAlgorithm;
+            console.log(`No sound curve algorithm specified. Initializing with ${def}-weight`)
+            this.soundCurve = curveChoose(def);
+        }
+        else
+            this.soundCurve = curveChoose(soundCurveAlgorithm);
+
         // set this.buflen value from parameter passed / defaultValues or throw error
-        general ? this.buflen = general.buflen : defaultValues.buflen ? this.buflen = defaultValues.buflen : errors(0);
+        general ? this.buflen = general.buflen : defaultValues.buflen ? this.buflen = defaultValues.buflen : this.errors(0);
 
         // Initialize deviceHandling and update device list
-        if (deviceChange) {
-            this.deviceHandler = new deviceHandler(deviceChange);
+        this.deviceHandler = new deviceHandler(deviceChange);
 
-            this.changeInput = (e) => {
-                this.deviceHandler.changeInput(e);
-                this.setupStream();
-            }
+        this.changeInput = (e) => {
+            this.deviceHandler.changeInput(e);
+        }
 
-            this.changeOutput = (e) => {
-                //this.deviceHandler.changeOutput(e);
-                console.log("I don't exist yet");
-            }
+        this.changeOutput = (e) => {
+            this.deviceHandler.changeOutput(e);
+            //console.log("I don't exist yet");
         }
 
         // Sets up audioContext and settings for gainNode and analyserNode
         this.audioTools = new audioSetup(callback, gainSettings, analyserSettings);
 
-        // starting up audio stream immediatly after initialization
+        this.outputElement = outputElement;
+
+        // starting up audio stream immediately after initialization
         //this.setupStream();
     }
 
     async setupStream() {
-        // Constrain specifing audio device
-        const audioConstrain = this.deviceHandler ? this.deviceHandler.navigatorInput() : undefined;
+        // Checking if there are any available input devices (await is a must)
+        if (!(await this.deviceHandler.checkForInput()))
+            throw ('No input audio devices available');
 
-        // audioTools thrown into audio variable to use inside navigator
+        // If stream was being restarted few times audioContext might remain in "closed" state
+        // so this method will restart the audioContext itself
+        this.audioTools.selfCheckAudioContext();
+
+        // Constrain specifying audio device
+        // if value here will be "undefined" then something's not right
+        // but the stream will start up with default available device (await is a must)
+        const audioConstrain = await this.deviceHandler.navigatorInput();
+        console.log(`Stream setting up using input device: ${audioConstrain.exact}`);
+
+        // audioTools thrown into "audio" variable to use inside navigator
         let audio = this.audioTools;
-
+        const audioElem = this.outputElement;
+        const deviceHandler = this.deviceHandler;
         const userMedia = navigator.mediaDevices.getUserMedia({
             audio: {
                 deviceId: audioConstrain
             },
             video: false
-        }).then(function(localStream) {
+        }).then(async function(localStream) {
             const input = audio.audioContext.createMediaStreamSource(localStream);
             const scriptProcessor = audio.audioContext.createScriptProcessor();
 
@@ -64,6 +103,14 @@ class audioHandler {
             // and assigns callback to scriptProcessor
             audio.streamSetup(input, scriptProcessor);
 
+            if(audioElem){
+                audioElem.srcObject = localStream;
+                const dev = await deviceHandler.getCurrentOrFirst();
+                //console.log(dev.out);
+                audioElem.setSinkId(dev.out.id);
+            }
+
+
             // return audioSetup instance
             return audio;
         });
@@ -71,44 +118,79 @@ class audioHandler {
         // assign returned audioSetup instance to audioHandler and setup Correlation
         userMedia.then((value) => {
             this.audioTools = value;
-            this.Correlation = new Correlation({
+            this.correlation = new Correlation({
                 buflen: this.buflen,
                 sampleRate: this.audioTools.sampleRate
             });
+            this.running = true;
+            this.streamReady = true;
         });
     }
 
-    getVolume() { // not tested, might not work well. Volume will be relative after all ¯\_(ツ)_/¯
-        const data = new Uint8Array(this.audioTools.binCount);
-        this.audioTools.BFD(data);
+    // Returns True when the AudioContext is working
+    // In state "suspended" & "closed" returns false
+    getState() {
+        return this.audioTools.audioContext.state === 'running';
+    }
 
-        // Basically returns average value multiplied by highest value in buffer... it's quite random
-        return data.reduce((sum, val) => {
-            return sum + val
-        }, 0) / this.audioTools.binCount * Math.max(...data);
+    nyquistFrequency(){
+        return this.audioTools.sampleRate / 2;
+    }
+
+    bandRange(){
+        return this.nyquistFrequency() / this.audioTools.binCount;
+    }
+
+    getVolume(accuracy){
+        const data = new Uint8Array(this.audioTools.binCount);
+        const nyquist = this.nyquistFrequency();                     // Max possible frequency
+        const band = parseFloat(this.bandRange().toFixed(accuracy)); // Calculates a frequency band range
+
+        let currentFrequency = band / 2;                             // Takes the middle frequency of a band
+
+        this.audioTools.BFD(data);                                   // Get's byte frequency data from audioSetup instance
+
+        const vol = data.reduce((result, level) => {
+            const dbw = this.soundCurve.dbLevel(currentFrequency, accuracy, level);
+            currentFrequency += band;    // Move to next frequency band
+
+            return result + dbw.dblevel; // Sums dbLevels
+        }, 0);
+
+        return (Math.log10(vol) * 10).toFixed(accuracy);
     }
 
     correlate() {
         let buf = new Float32Array(this.buflen);
         this.audioTools.FTD(buf);
 
-        //console.log(this.Correlation.perform( buf ));
+        return this.correlation.perform(buf);
+    }
 
-        return this.Correlation.perform(buf);
+    async getDeviceList() {
+        return this.deviceHandler.getDeviceList();
     }
 
     async end() {
         await this.audioTools.streamClose();
+        this.outputElement.srcObject = null;
+        this.running = false;
+        this.streamReady = false;
     }
 
+    // So it appears chromium is so "backward compatible" that it doesn't suspend correctly
+    // therefore using end() method seems more reliable
+    // Basically it stops whole processing but mediaStream is still passed to the audio element
     async pause() {
         await this.audioTools.streamPause();
         console.log("Stream paused");
+        this.running = false;
     }
 
     async resume() {
         await this.audioTools.streamResume();
         console.log("Stream resumed");
+        this.running = true;
     }
 
     errors(e) {
@@ -120,10 +202,9 @@ class audioHandler {
                 break;
             default:
                 throw ("Unexpected error during micSetup class initialization");
-                break;
         }
 
-        msg += "' value passed in object containing initializadion data and object containing default values";
+        msg += "' value passed in object containing initialization data and object containing default values";
         throw (msg);
     }
 }

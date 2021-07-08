@@ -24,22 +24,43 @@ class frequencyMath {
                                                            // x = ln(fx / f0) / ln(r)
 
         //return (fx < 90 ? Math.floor(result) : Math.round(result)); // Rounds down the results if the frequency is low compensating lack of
-                                                                      // accuracy determining the low frequencies as the "distance" between
-                                                                      // notes gets smaller the lower the frequency. Accurate only from E2 up.
-                                                                      // Useful ONLY with buffer size ("buflen" variable) in audioHandler.js under 2048
+        // accuracy determining the low frequencies as the "distance" between
+        // notes gets smaller the lower the frequency. Accurate only from E2 up.
+        // Useful ONLY with buffer size ("buflen" variable) in audioHandler.js under 2048
         return Math.round(result);
     }
 
-    getFrequencyFromDistance(distance){
-      // Will be here later
+    AweightFrequency(frequency){
+
     }
 
-    getDistanceFromNote(note, octave){
-      // Will be here later
+    getFrequencyFromDistance(distance) {
+        return this.A4 * Math.pow(2, distance / 12); // Returns a perfect frequency of note x steps from A4
     }
 
-    getDistanceFromNote(note){
-      // Will be here later
+    getIntervalCents(f1, f2){
+        return 1200 * Math.log2(f1 / f2); // Returns amount of cents between two frequencies
+    }
+
+    getFrequencyError(frequency){
+        const targetNoteDist = this.getDistanceFromFrequency(frequency);
+        const targetFrequency = this.getFrequencyFromDistance(targetNoteDist);
+        const nextNote = frequency > targetFrequency ? targetNoteDist + 1 : targetNoteDist - 1;
+
+        return {
+            frequency: frequency,
+            perfectPitch: this.getSoundInfo(targetFrequency),
+            error: frequency - targetFrequency, // Negative result - pitch too low, positive - too high, 0 - perfect pitch
+            centsError: this.getIntervalCents(frequency, targetFrequency),
+        };
+    }
+
+    getDistanceFromNote(note, octave) {
+        const basePos = this.soundArray.indexOf(note);
+        const multiplyOctave = octave - 4; // minus 4 because we're counting from A4
+        let pos = 12 * multiplyOctave + basePos;
+        if(basePos > 2) pos -= 12;         // offset made because in music the scale starts at C not A
+        return pos;
     }
 
     // Returns index of a note passed in the parameter based on the distance from A4 note
@@ -47,17 +68,28 @@ class frequencyMath {
         let id = (step > 11 || step < -11 ? step % 12 : step); //
         id = (id < 0 ? 12 + id : id);
 
-        return id;
+        return Math.round(id);
     }
 
-    getOctaveFromDistance(distance){
-      const arrLength = 12;
-      const A4dist = 48;
-      return Math.round((A4dist + distance) / arrLength);
-    }
+    getOctaveFromDistance(distance) {
+        let octaves = 4; // Distance is relative to A4
 
-    getFrequencyError(frequency){
+        while(true){
+            if(distance < -11){     // Checking if offset is needed as scale starts at C and not A
+                --octaves;
+                distance += 12;
+            }
+            else if(distance > 11){ // Checking if offset is needed as scale starts at C and not A
+                ++octaves;
+                distance -= 12;
+            }
+            else
+                break;
+        }
 
+        if(distance < -9) octaves--;
+        if(distance > 2) octaves++;
+        return octaves;
     }
 
     getSoundInfo(fx) {
@@ -67,6 +99,7 @@ class frequencyMath {
 
         //console.log(`fx: ${fx}, res: ${res}, soundId: ${soundId}, sound: ${this.soundArray[soundId]}`);
         return {
+            frequency: fx,
             note: this.soundArray[soundId],
             step: res,
             soundId: soundId,

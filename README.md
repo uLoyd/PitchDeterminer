@@ -1,9 +1,8 @@
+
 # PitchDeterminer
 ## **WIP**
 Electron App to determine note based on the signal received from mic.
 
-Currently tested determining sounds down to C1 ~ 32.7Hz (Less than 2Hz difference between C#1 and B0).
-At the moment it's accurate enough down to 2Hz differences.
 Currently tested determining sounds down to C1 ~ 32.7Hz (Less than 2Hz difference between C1 and B0)
 so at the moment it's accurate enough down to at least 2Hz differences.
 
@@ -15,9 +14,17 @@ so at the moment it's accurate enough down to at least 2Hz differences.
 - Separated most micSetup and Renderer methods into modules
 - Changed objects into classes
 - Fixed bug with enabling mic after disabling it
+- Fixed bug with repeatedly changing input device while the mic is enabled resulting in problems with audioContext
+- Untangled logic, so it's a bit more simple and less convoluted now imo
+- Added A-, B-, C- and D-weighting classes
+- Changed audio volume measurment using weighting classes
+- Added methods returning nyquist frequency and band range of current audioHandler setup
 
 TODO right now:
-- Add methods to frequencyMath
-- Untangle deviceHandler and other redundant methods etc.
-- Adding possibility to automatically switch to default avaible device if currently used one gets disconnected
-- General code refactor
+- [ ] Add methods to frequencyMath
+- [x] Untangle deviceHandler and other redundant methods etc.
+- [ ] Adding possibility to automatically switch to default avaible device if currently used one gets disconnected
+- [x] General code refactor
+- [ ] Output audio (the latency is/will be +- 1 second so not great but it's Node + Chromium ¯\\_(ツ)_/¯
+- [ ] Changes in soundStorage module for storing and determining frequencies
+- [ ] Anything else that will pop up later

@@ -3,28 +3,46 @@ const defaults = require('./defaultAudioValues').audioSetup;
 class audioSetup {
     default = defaults;
     audioContext = null;
+    gainSettings = null;
+    analyserSettings = null;
     analyser = null;
     gainNode = null;
     callback = null;
 
     constructor(callback, gainSettings, analyserSettings) {
+        this.gainSettings = gainSettings ? gainSettings : defaults.gain;
+        this.analyserSettings = analyserSettings ? analyserSettings : defaults.analyser ? defaults.analyser : this.errors(0);
+
         if (!callback)
             this.errors(7);
         else
             this.callback = callback;
 
+        this.startAudioContext();
+    }
+
+    checkAudioContext() {
+        return this.audioContext.state;
+    }
+
+    selfCheckAudioContext() {
+        if (this.checkAudioContext() === 'closed')
+            this.startAudioContext();
+    }
+
+    startAudioContext() {
         this.audioContext = new(window.AudioContext || window.webkitAudioContext)();
 
         // GainNode setup
-        this.gainSettingsUpdate(gainSettings ? gainSettings : defaults.gain);
+        this.gainSettingsUpdate(this.gainSettings);
 
         this.gainNode = this.audioContext.createGain();
-        this.gainNode.minValue = this.default.gain.minGain;
-        this.gainNode.maxValue = this.default.gain.maxGain;
+        this.gainNode.minValue = this.gainSettings.minGain;
+        this.gainNode.maxValue = this.gainSettings.maxGain;
         //console.log(this.gainNode);
 
         // AnalyserNode setup
-        this.analyserSettingsUpdate(analyserSettings);
+        this.analyserSettingsUpdate(this.analyserSettings);
     }
 
     streamSetup(input, scriptProcessor) {
@@ -33,7 +51,9 @@ class audioSetup {
 
         input.connect(this.analyser);
         this.analyser.connect(scriptProcessor);
+
         scriptProcessor.connect(this.audioContext.destination);
+
         this.gainNode.connect(this.audioContext.destination);
 
         scriptProcessor.onaudioprocess = this.callback;
@@ -54,7 +74,10 @@ class audioSetup {
     }
 
     gainSettingsUpdate(settings) {
-        const { minGain, maxGain } = settings;
+        const {
+            minGain,
+            maxGain
+        } = settings;
 
         this.default.gain.minGain = minGain ? minGain : this.errors(5);
         this.default.gain.maxGain = maxGain ? maxGain : this.errors(6);
@@ -71,21 +94,16 @@ class audioSetup {
         this.binCount = this.analyser.frequencyBinCount;
     }
 
-    analyserSettingsUpdate(settings) {
-        if (settings) {
-            const { smoothing, fftSize, minDec, maxDec } = settings;
+    analyserSettingsUpdate() {
+        const short = this.analyserSettings;
 
-            // assigning values passed or checking if default ones are set
-            this.default.analyser = {
-                smoothing: (smoothing ? smoothing : defaults.analysersmoothing ? defaults.analyser.analysersmoothing : this.errors(1)),
-                fftSize: (fftSize ? fftSize : defaults.analyserfftSize ? defaults.analyser.analyserfftSize : this.errors(2)),
-                minDec: (minDec ? minDec : defaults.analyserminDec ? defaults.analyser.analyserminDec : this.errors(3)),
-                maxDec: (maxDec ? maxDec : defaults.analysermaxDec ? defaults.analyser.analysermaxDec : this.errors(4))
-            }
-        } else if (defaults)
-            console.log("Analyser set up with default settings");
-        else
-            errors(0);
+        // assigning values passed or throwing error
+        this.default.analyser = {
+            smoothing: (short.smoothing ? short.smoothing : this.errors(1)),
+            fftSize: (short.fftSize ? short.fftSize : this.errors(2)),
+            minDec: (short.minDec ? short.minDec : this.errors(3)),
+            maxDec: (short.maxDec ? short.maxDec : this.errors(4))
+        }
     }
 
     errors(e) {
@@ -115,7 +133,6 @@ class audioSetup {
             case 7:
                 msg += "callback processing data from the audio stream"
                 throw (msg);
-                break;
             default:
                 throw ("Unexpected error in audioSetup object");
         }
