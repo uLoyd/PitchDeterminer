@@ -27,7 +27,8 @@ class deviceHandler {
         if (callback)
             this.deviceChangeCallback = callback;
 
-        navigator.mediaDevices.ondevicechange = this.deviceChangeEvent();
+        navigator.mediaDevices.ondevicechange = this.deviceChangeEvent.bind(this);
+        navigator.mediaDevices.dispatchEvent(new Event('devicechange'));
     }
 
     async deviceChangeEvent() {
@@ -63,39 +64,29 @@ class deviceHandler {
         }
     }
 
-    async changeInput(e) {
-        let inDevice;
+    async changeDevice(e, dir) {
+        let dev;
         const devList = await this.getDeviceList();
 
-        if (!e) // If no parameter passed device will be changed to first in the list
-            inDevice = devList.find(x => x.dir === 'input');               // first input device
+        if(!e)
+            dev = devList.find(x => x.dir === dir);
         else
-            inDevice = devList.find(x => x.id === e && x.dir === 'input'); // first input device with given id
+            dev = devList.find(x => x.id === e && x.dir === dir);
 
-        this.currentInput = inDevice;
+        dir === 'input' ? this.currentInput = dev : this.currentOutput = dev;
 
         this.deviceChangeCallback(await this.getDeviceList(), this.currentInput, this.currentOutput);
     }
 
-    async changeOutput(e) {
-        let outDevice;
-        const devList = await this.getDeviceList();
+    changeInput = async (e) => this.changeDevice(e, 'input');
 
-        if (!e) // If no parameter passed device will be changed to first in the list
-            outDevice = devList.find(x => x.dir === 'output');               // first output device
-        else
-            outDevice = devList.find(x => x.id === e && x.dir === 'output'); // first output device with given id
-
-        this.currentOutput = outDevice;
-
-        this.deviceChangeCallback(await this.getDeviceList(), this.currentInput, this.currentOutput);
-    }
+    changeOutput = async (e) => this.changeDevice(e, 'output');
 
     // Returns bool. True - there's at least 1 input device available
     async checkForInput() {
         const devList = await this.getDeviceList();
 
-        return devList.some(x => x.dir === "input");
+        return devList.some(x => x.dir === 'input');
     }
 
     // Return constrain for setting up the stream

@@ -30,9 +30,7 @@ class audioHandleTest {
             micBut: new htmlElement('micBut')
         }
 
-        this.elements.micBut.element.addEventListener('click', function() {
-            micToggleEvent();
-        });
+        this.elements.micBut.element.addEventListener('click', micToggleEvent);
     }
 
     emptyDevices() {
@@ -63,8 +61,8 @@ class audioHandleTest {
         //const callbackOut = this.changeOutput;
 
         devArr.forEach(async (entry) => {
-            const target = (entry.dir === 'input' ? this.elements.audioIn : this.elements.audioOut);
-            const selected = entry.id === currentInput?.id || entry.id === currentOutput?.id;
+            const target = entry.dir === 'input' ? this.elements.audioIn : this.elements.audioOut;
+            const selected = entry.dir === 'input' ? entry.id === currentInput?.id : entry.id === currentOutput?.id;
             const elem = await this.createElement(target, entry.id, entry.dir, entry.label, selected);
 
             document.getElementById(elem).addEventListener('click', function() {
