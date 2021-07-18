@@ -49,8 +49,8 @@ window.onload = async function() {
     }
 
 
-    async function changeDevice(e) {
-        e.dir === 'input' ? mic.changeInput(e.id) : mic.changeOutput(e.id);
+    async function changeDevice() {
+        this.dir === 'input' ? mic.changeInput(this.id) : mic.changeOutput(this.id);
 
         // No need to restart if it's not running
         if (!mic.running)

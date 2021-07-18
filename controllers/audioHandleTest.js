@@ -65,9 +65,7 @@ class audioHandleTest {
             const selected = entry.dir === 'input' ? entry.id === currentInput?.id : entry.id === currentOutput?.id;
             const elem = await this.createElement(target, entry.id, entry.dir, entry.label, selected);
 
-            document.getElementById(elem).addEventListener('click', function() {
-                callback(entry);
-            });
+            document.getElementById(elem).addEventListener('click', callback.bind(entry));
         });
     }
 

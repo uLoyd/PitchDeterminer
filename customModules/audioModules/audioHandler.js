@@ -52,14 +52,10 @@ class audioHandler {
         // Initialize deviceHandling and update device list
         this.deviceHandler = new deviceHandler(deviceChange);
 
-        this.changeInput = (e) => {
-            this.deviceHandler.changeInput(e);
-        }
+        this.changeInput = (e) => this.deviceHandler.changeInput(e);
 
-        this.changeOutput = (e) => {
-            this.deviceHandler.changeOutput(e);
-            //console.log("I don't exist yet");
-        }
+
+        this.changeOutput = (e) => this.deviceHandler.changeOutput(e);
 
         // Sets up audioContext and settings for gainNode and analyserNode
         this.audioTools = new audioSetup(callback, gainSettings, analyserSettings);
@@ -73,7 +69,7 @@ class audioHandler {
     async setupStream() {
         // Checking if there are any available input devices (await is a must)
         if (!(await this.deviceHandler.checkForInput()))
-            throw ('No input audio devices available');
+            throw ('No input audio input devices available');
 
         // If stream was being restarted few times audioContext might remain in "closed" state
         // so this method will restart the audioContext itself
@@ -88,13 +84,14 @@ class audioHandler {
         // audioTools thrown into "audio" variable to use inside navigator
         let audio = this.audioTools;
         const audioElem = this.outputElement;
-        const deviceHandler = this.deviceHandler;
+        const device = await this.deviceHandler.getCurrentOrFirst();
+
         const userMedia = navigator.mediaDevices.getUserMedia({
             audio: {
                 deviceId: audioConstrain
             },
             video: false
-        }).then(async function(localStream) {
+        }).then(function(localStream) {
             const input = audio.audioContext.createMediaStreamSource(localStream);
             const scriptProcessor = audio.audioContext.createScriptProcessor();
 
@@ -105,26 +102,20 @@ class audioHandler {
 
             if(audioElem){
                 audioElem.srcObject = localStream;
-                const dev = await deviceHandler.getCurrentOrFirst();
-                //console.log(dev.out);
-                audioElem.setSinkId(dev.out.id);
+                audioElem.setSinkId(device.out.id);
             }
-
 
             // return audioSetup instance
             return audio;
         });
 
-        // assign returned audioSetup instance to audioHandler and setup Correlation
-        userMedia.then((value) => {
-            this.audioTools = value;
-            this.correlation = new Correlation({
-                buflen: this.buflen,
-                sampleRate: this.audioTools.sampleRate
-            });
-            this.running = true;
-            this.streamReady = true;
+        this.audioTools = await userMedia;
+        this.correlation = new Correlation({
+            buflen: this.buflen,
+            sampleRate: this.audioTools.sampleRate
         });
+        this.running = true;
+        this.streamReady = true;
     }
 
     // Returns True when the AudioContext is working
