@@ -42,10 +42,6 @@ class frequencyMath {
         return 1200 * Math.log2(f1 / f2); // Returns amount of cents between two frequencies
     }
 
-    getIntervalCents(f1, f2){
-        return 1200 * Math.log2(f1 / f2); // Returns amount of cents between two frequencies
-    }
-  
     getFrequencyError(frequency){
         const targetNoteDist = this.getDistanceFromFrequency(frequency);
         const targetFrequency = this.getFrequencyFromDistance(targetNoteDist);
