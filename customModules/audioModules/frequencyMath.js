@@ -42,13 +42,10 @@ class frequencyMath {
         return 1200 * Math.log2(f1 / f2); // Returns amount of cents between two frequencies
     }
 
-    getFrequencyFromDistance(distance) {
-        return this.A4 * Math.pow(2, distance / 12); // Returns a perfect frequency of note x steps from A4
-    }
-
     getIntervalCents(f1, f2){
         return 1200 * Math.log2(f1 / f2); // Returns amount of cents between two frequencies
     }
+  
     getFrequencyError(frequency){
         const targetNoteDist = this.getDistanceFromFrequency(frequency);
         const targetFrequency = this.getFrequencyFromDistance(targetNoteDist);
