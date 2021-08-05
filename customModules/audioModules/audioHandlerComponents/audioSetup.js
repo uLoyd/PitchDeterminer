@@ -33,7 +33,7 @@ class audioSetup {
     startAudioContext() {
         this.audioContext = new(window.AudioContext || window.webkitAudioContext)();
 
-        // GainNode setup
+        // GainNode setup/
         this.gainSettingsUpdate(this.gainSettings);
 
         this.gainNode = this.audioContext.createGain();
@@ -41,8 +41,8 @@ class audioSetup {
         this.gainNode.maxValue = this.gainSettings.maxGain;
         //console.log(this.gainNode);
 
-        // AnalyserNode setup
-        this.analyserSettingsUpdate(this.analyserSettings);
+        // AnalyserNode settings setup
+        this.analyserSettingsUpdate();
     }
 
     streamSetup(input, scriptProcessor) {

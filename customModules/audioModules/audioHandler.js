@@ -164,7 +164,10 @@ class audioHandler {
 
     async end() {
         await this.audioTools.streamClose();
-        this.outputElement.srcObject = null;
+
+        if(this.outputElement?.srcObject)
+            this.outputElement.srcObject = null;
+
         this.running = false;
         this.streamReady = false;
     }
