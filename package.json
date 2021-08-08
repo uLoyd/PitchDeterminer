@@ -6,9 +6,14 @@
   "dependencies": {
     "electron": "^11.4.10"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "mocha": "^9.0.3",
+    "nyc": "^15.1.0",
+    "spectron": "^15.0.0",
+    "web-audio-test-api": "^0.5.2"
+  },
   "scripts": {
-    "test": "SET NODE_ENV=test&&SET ENVIRONMENT=local&&electron .",
+    "test": "mocha",
     "start": "electron ."
   },
   "repository": {

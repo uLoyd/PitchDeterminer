@@ -40,7 +40,7 @@ class audioHandler {
         // Creates instance of class responsible for weighting sound levels
         if(!soundCurveAlgorithm){
             const def = defaultValues.curveAlgorithm;
-            console.log(`No sound curve algorithm specified. Initializing with ${def}-weight`)
+            //console.log(`No sound curve algorithm specified. Initializing with ${def}-weight`);
             this.soundCurve = curveChoose(def);
         }
         else
@@ -53,7 +53,6 @@ class audioHandler {
         this.deviceHandler = new deviceHandler(deviceChange);
 
         this.changeInput = (e) => this.deviceHandler.changeInput(e);
-
 
         this.changeOutput = (e) => this.deviceHandler.changeOutput(e);
 

@@ -27,8 +27,13 @@ class deviceHandler {
         if (callback)
             this.deviceChangeCallback = callback;
 
-        navigator.mediaDevices.ondevicechange = this.deviceChangeEvent.bind(this);
-        navigator.mediaDevices.dispatchEvent(new Event('devicechange'));
+        try{
+            navigator.mediaDevices.ondevicechange = this.deviceChangeEvent.bind(this);
+            navigator.mediaDevices.dispatchEvent(new Event('devicechange'));
+        }
+        catch (e){
+
+        }
     }
 
     async deviceChangeEvent() {

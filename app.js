@@ -14,7 +14,7 @@ const createWindow = async () => {
       }
   });
 
-  await win.loadURL(path.join(__dirname, process.env.NODE_ENV==='test' ? `./test/tests.html` : `./view/index.html`));
+  await win.loadURL(path.join(__dirname, `./view/index.html`));
 
   win.webContents.openDevTools();
 

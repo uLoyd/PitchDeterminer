@@ -31,7 +31,7 @@ class audioSetup {
     }
 
     startAudioContext() {
-        this.audioContext = new(window.AudioContext || window.webkitAudioContext)();
+        this.audioContext = new AudioContext();
 
         // GainNode setup/
         this.gainSettingsUpdate(this.gainSettings);
