@@ -30,10 +30,6 @@ class frequencyMath {
         return Math.round(result);
     }
 
-    AweightFrequency(frequency){
-
-    }
-
     getFrequencyFromDistance(distance) {
         return this.A4 * Math.pow(2, distance / 12); // Returns a perfect frequency of note x steps from A4
     }
