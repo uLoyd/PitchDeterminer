@@ -3,7 +3,6 @@ const path = require('path');
 const Application = require('spectron').Application;
 const electronPath = require('electron').remote;
 const audioHandler = require('../customModules/audioModules/audioHandler');
-const { analyser, gain } = require('../customModules/audioModules/audioHandlerComponents/defaultAudioValues').audioSetup;
 const testData = require('./data/AudioHandlerInitData');
 require("web-audio-test-api"); // web-audio-api mock
 

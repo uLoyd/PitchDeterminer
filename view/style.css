@@ -21,13 +21,13 @@ button{
 }
 
 /* The dropdown container */
-.dropdown {
+.dropdwn {
   float: left;
   overflow: hidden;
 }
 
 /* Dropdown button */
-.dropdown .dropbtn {
+.dropdwn .dropbtn {
   font-size: 16px;
   border: none;
   outline: none;
@@ -39,45 +39,44 @@ button{
 }
 
 /* Add a red background color to navbar links on hover */
-.dropdown:hover .dropbtn {
+.dropdwn:hover .dropbtn {
   background-color: red;
 }
 
 /* Dropdown content (hidden by default) */
-.dropdown-content {
+.dropdwn-content {
   display: none;
   position: absolute;
   background-color: #f9f9f9;
   min-width: 160px;
-  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+  box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
   z-index: 1;
 }
 
 /* Links inside the dropdown */
-.dropdown-content button {
+.dropdwn-content button {
   float: none;
   /*color: black;*/
   padding: 12px 16px;
   text-decoration: none;
   display: block;
-  text-align: left;
   width: 100%;
   text-align: center;
-  border: 0px;
+  border: 0;
   background-color: #949494;
 }
 
-.dropdown-content button .selected {
+.dropdwn-content button .selected {
   background-color: #821e1e !important;
 }
 
 /* Add a grey background color to dropdown links on hover */
-.dropdown-content button:hover {
+.dropdwn-content button:hover {
   background-color: #BFB6B6;
 }
 
 /* Show the dropdown menu on hover */
-.dropdown:hover .dropdown-content {
+.dropdwn:hover .dropdwn-content {
   display: block;
 }
 
@@ -158,4 +157,89 @@ button{
 span{
   float: left;
   clear: left;
+}
+
+.na{ /* Note A */
+  background-color: #1F55BC;
+}
+
+.nas{ /* Note A# */
+  background-color: #228692;
+}
+
+.nb{ /* Note B */
+  background-color: #1a826e;
+}
+
+.nc{ /* Note C */
+  background-color: #055340;
+}
+
+.ncs{ /* Note C# */
+  background-color: #AA51A1;
+}
+
+.nd{ /* Note D */
+  background-color: #b15366;
+}
+
+.nds{ /* Note D# */
+  background-color: #525229;
+}
+
+.ne{ /* Note E */
+  background-color: #249041;
+}
+
+.nf{ /* Note F */
+  background-color: #90673e;
+}
+
+.nfs{ /* Note F# */
+  background-color: #e3004b;
+}
+
+.ng{ /* Note G */
+  background-color: #ea6d35;
+}
+
+.ngs{ /* Note G# */
+  background-color: #0e3803;
+}
+
+.fret_place {
+  cursor: pointer;
+  border-bottom: 0.5px solid black;
+  background-image: url("../img/fret.png");
+  background-size: cover;
+}
+
+.empty_string {
+  background-color: #363636;
+  border-bottom: 0.5px solid black;
+}
+
+.fret_mark{
+  width: 80%;
+  text-align: center;
+}
+
+.fret_place:nth-child(odd) {
+  border-left: 2px solid black;
+  border-right: 2px solid black;
+  width: 4%;
+}
+
+.fixed_tuning, .fixed_octave{
+  text-align: center;
+  border: solid 1px black;
+}
+
+#fretboard div {
+  user-select: none;
+}
+
+#fretboard {
+  min-width: 1160px;
+  margin-left: 5%;
 }
