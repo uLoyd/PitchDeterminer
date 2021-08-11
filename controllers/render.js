@@ -1,4 +1,4 @@
-let frequencyMath = require('./../customModules/audioModules/frequencyMath.js'),
+const frequencyMath = require('./../customModules/audioModules/frequencyMath.js'),
     audioHandler = require('./../customModules/audioModules/audioHandler'),
     soundStorage = require('./helpers/soundStorage'),
     audioTest = require('./audioHandleTest'),
@@ -7,7 +7,7 @@ let frequencyMath = require('./../customModules/audioModules/frequencyMath.js'),
 const { Fretboard } = require('./../customModules/fretboard/Fretboard');
 const { Sound, sounds } = require('./../customModules/fretboard/Sound');
 
-window.onload = async function() {
+window.onload = async () => {
     const soundData = new soundStorage(); // soundData instance
     const freqMath = new frequencyMath(); // frequencyMath instance
 
@@ -63,7 +63,7 @@ window.onload = async function() {
     }
 
     // callback passed to audioHandler that will be receiving audio data to process
-    function dataProcess(time) {
+    function dataProcess() {
         let volume = mic.getVolume(2);
 
         test.updateVolume(volume);
@@ -89,13 +89,8 @@ window.onload = async function() {
         }
     }
 
-
-    async function changeDevice() {
-        this.dir === 'input' ? mic.changeInput(this.id) : mic.changeOutput(this.id);
-
-        // No need to restart if it's not running
-        if (!mic.running)
-            return;
+    async function changeInput(id) {
+        mic.changeInput(id);
 
         // "Have you tried turning it off and on again?"
         await mic.end();
@@ -105,6 +100,24 @@ window.onload = async function() {
         await mic.setupStream();
     }
 
+    async function changeOutput(id, force) {
+        mic.changeOutput(id);
+
+        const audioOutput = document.querySelector('audio');
+
+        if(force || audioOutput.srcObject){
+            const audioOutput = document.querySelector('audio');
+            audioOutput.srcObject = mic.stream;
+            audioOutput.setSinkId(id);
+        }
+    }
+
+    async function changeDevice() {
+        if (!mic.running)
+            return;
+        this.dir === 'input' ? await changeInput(this.id) : await changeOutput(this.id);
+    }
+
     async function micToggleEvent() {
         const state = mic.running;
 
@@ -112,11 +125,30 @@ window.onload = async function() {
             await mic.end();
             test.clearData();
             tun.clear();
-        } else {
-            mic.streamReady ? await mic.resume() : await mic.setupStream();
+            await speakerToggleEvent(false);
         }
+        else
+            mic.streamReady ? await mic.resume() : await mic.setupStream();
 
         test.micState(!state); //Returning opposite state to change icon color
+    }
+
+    // passed true = turn off, false = turn on, nothing = switch
+    async function speakerToggleEvent(evt, forceState) {
+        if(!mic.running)
+            return;
+
+        const audioOutput = document.querySelector('audio');
+        const state = forceState ?? !!audioOutput.srcObject;
+
+        if (state)
+            audioOutput.srcObject = null;
+        else {
+            const dev = await mic.deviceHandler.getCurrentOrFirst();
+            await changeOutput(dev.out.id, true);
+        }
+
+        test.speakerState(!state); //Returning opposite state to change icon color
     }
 
     // callback that will be passed to deviceHandler from audioHandlers constructor
@@ -126,11 +158,10 @@ window.onload = async function() {
 
     // audioHandler instance
     let mic = new audioHandler({
-        deviceChange: deviceChangeAction,
-        outputElement: document.querySelector('audio')
+        deviceChange: deviceChangeAction
     }, dataProcess);
 
     // audioHandleTest instance - shows data in window
-    const test = new audioTest(changeDevice, micToggleEvent);
+    const test = new audioTest(changeDevice, micToggleEvent, speakerToggleEvent);
     const tun = new tuner();
 }

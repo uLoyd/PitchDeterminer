@@ -85,7 +85,7 @@ button{
   color: white;
 }
 
-#micBut{
+#micBut, #speakerBut {
   background-color: #555;
   border: none;
   float: right;

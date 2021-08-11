@@ -20,12 +20,11 @@ class audioHandler {
             gainSettings,
             analyserSettings,
             deviceChange,
-            soundCurveAlgorithm,
-            outputElement
+            soundCurveAlgorithm
         } = initData;
 
         const curveChoose = (x) =>{
-            switch (x.toUpperCase()){
+            switch (x?.toUpperCase()){
                 case 'A':
                     return new Weight.Aweight();
                 case 'B':
@@ -34,17 +33,13 @@ class audioHandler {
                     return new Weight.Cweight();
                 case 'D':
                     return new Weight.Dweight();
+                default:
+                    return curveChoose(defaultValues.curveAlgorithm);
             }
         }
 
         // Creates instance of class responsible for weighting sound levels
-        if(!soundCurveAlgorithm){
-            const def = defaultValues.curveAlgorithm;
-            //console.log(`No sound curve algorithm specified. Initializing with ${def}-weight`);
-            this.soundCurve = curveChoose(def);
-        }
-        else
-            this.soundCurve = curveChoose(soundCurveAlgorithm);
+        this.soundCurve = curveChoose(soundCurveAlgorithm);
 
         // set this.buflen value from parameter passed / defaultValues or throw error
         general ? this.buflen = general.buflen : defaultValues.buflen ? this.buflen = defaultValues.buflen : this.errors(0);
@@ -58,8 +53,6 @@ class audioHandler {
 
         // Sets up audioContext and settings for gainNode and analyserNode
         this.audioTools = new audioSetup(callback, gainSettings, analyserSettings);
-
-        this.outputElement = outputElement;
 
         // starting up audio stream immediately after initialization
         //this.setupStream();
@@ -99,16 +92,13 @@ class audioHandler {
             // and assigns callback to scriptProcessor
             audio.streamSetup(input, scriptProcessor);
 
-            if(audioElem){
-                audioElem.srcObject = localStream;
-                audioElem.setSinkId(device.out.id);
-            }
-
             // return audioSetup instance
-            return audio;
+            return { audio, localStream };
         });
 
-        this.audioTools = await userMedia;
+        const setup = await userMedia;
+        this.audioTools = setup.audio;
+        this.stream = setup.localStream;
         this.correlation = new Correlation({
             buflen: this.buflen,
             sampleRate: this.audioTools.sampleRate

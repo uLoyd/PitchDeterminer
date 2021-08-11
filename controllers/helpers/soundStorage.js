@@ -3,7 +3,7 @@ class soundStorage {
     biasThreshold = 0.03; // 0.03 is just a random default bias for similarity check. Works alright.
 
     constructor(bias) {
-        bias ? tihs.biasThreshold = bias : null; // Change biasThreshold if a parameter was passed
+        this.biasThreshold = bias ?? null; // Change biasThreshold if a parameter was passed
     }
 
     add(fx) {

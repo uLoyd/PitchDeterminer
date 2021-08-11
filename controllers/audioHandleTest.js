@@ -19,7 +19,7 @@ class htmlElement { // Redundant, created just for own convenience
 class audioHandleTest {
     changeDevice = () => {};
 
-    constructor(changeDevice, micToggleEvent) {
+    constructor(changeDevice, micToggleEvent, speakerToggleEvent) {
         this.changeDevice = changeDevice;
 
         this.elements = {
@@ -27,10 +27,12 @@ class audioHandleTest {
             volume: new htmlElement('volume'),     // All the stuff there is just because of laziness
             audioIn: new htmlElement('audioIn'),
             audioOut: new htmlElement('audioOut'),
-            micBut: new htmlElement('micBut')
+            micBut: new htmlElement('micBut'),
+            speakerBut: new htmlElement('speakerBut')
         }
 
         this.elements.micBut.element.addEventListener('click', micToggleEvent);
+        this.elements.speakerBut.element.addEventListener('click', speakerToggleEvent);
     }
 
     emptyDevices() {
@@ -50,6 +52,13 @@ class audioHandleTest {
 
     micState(state) {
         this.elements.micBut.style([{ // Change the color of mic button
+            key: 'background-color',
+            value: (state ? 'red' : '#555')
+        }]);
+    }
+
+    speakerState(state) {
+        this.elements.speakerBut.style([{ // Change the color of mic button
             key: 'background-color',
             value: (state ? 'red' : '#555')
         }]);
