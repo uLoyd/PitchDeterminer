@@ -62,33 +62,6 @@ window.onload = async () => {
             tun.update(new frequencyMath(errorUpdate).getFrequencyError());
     }
 
-    // callback passed to audioHandler that will be receiving audio data to process
-    function dataProcess() {
-        let volume = mic.getVolume(2);
-
-        test.updateVolume(volume);
-
-        const ac = mic.correlate();
-
-        if (ac > -1) { // Add data to object as long as the correlation and signal are good
-            soundData.add(ac);
-            updateTuner(ac);
-
-            if(soundData.selfCheck() > 30){
-                updatePitch();
-            }
-        }
-        else  if (soundData.selfCheck()) { // if soundData not empty
-            updatePitch();                 // send data to controller and update displayed note
-            updateTuner(ac);
-        } else {
-            if (soundData.selfCheck())                                          // if soundData not empty
-                test.updatePitch(freqMath.getSoundInfo(soundData.determine())); // send data to controller and update displayed note
-
-            soundData.emptyData();                                              // Empty the whole data storage object
-        }
-    }
-
     async function changeInput(id) {
         mic.changeInput(id);
 
@@ -118,50 +91,75 @@ window.onload = async () => {
         this.dir === 'input' ? await changeInput(this.id) : await changeOutput(this.id);
     }
 
-    async function micToggleEvent() {
-        const state = mic.running;
-
-        if (state) {
-            await mic.end();
-            test.clearData();
-            tun.clear();
-            await speakerToggleEvent(false);
-        }
-        else
-            mic.streamReady ? await mic.resume() : await mic.setupStream();
-
-        test.micState(!state); //Returning opposite state to change icon color
-    }
-
     // passed true = turn off, false = turn on, nothing = switch
-    async function speakerToggleEvent(evt, forceState) {
-        if(!mic.running)
-            return;
-
-        const audioOutput = document.querySelector('audio');
-        const state = forceState ?? !!audioOutput.srcObject;
-
-        if (state)
-            audioOutput.srcObject = null;
-        else {
-            const dev = await mic.deviceHandler.getCurrentOrFirst();
-            await changeOutput(dev.out.id, true);
+    async function speakerToggleEvent() {
+        const { speakerBut } = test.elements;
+        const audio = document.querySelector('audio');
+        if(test.speakerEnabled && mic.running){
+            test.buttonToggle(speakerBut, true);
+            return audio.srcObject = mic.stream;
         }
 
-        test.speakerState(!state); //Returning opposite state to change icon color
-    }
-
-    // callback that will be passed to deviceHandler from audioHandlers constructor
-    function deviceChangeAction(deviceArray, currentInput, currentOutput) {
-        test?.updateDeviceList(deviceArray, currentInput, currentOutput);
+        test.buttonToggle(speakerBut, false);
+        audio.srcObject = null;
     }
 
     // audioHandler instance
-    let mic = new audioHandler({
-        deviceChange: deviceChangeAction
-    }, dataProcess);
+    let mic = new audioHandler({});
 
     // audioHandleTest instance - shows data in window
-    const test = new audioTest(changeDevice, micToggleEvent, speakerToggleEvent);
+    const test = new audioTest(changeDevice, speakerToggleEvent);
+    test.elements.micBut.element.onclick = () => {
+        mic.streamReady ? mic.resume() : mic.setupStream();
+    };
+    //const test = new audioTest(changeDevice, micToggleEvent, speakerToggleEvent);
+
     const tun = new tuner();
+
+    mic.on("DeviceChange", test.updateDeviceList.bind(test));
+
+    mic.on("AudioProcessUpdate", (evt) => {
+        const volume = evt.getVolume(2);
+
+        test.updateVolume(volume);
+
+        const ac = evt.correlate();
+
+        if (ac > -1) { // Add data to object as long as the correlation and signal are good
+            soundData.add(ac);
+            updateTuner(ac);
+
+            if(soundData.selfCheck() > 30){
+                updatePitch();
+            }
+        }
+        else  if (soundData.selfCheck()) { // if soundData not empty
+            updatePitch();                 // send data to controller and update displayed note
+            updateTuner(ac);
+        } else {
+            if (soundData.selfCheck())                                          // if soundData not empty
+                test.updatePitch(freqMath.getSoundInfo(soundData.determine())); // send data to controller and update displayed note
+
+            soundData.emptyData();                                              // Empty the whole data storage object
+        }
+    });
+
+    mic.on("StreamEnd", (evt) => {
+        const { micBut, speakerBut } = test.elements;
+        test.buttonToggle(micBut, false);
+        test.buttonToggle(speakerBut, false);
+        test.elements.micBut.element.onclick = evt.setupStream.bind(evt);
+        test.speakerEnabled = false;
+        test.clearData();
+        tun.clear();
+        document.querySelector('audio').srcObject = null;
+    });
+
+    mic.on("SetupDone", (evt) => {
+        const { micBut } = test.elements;
+        micBut.element.onclick = evt.end.bind(evt);
+        test.buttonToggle(micBut, true);
+    });
+
+    await test.updateDeviceList(mic);
 }

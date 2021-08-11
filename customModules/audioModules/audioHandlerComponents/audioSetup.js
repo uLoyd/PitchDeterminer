@@ -1,6 +1,7 @@
 const defaults = require('./defaultAudioValues').audioSetup;
+const EventEmitter = require('events');
 
-class audioSetup {
+class audioSetup extends EventEmitter {
     default = defaults;
     audioContext = null;
     gainSettings = null;
@@ -9,14 +10,11 @@ class audioSetup {
     gainNode = null;
     callback = null;
 
-    constructor(callback, gainSettings, analyserSettings) {
+    constructor(gainSettings, analyserSettings) {
+        super();
+
         this.gainSettings = gainSettings ? gainSettings : defaults.gain;
         this.analyserSettings = analyserSettings ? analyserSettings : defaults.analyser ? defaults.analyser : this.errors(0);
-
-        if (!callback)
-            this.errors(7);
-        else
-            this.callback = callback;
 
         this.startAudioContext();
     }
@@ -56,7 +54,9 @@ class audioSetup {
 
         this.gainNode.connect(this.audioContext.destination);
 
-        scriptProcessor.onaudioprocess = this.callback;
+        scriptProcessor.onaudioprocess = function () {
+            this.emit("AudioProcessUpdate", this);
+        }.bind(this);
     }
 
     async streamClose() {
@@ -131,9 +131,6 @@ class audioSetup {
             case 6:
                 msg += "gain.maxGain"
                 break;
-            case 7:
-                msg += "callback processing data from the audio stream"
-                throw (msg);
             default:
                 throw ("Unexpected error in audioSetup object");
         }

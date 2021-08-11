@@ -1,7 +1,7 @@
 const assert = require('assert');
 const path = require('path');
 const Application = require('spectron').Application;
-const electronPath = require('electron').remote;
+//const electronPath = require('electron').remote;
 const audioHandler = require('../customModules/audioModules/audioHandler');
 const testData = require('./data/AudioHandlerInitData');
 require("web-audio-test-api"); // web-audio-api mock
@@ -22,12 +22,10 @@ const compObj = (value, expected) => {
 testData.forEach(async (data) => {
     describe(`Audio Handler Initialization with params: ${data.title}`, function () {
        let audio;
-       let tools;
 
        before(() => {
            audio = new audioHandler(data.params, () => {});
-           tools = audio.audioTools;
-           tools.analyserSetup();
+           audio.analyserSetup();
 
            app.start();
        });
@@ -39,16 +37,13 @@ testData.forEach(async (data) => {
            done();
        });
 
-       it('Audio handler exists', () => {
-           //console.log(audio.audioTools);
-           assert.ok(audio);
-       });
+       it('Audio handler exists', () => assert.ok(audio));
 
        describe('Audio Handler Analyser Node Initialization', () => {
            const values = {};
            before(() => {
                const { minDec, maxDec, fft, smoothing } = data.compare;
-               const { minDecibels, maxDecibels, fftSize, smoothingTimeConstant } = tools.analyser;
+               const { minDecibels, maxDecibels, fftSize, smoothingTimeConstant } = audio.analyser;
                values.minDec = compObj(minDec, minDecibels);
                values.maxDec = compObj(maxDec, maxDecibels);
                values.fft = compObj(fft, fftSize);
@@ -80,7 +75,7 @@ testData.forEach(async (data) => {
             const values = {};
             before(() => {
                 const { minGain, maxGain } = data.compare;
-                const { minValue, maxValue } = tools.gainNode;
+                const { minValue, maxValue } = audio.gainNode;
                 values.minGain = compObj(minGain, minValue);
                 values.maxGain = compObj(maxGain, maxValue);
             });

@@ -235,6 +235,10 @@ span{
   border: solid 1px black;
 }
 
+.selectedDevice {
+  background-color: red !important;
+}
+
 #fretboard div {
   user-select: none;
 }

@@ -1,3 +1,5 @@
+const { createDomElement } = require('../customModules/fretboard/utils');
+
 class htmlElement { // Redundant, created just for own convenience
     constructor(name) {
         this.element = document.getElementById(name);
@@ -19,7 +21,7 @@ class htmlElement { // Redundant, created just for own convenience
 class audioHandleTest {
     changeDevice = () => {};
 
-    constructor(changeDevice, micToggleEvent, speakerToggleEvent) {
+    constructor(changeDevice, speakerToggleEvent) {
         this.changeDevice = changeDevice;
 
         this.elements = {
@@ -31,8 +33,14 @@ class audioHandleTest {
             speakerBut: new htmlElement('speakerBut')
         }
 
-        this.elements.micBut.element.addEventListener('click', micToggleEvent);
-        this.elements.speakerBut.element.addEventListener('click', speakerToggleEvent);
+        this.speakerEnabled = false;
+
+        this.elements.speakerBut.element.addEventListener('click', () => {
+            this.speakerEnabled = !this.speakerEnabled;
+            speakerToggleEvent();
+        });
+
+        return this;
     }
 
     emptyDevices() {
@@ -40,41 +48,36 @@ class audioHandleTest {
         this.elements.audioOut.content(''); // Empties devices list
     }
 
-    async createElement(target, id, dir, label, selected) { // Creates an element to be added to the device list
-        const elem = id + dir;
-        const style = selected ? "style='background-color: red;'" : "";
-        const add = `<button id="${elem}" class='deviceButton' ${style}">${label}</button>`;
-        target.append(add);
-        //await target.append(add);
-
-        return elem;
+    // true = add class; false = remove class;
+    buttonToggle(button, state){
+        const classActive = 'selectedDevice';
+        state ? button.element.classList.add(classActive) : button.element.classList.remove(classActive);
     }
 
-    micState(state) {
-        this.elements.micBut.style([{ // Change the color of mic button
-            key: 'background-color',
-            value: (state ? 'red' : '#555')
-        }]);
-    }
+    async updateDeviceList(evt) {
+        const devArr = await evt.deviceHandler.getDeviceList();
+        const currentInput = evt.deviceHandler.currentInput;
+        const currentOutput = evt.deviceHandler.currentOutput;
 
-    speakerState(state) {
-        this.elements.speakerBut.style([{ // Change the color of mic button
-            key: 'background-color',
-            value: (state ? 'red' : '#555')
-        }]);
-    }
-
-    updateDeviceList(devArr, currentInput, currentOutput) {
         this.emptyDevices();
         const callback = this.changeDevice;
-        //const callbackOut = this.changeOutput;
 
-        devArr.forEach(async (entry) => {
+        devArr.forEach((entry) => {
             const target = entry.dir === 'input' ? this.elements.audioIn : this.elements.audioOut;
             const selected = entry.dir === 'input' ? entry.id === currentInput?.id : entry.id === currentOutput?.id;
-            const elem = await this.createElement(target, entry.id, entry.dir, entry.label, selected);
 
-            document.getElementById(elem).addEventListener('click', callback.bind(entry));
+            const elem = createDomElement(
+                'button',
+                ['deviceButton'],
+                    entry.label
+            );
+
+            target.element.appendChild(elem);
+
+            if(selected)
+                elem.classList.add('selectedDevice');
+
+            elem.onclick = callback.bind(entry);
         });
     }
 
