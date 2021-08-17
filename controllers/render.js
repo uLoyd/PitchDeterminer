@@ -1,6 +1,6 @@
 const frequencyMath = require('./../customModules/audioModules/frequencyMath.js'),
     audioHandler = require('./../customModules/audioModules/audioHandler'),
-    soundStorage = require('./helpers/soundStorage'),
+    soundStorageEvent = require('./helpers/soundStorageEvent'),
     audioTest = require('./audioHandleTest'),
     tuner = require('./tuner');
 
@@ -8,9 +8,7 @@ const { Fretboard } = require('./../customModules/fretboard/Fretboard');
 const { Sound, sounds } = require('./../customModules/fretboard/Sound');
 
 window.onload = async () => {
-    const soundData = new soundStorage(); // soundData instance
-    const freqMath = new frequencyMath(); // frequencyMath instance
-
+    let soundDataEvent = new soundStorageEvent();
     const fretboardInstance = new Fretboard({
         container: document.getElementById('fretboard'),
         frets: 12,
@@ -47,15 +45,14 @@ window.onload = async () => {
         .create([0, 3, 5, 7, 9, 12]);
 
     function updatePitch(){
-        const snd = new frequencyMath(soundData.determine()).getSoundInfo();
+        const snd = new frequencyMath(soundDataEvent.determine()).getSoundInfo();
         test.updatePitch(snd);
         fretboardInstance.addCurrentSound(snd.soundId)
             .addSoundMarksOnStrings();
-        soundData.emptyData();
     }
 
     function updateTuner(ac){
-        let errorUpdate = soundData.determine();
+        let errorUpdate = soundDataEvent.determine(false);
         errorUpdate = errorUpdate ? errorUpdate : ac;
 
         if(errorUpdate > -1)
@@ -109,10 +106,7 @@ window.onload = async () => {
 
     // audioHandleTest instance - shows data in window
     const test = new audioTest(changeDevice, speakerToggleEvent);
-    test.elements.micBut.element.onclick = () => {
-        mic.streamReady ? mic.resume() : mic.setupStream();
-    };
-    //const test = new audioTest(changeDevice, micToggleEvent, speakerToggleEvent);
+    test.elements.micBut.element.onclick = mic.setupStream.bind(mic);
 
     const tun = new tuner();
 
@@ -126,22 +120,13 @@ window.onload = async () => {
         const ac = evt.correlate();
 
         if (ac > -1) { // Add data to object as long as the correlation and signal are good
-            soundData.add(ac);
-            updateTuner(ac);
-
-            if(soundData.selfCheck() > 30){
-                updatePitch();
-            }
+            soundDataEvent.add(ac);
+            updateTuner();
         }
-        else  if (soundData.selfCheck()) { // if soundData not empty
-            updatePitch();                 // send data to controller and update displayed note
-            updateTuner(ac);
-        } else {
-            if (soundData.selfCheck())                                          // if soundData not empty
-                test.updatePitch(freqMath.getSoundInfo(soundData.determine())); // send data to controller and update displayed note
-
-            soundData.emptyData();                                              // Empty the whole data storage object
-        }
+        else if(soundDataEvent.selfCheck() > 3)
+            soundDataEvent.emit("SampleLimit", soundDataEvent);
+        else
+            soundDataEvent.emptyData();
     });
 
     mic.on("StreamEnd", (evt) => {
@@ -152,13 +137,23 @@ window.onload = async () => {
         test.speakerEnabled = false;
         test.clearData();
         tun.clear();
+        soundDataEvent.emptyData();
         document.querySelector('audio').srcObject = null;
     });
 
-    mic.on("SetupDone", (evt) => {
+    mic.on("SetupDone", async (evt) => {
         const { micBut } = test.elements;
         micBut.element.onclick = evt.end.bind(evt);
         test.buttonToggle(micBut, true);
+    });
+
+    soundDataEvent.on("SampleLimit", (evt) => {
+        updatePitch();
+        evt.emptyData();
+    });
+
+    soundDataEvent.on("SampleTarget", () => {
+        updatePitch();
     });
 
     await test.updateDeviceList(mic);

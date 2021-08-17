@@ -1,8 +1,11 @@
-class soundStorage {
-    freqArr = [];
-    biasThreshold = 0.03; // 0.03 is just a random default bias for similarity check. Works alright.
+const EventEmitter = require('events');
 
-    constructor(bias) {
+// Doesn't use any events. EventEmitter is here only  for a derived class
+// to not make another class "in the middle" just to be able to inherit the "events"
+class soundStorage extends EventEmitter {
+    constructor(bias = 0.03) {     // 0.03 is just a random default bias for similarity check. Works alright.
+        super();
+        this.freqArr = [];
         this.biasThreshold = bias ?? null; // Change biasThreshold if a parameter was passed
     }
 
@@ -25,7 +28,6 @@ class soundStorage {
     }
 
     determine() {
-        //console.log(this.freqArr.length);
         if (!this.freqArr.length)
             return null;
 
@@ -53,8 +55,10 @@ class soundStorage {
     selfCheck() {
         return this.freqArr.length;
     }
+
     emptyData() {
         this.freqArr = [];
+        return this;
     }
 }
 

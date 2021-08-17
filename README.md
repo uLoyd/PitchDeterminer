@@ -26,5 +26,5 @@ TODO right now:
 - [ ] Adding possibility to automatically switch to default avaible device if currently used one gets disconnected
 - [x] General code refactor
 - [x] Output audio (the latency is/will be +- 1 second so not great but it's Node + Chromium ¯\\_(ツ)_/¯
-- [ ] Changes in soundStorage module for storing and determining frequencies
+- [x] Changes in soundStorage module for storing and determining frequencies (in progress)
 - [ ] Anything else that will pop up later

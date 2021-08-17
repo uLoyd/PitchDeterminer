@@ -41,6 +41,8 @@ class audioSetup extends EventEmitter {
 
         // AnalyserNode settings setup
         this.analyserSettingsUpdate();
+
+        this.emit("AudioContextStarted", this);
     }
 
     streamSetup(input, scriptProcessor) {

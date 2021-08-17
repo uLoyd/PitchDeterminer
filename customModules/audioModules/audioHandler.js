@@ -42,7 +42,7 @@ class audioHandler extends audioSetup {
         this.soundCurve = curveChoose(soundCurveAlgorithm);
 
         // set this.buflen value from parameter passed / defaultValues or throw error
-        general ? this.buflen = general.buflen : defaultValues.buflen ? this.buflen = defaultValues.buflen : this.errors(0);
+        this.buflen = general?.buflen ?? defaultValues?.buflen;
 
         // Initialize deviceHandling and update device list
         this.deviceHandler = new deviceHandler( () => { this.emit("DeviceChange", this) });
@@ -98,6 +98,7 @@ class audioHandler extends audioSetup {
             buflen: this.buflen,
             sampleRate: this.sampleRate
         });
+        this.bandRange = this.nyquistFrequency() / this.binCount;
         this.running = true;
         this.streamReady = true;
 
@@ -114,14 +115,14 @@ class audioHandler extends audioSetup {
         return this.sampleRate / 2;
     }
 
-    bandRange(){
+    /*bandRange(){
         return this.nyquistFrequency() / this.binCount;
-    }
+    }*/
 
     getVolume(accuracy){
         const data = new Uint8Array(this.binCount);
-        const nyquist = this.nyquistFrequency();                     // Max possible frequency
-        const band = parseFloat(this.bandRange().toFixed(accuracy)); // Calculates a frequency band range
+        //const nyquist = this.nyquistFrequency();                   // Max possible frequency
+        const band = parseFloat(this.bandRange.toFixed(accuracy));   // Calculates a frequency band range
 
         let currentFrequency = band / 2;                             // Takes the middle frequency of a band
 
@@ -171,21 +172,6 @@ class audioHandler extends audioSetup {
         console.log("Stream resumed");
         this.running = true;
         this.emit("StreamResume", this);
-    }
-
-    errors(e) {
-        let msg = `micSetup constructor error:${e} no '`;
-
-        switch (e) {
-            case 0:
-                msg += "buflen";
-                break;
-            default:
-                throw ("Unexpected error during micSetup class initialization");
-        }
-
-        msg += "' value passed in object containing initialization data and object containing default values";
-        throw (msg);
     }
 }
 
