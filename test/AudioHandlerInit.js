@@ -29,10 +29,11 @@ testData.forEach(async (data) => {
            app.start();
        });
 
-       after(() => {
+       after(async (done) => {
            if (app && app.isRunning()) {
-               app.stop();
+               await app.stop();
            }
+           done();
        });
 
        it('Audio handler exists', () => assert.ok(audio));
