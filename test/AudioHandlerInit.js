@@ -26,7 +26,6 @@ testData.forEach(async (data) => {
        before(() => {
            audio = new audioHandler(data.params, () => {});
            audio.analyserSetup();
-
            app.start();
        });
 
@@ -38,6 +37,12 @@ testData.forEach(async (data) => {
        });
 
        it('Audio handler exists', () => assert.ok(audio));
+
+       it('Audio handler buflen value', () =>
+           assert.strictEqual(audio.buflen, data.compare.buflen));
+
+       it('Audio handler sound curve algorithm instance', () =>
+           assert.strictEqual(audio.soundCurve instanceof data.compare.soundCurve, true));
 
        describe('Audio Handler Analyser Node Initialization', () => {
            const values = {};
@@ -71,7 +76,7 @@ testData.forEach(async (data) => {
            });
        });
 
-        describe('Audio Handler Gain Node Initialization', () => {
+       describe('Audio Handler Gain Node Initialization', () => {
             const values = {};
             before(() => {
                 const { minGain, maxGain } = data.compare;
