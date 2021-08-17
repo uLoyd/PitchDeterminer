@@ -99,13 +99,13 @@ class audioSetup extends EventEmitter {
 
     analyserSettingsUpdate() {
         const short = this.analyserSettings;
-
+        const { analyser } = this.default;
         // assigning values passed or throwing error
         this.default.analyser = {
-            smoothing: (short.smoothing ? short.smoothing : this.errors(1)),
-            fftSize: (short.fftSize ? short.fftSize : this.errors(2)),
-            minDec: (short.minDec ? short.minDec : this.errors(3)),
-            maxDec: (short.maxDec ? short.maxDec : this.errors(4))
+            smoothing: (short.smoothing ?? analyser.smoothing ?? this.errors(1)),
+            fftSize: (short.fftSize ?? analyser.fftSize ?? this.errors(2)),
+            minDec: (short.minDec ?? analyser.minDec ?? this.errors(3)),
+            maxDec: (short.maxDec ?? analyser.maxDec ?? this.errors(4))
         }
     }
 
