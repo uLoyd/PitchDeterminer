@@ -115,10 +115,6 @@ class audioHandler extends audioSetup {
         return this.sampleRate / 2;
     }
 
-    /*bandRange(){
-        return this.nyquistFrequency() / this.binCount;
-    }*/
-
     getVolume(accuracy){
         const data = new Uint8Array(this.binCount);
         //const nyquist = this.nyquistFrequency();                   // Max possible frequency

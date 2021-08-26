@@ -40,9 +40,9 @@ class Correlation {
         for (let offset = this.minSamples; offset < this.maxSamples; offset++) {
             let correlation = 0;
 
-            for (let i = 0; i < this.maxSamples; i++) {
+            for (let i = 0; i < this.maxSamples; i++)
                 correlation += Math.abs((buf[i]) - (buf[i + offset]));
-            }
+
             correlation = 1 - (correlation / this.maxSamples);
 
             correlations[offset] = correlation;
@@ -51,7 +51,8 @@ class Correlation {
                 if (correlation > best_correlation) {
                     best_correlation = correlation;
                     best_offset = offset;
-                } else {
+                }
+                else {
                     const shift = (correlations[best_offset + 1] - correlations[best_offset - 1]) / correlations[best_offset];
                     return this.sampleRate / (best_offset + (8 * shift));
                 }

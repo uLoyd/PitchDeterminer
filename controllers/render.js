@@ -1,5 +1,6 @@
 const frequencyMath = require('./../customModules/audioModules/frequencyMath.js'),
     audioHandler = require('./../customModules/audioModules/audioHandler'),
+    audioFileHandler = require('./../customModules/audioModules/audioFileHandler'),
     soundStorageEvent = require('./helpers/soundStorageEvent'),
     audioTest = require('./audioHandleTest'),
     tuner = require('./tuner');
@@ -157,4 +158,15 @@ window.onload = async () => {
     });
 
     await test.updateDeviceList(mic);
+
+    /*
+    const fileHandler = new audioFileHandler({}, './controllers/audio/test.wav');
+    fileHandler.on("ProcessedFileChunk", evt =>
+        console.log(fileHandler.correlation.perform(evt)));
+
+    //fileHandler.processEvent();
+
+    fileHandler.processCallback((data) => {
+        console.log(fileHandler.correlation.perform(data))});
+    */
 }
