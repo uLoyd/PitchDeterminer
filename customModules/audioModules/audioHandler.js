@@ -94,15 +94,19 @@ class audioHandler extends audioSetup {
         const setup = await userMedia;
 
         this.stream = setup.localStream;
-        this.correlation = new Correlation({
-            buflen: this.buflen,
-            sampleRate: this.sampleRate
-        });
+        this.initCorrelation();
         this.bandRange = this.nyquistFrequency() / this.binCount;
         this.running = true;
         this.streamReady = true;
 
         this.emit("SetupDone", this);
+    }
+
+    initCorrelation(buflen = this.buflen, sampleRate = this.sampleRate) {
+        this.correlation = new Correlation({
+            buflen: buflen,
+            sampleRate: sampleRate
+        });
     }
 
     // Returns True when the AudioContext is working

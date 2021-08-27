@@ -18,20 +18,21 @@ class audioFileHandler extends audioHandler {
 
     // returns AudioBuffer instance
     async decode() {
-        await this.setupStream(); // just to initialize Correlation
         const fileData = readFileSync(this.filePath); // audioContext.decodeAudioData wants the whole file as param
-
-        return this.audioContext.decodeAudioData(this.toArrayBuffer(fileData));
+        return await this.audioContext.decodeAudioData(this.toArrayBuffer(fileData));
     }
 
     // Pulse-Code Modulation
     async getPCMData(data, channel) {
         data = data ?? await this.decode();
-
         const pcm = Array.from(data.getChannelData(channel));
-
         return { data, pcm };
     };
+
+    async initCorrelation(buflen = this.buflen) {
+        const { sampleRate } = await this.decode();
+        super.initCorrelation(buflen, sampleRate);
+    }
 
     #process(pcm, action) {
         while(pcm.length) {
