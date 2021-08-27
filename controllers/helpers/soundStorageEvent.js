@@ -69,7 +69,7 @@ class soundStorageEvent extends soundStorage {
         super.emptyData();
 
         if(this.lastFrequency){
-            this.add(this.lastFrequency);
+            //this.add(this.lastFrequency);
             this.lastFrequency = null;
         }
 

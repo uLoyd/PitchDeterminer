@@ -3,7 +3,8 @@ const frequencyMath = require('./../customModules/audioModules/frequencyMath.js'
     audioFileHandler = require('./../customModules/audioModules/audioFileHandler'),
     soundStorageEvent = require('./helpers/soundStorageEvent'),
     audioTest = require('./audioHandleTest'),
-    tuner = require('./tuner');
+    tuner = require('./tuner'),
+    fs = require('fs');
 
 const { Fretboard } = require('./../customModules/fretboard/Fretboard');
 const { Sound, sounds } = require('./../customModules/fretboard/Sound');
@@ -160,13 +161,21 @@ window.onload = async () => {
     await test.updateDeviceList(mic);
 
     /*
-    const fileHandler = new audioFileHandler({}, './controllers/audio/test.wav');
+    const fileHandler = new audioFileHandler({}, './controllers/audio/E2.wav');
+    await fileHandler.initCorrelation();
+
     fileHandler.on("ProcessedFileChunk", evt =>
         console.log(fileHandler.correlation.perform(evt)));
 
     //fileHandler.processEvent();
 
-    fileHandler.processCallback((data) => {
-        console.log(fileHandler.correlation.perform(data))});
+    fileHandler.processCallback(data => console.log(fileHandler.correlation.perform(data)));
+    */
+    /*
+    const fileHandler = new audioFileHandler({}, './controllers/audio/B3.wav');
+    await fileHandler.initCorrelation();
+    const content = [];
+    await fileHandler.processCallback(data => content.push(fileHandler.correlation.perform(data)));
+    fs.writeFile('./test/data/B3.json', JSON.stringify(content), () => {});
     */
 }

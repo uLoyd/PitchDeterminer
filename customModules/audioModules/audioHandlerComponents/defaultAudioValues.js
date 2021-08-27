@@ -3,7 +3,7 @@ const defaultAudioValues = {
     minSamples: 100,
     rmsThreshold: 0.01,
     correlationThreshold: 0.01,
-    correlationDegree: 0.90
+    correlationDegree: 0.98
   },
   audioSetup: {
     gain: {
