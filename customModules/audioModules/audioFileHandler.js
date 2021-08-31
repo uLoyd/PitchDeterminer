@@ -17,9 +17,9 @@ class audioFileHandler extends audioHandler {
     }
 
     // returns AudioBuffer instance
-    async decode() {
+    async decode(callback) {
         const fileData = readFileSync(this.filePath); // audioContext.decodeAudioData wants the whole file as param
-        return await this.audioContext.decodeAudioData(this.toArrayBuffer(fileData));
+        return await this.audioContext.decodeAudioData(this.toArrayBuffer(fileData), callback);
     }
 
     // Pulse-Code Modulation
@@ -44,13 +44,25 @@ class audioFileHandler extends audioHandler {
     async processEvent(decoded, channel = 0) {
         const { pcm } = await this.getPCMData(decoded, channel);
 
-        this.#process(pcm, (data) => { this.emit("ProcessedFileChunk", data)});
+        this.#process(pcm, (data) => { this.emit("ProcessedFileChunk", data) });
     }
 
     async processCallback(callback, decoded, channel = 0) {
         const { pcm } = await this.getPCMData(decoded, channel);
 
-        this.#process(pcm, data => callback(data) );
+        this.#process(pcm, callback);
+    }
+
+    async createSource(callback) {
+        const source = this.audioContext.createBufferSource();
+
+        const action = callback ?? async function (buf) {
+            source.buffer = buf;
+            source.connect(this.audioContext.destination);
+        }.bind(this);
+
+        await this.decode(action);
+        return source;
     }
 }
 

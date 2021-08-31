@@ -64,28 +64,24 @@ class deviceHandler {
         const devices = await this.getDeviceList();
 
         return {
-            in: this.currentInput ?? devices.find(x => x.dir = 'input'),
-            out: this.currentOutput ?? devices.find(x => x.dir = 'output')
+            in: this.currentInput ?? devices.find(x => x.dir === 'input'),
+            out: this.currentOutput ?? devices.find(x => x.dir === 'output')
         }
     }
 
-    async changeDevice(e, dir) {
-        let dev;
+    // e = device ID!
+    async changeDevice(dir, e) {
         const devList = await this.getDeviceList();
-
-        if(!e)
-            dev = devList.find(x => x.dir === dir);
-        else
-            dev = devList.find(x => x.id === e && x.dir === dir);
+        const dev = e ? devList.find(x => x.id === e && x.dir === dir) : devList.find(x => x.dir === dir);
 
         dir === 'input' ? this.currentInput = dev : this.currentOutput = dev;
 
         this.deviceChangeCallback(await this.getDeviceList(), this.currentInput, this.currentOutput);
     }
 
-    changeInput = async (e) => this.changeDevice(e, 'input');
+    changeInput = async (e) => this.changeDevice('input', e);
 
-    changeOutput = async (e) => this.changeDevice(e, 'output');
+    changeOutput = async (e) => this.changeDevice('output', e);
 
     // Returns bool. True - there's at least 1 input device available
     async checkForInput() {
@@ -100,6 +96,14 @@ class deviceHandler {
 
         return device.in ? {
             exact: device.in.id
+        } : undefined;
+    }
+
+    async navigatorOutput() {
+        const device = await this.getCurrentOrFirst();
+
+        return device.out ? {
+            exact: device.out.id
         } : undefined;
     }
 }

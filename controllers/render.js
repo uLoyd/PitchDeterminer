@@ -87,6 +87,7 @@ window.onload = async () => {
     async function changeDevice() {
         if (!mic.running)
             return;
+
         this.dir === 'input' ? await changeInput(this.id) : await changeOutput(this.id);
     }
 
@@ -161,8 +162,14 @@ window.onload = async () => {
     await test.updateDeviceList(mic);
 
     /*
+    const fileHandler = new audioFileHandler({}, './controllers/audio/test.wav');
+    await fileHandler.initCorrelation();
+    (await fileHandler.createSource()).start(0);
+    */
+    /*
     const fileHandler = new audioFileHandler({}, './controllers/audio/E2.wav');
     await fileHandler.initCorrelation();
+    (await fileHandler.createSource()).start(0);
 
     fileHandler.on("ProcessedFileChunk", evt =>
         console.log(fileHandler.correlation.perform(evt)));
