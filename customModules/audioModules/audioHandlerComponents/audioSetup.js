@@ -8,9 +8,6 @@ class audioSetup extends EventEmitter {
     audioContext = null;
     analyserNode = null;
     gainNode = null;
-    analyser = null;
-    gain = null;
-    callback = null;
 
     constructor(gainNode = new GainNode(), analyserNode = new AnalyserNode()) {
         super();
@@ -33,22 +30,22 @@ class audioSetup extends EventEmitter {
     startAudioContext() {
         this.audioContext = new AudioContext();
 
-        this.gain = this.gainNode.create(this.audioContext).node;
-        this.analyser = this.analyserNode.create(this.audioContext).node;
+        this.gainNode.create(this.audioContext);
+        this.analyserNode.create(this.audioContext);
 
         this.sampleRate = this.audioContext.sampleRate;
-        this.binCount = this.analyser.frequencyBinCount;
+        this.binCount = this.analyserNode.node.frequencyBinCount;
 
         this.emit("AudioContextStarted", this);
     }
 
     streamSetup(input, scriptProcessor) {
-        input.connect(this.analyser);
-        this.analyser.connect(scriptProcessor);
+        this.analyserNode.connectTo(input);
+        this.analyserNode.connect(scriptProcessor);
 
         scriptProcessor.connect(this.audioContext.destination);
 
-        this.gain.connect(this.audioContext.destination);
+        this.gainNode.connect(this.audioContext.destination);
 
         scriptProcessor.onaudioprocess = function () {
             this.emit("AudioProcessUpdate", this);
@@ -56,8 +53,8 @@ class audioSetup extends EventEmitter {
     }
 
     async streamClose() {
-        await this.gain.disconnect();
-        await this.analyser.disconnect();
+        await this.gainNode.node.disconnect();
+        await this.analyserNode.node.disconnect();
         await this.audioContext.close();
     }
 
@@ -71,12 +68,12 @@ class audioSetup extends EventEmitter {
 
     // Just a shorter call for analyser.ByteFrequencyData
     BFD(data) {
-        this.analyser.getByteFrequencyData(data);
+        this.analyserNode.node.getByteFrequencyData(data);
     }
 
     // Just a shorter call for analyser.FloatTimeDomainData
     FTD(buf) {
-        this.analyser.getFloatTimeDomainData(buf);
+        this.analyserNode.node.getFloatTimeDomainData(buf);
     }
 }
 
