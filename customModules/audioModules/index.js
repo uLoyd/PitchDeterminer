@@ -1,0 +1,11 @@
+module.exports.audioSetup = require('./audioHandlerComponents/audioSetup');
+module.exports.GainNode = require('./audioHandlerComponents/audioSetupComponents/GainNode');
+module.exports.AnalyserNode = require('./audioHandlerComponents/audioSetupComponents/AnalyserNode');
+module.exports.IAudioNode = require('./audioHandlerComponents/audioSetupComponents/IAudioNode');
+module.exports.Correlation = require('./audioHandlerComponents/Correlation');
+module.exports.defaultAudioValues = require('./audioHandlerComponents/defaultAudioValues').all;
+module.exports.deviceHandler = require('./audioHandlerComponents/deviceHandler');
+module.exports.audioFileHandler = require('./audioFileHandler');
+module.exports.audioHandler = require('./audioHandler');
+module.exports.frequencyMath = require('./frequencyMath');
+module.exports.weights = require('./weights').all;

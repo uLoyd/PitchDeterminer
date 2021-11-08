@@ -1,8 +1,8 @@
 const assert = require('assert');
 const path = require('path');
 const Application = require('spectron').Application;
-//const electronPath = require('electron').remote;
 const audioHandler = require('../customModules/audioModules/audioHandler');
+const { AnalyserNode, GainNode } = require('../customModules/audioModules/index');
 const testData = require('./data/AudioHandlerInitData');
 require("web-audio-test-api"); // web-audio-api mock
 
@@ -24,8 +24,12 @@ testData.forEach(async (data) => {
        let audio;
 
        before(() => {
-           audio = new audioHandler(data.params, () => {});
-           audio.analyserSetup();
+           audio = new audioHandler({
+               general: data.params.general,
+               gainNode: new GainNode(data.params.gainSettings),
+               analyserNode: new AnalyserNode(data.params.analyserSettings)
+           });
+
            app.start();
        });
 
@@ -80,7 +84,7 @@ testData.forEach(async (data) => {
             const values = {};
             before(() => {
                 const { minGain, maxGain } = data.compare;
-                const { minValue, maxValue } = audio.gainNode;
+                const { minValue, maxValue } = audio.gain;
                 values.minGain = compObj(minGain, minValue);
                 values.maxGain = compObj(maxGain, maxValue);
             });

@@ -1,8 +1,23 @@
 const Correlation = require('./audioHandlerComponents/Correlation');
 const audioSetup = require('./audioHandlerComponents/audioSetup');
-const defaultValues = require('./audioHandlerComponents/defaultAudioValues').general;
+const defaults = require('./audioHandlerComponents/defaultAudioValues').all;
 const deviceHandler = require('./audioHandlerComponents/deviceHandler');
 const Weight = require('./weights').all;
+
+const curveChoose = (x) =>{
+    switch (x?.toUpperCase()){
+        case 'A':
+            return new Weight.Aweight();
+        case 'B':
+            return new Weight.Bweight();
+        case 'C':
+            return new Weight.Cweight();
+        case 'D':
+            return new Weight.Dweight();
+        default:
+            return curveChoose(defaults.general.curveAlgorithm);
+    }
+}
 
 class audioHandler extends audioSetup {
     correlation = null;   // Placeholder for Correlation class instance
@@ -13,36 +28,13 @@ class audioHandler extends audioSetup {
     running = false;      // State (is it running) defined here as at the start AudioContext.state can
                           // be set to "running" before invocation of setupStream method
 
-    constructor(initData) {
-        const {
-            general,
-            gainSettings,
-            analyserSettings,
-            soundCurveAlgorithm
-        } = initData;
-
-        const curveChoose = (x) =>{
-            switch (x?.toUpperCase()){
-                case 'A':
-                    return new Weight.Aweight();
-                case 'B':
-                    return new Weight.Bweight();
-                case 'C':
-                    return new Weight.Cweight();
-                case 'D':
-                    return new Weight.Dweight();
-                default:
-                    return curveChoose(defaultValues.curveAlgorithm);
-            }
-        }
-
-        super(gainSettings, analyserSettings);
+    constructor({ general = defaults.general, gainNode, analyserNode } = {}) {
+        super(gainNode, analyserNode);
 
         // Creates instance of class responsible for weighting sound levels
-        this.soundCurve = curveChoose(soundCurveAlgorithm);
+        this.soundCurve = curveChoose(general.curveAlgorithm);
 
-        // set this.buflen value from parameter passed / defaultValues or throw error
-        this.buflen = general?.buflen ?? defaultValues?.buflen;
+        this.buflen = general.buflen;
 
         // Initialize deviceHandling and update device list
         this.deviceHandler = new deviceHandler( () => { this.emit("DeviceChange", this) });

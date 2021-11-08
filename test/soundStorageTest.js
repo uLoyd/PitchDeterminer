@@ -58,6 +58,7 @@ testData.forEach(async (data) => {
         });
 
         it('Storage empty', () => {
+            data.content.forEach(entry => entry > -1 ? storage.add(entry) : null);
             storage.emptyData();
             assert.strictEqual(storage.selfCheck(), 0);
         });

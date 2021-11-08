@@ -105,7 +105,7 @@ window.onload = async () => {
     }
 
     // audioHandler instance
-    let mic = new audioHandler({});
+    let mic = new audioHandler();
 
     // audioHandleTest instance - shows data in window
     const test = new audioTest(changeDevice, speakerToggleEvent);

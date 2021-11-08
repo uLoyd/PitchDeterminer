@@ -25,9 +25,9 @@ module.exports = [
         title: 'Custom1',
         params: {
             general: {
-                buflen: 512  
+                buflen: 512,
+                curveAlgorithm: 'B'
             },
-            soundCurveAlgorithm: 'B',
             gainSettings: {
                 minGain: 1,
                 maxGain: 2
@@ -54,9 +54,9 @@ module.exports = [
         title: 'Custom2',
         params: {
             general: {
-                buflen: 2048
+                buflen: 2048,
+                curveAlgorithm: 'C'
             },
-            soundCurveAlgorithm: 'C',
             gainSettings: {
                 minGain: 0.3,
                 maxGain: 0.6
