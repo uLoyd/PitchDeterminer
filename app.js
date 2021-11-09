@@ -1,6 +1,5 @@
 const electron = require('electron');
 const path = require('path');
-const url = require('url');
 
 const app = electron.app;
 const browserWindow = electron.BrowserWindow;
@@ -11,6 +10,7 @@ const createWindow = async () => {
   win = new browserWindow({
       width: 1800,
       webPreferences: {
+          contextIsolation: false,
           nodeIntegration: true,
           nodeIntegrationInWorker: true
       }

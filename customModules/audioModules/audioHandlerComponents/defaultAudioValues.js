@@ -7,14 +7,14 @@ const defaultAudioValues = {
   },
   audioSetup: {
     gain: {
-      minGain: 0.7,
-      maxGain: 0.85
+      minValue: 0.7,
+      maxValue: 0.85
     },
     analyser: {
-      smoothing: 0.9,
+      smoothingTimeConstant: 0.9,
       fftSize: 32768, // max possible size
-      minDec: -90,
-      maxDec: -10
+      minDecibels: -90,
+      maxDecibels: -10
     }
   },
   general: {

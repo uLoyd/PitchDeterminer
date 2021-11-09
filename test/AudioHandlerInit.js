@@ -51,52 +51,52 @@ testData.forEach(async (data) => {
        describe('Audio Handler Analyser Node Initialization', () => {
            const values = {};
            before(() => {
-               const { minDec, maxDec, fft, smoothing } = data.compare;
-               const { minDecibels, maxDecibels, fftSize, smoothingTimeConstant } = audio.analyserNode.node;
-               values.minDec = compObj(minDec, minDecibels);
-               values.maxDec = compObj(maxDec, maxDecibels);
-               values.fft = compObj(fft, fftSize);
-               values.smoothing = compObj(smoothing, smoothingTimeConstant);
+               const expected = data.compare;
+               const actual = audio.analyserNode.node;
+               values.minDecibels = compObj(actual.minDecibels, expected.minDecibels);
+               values.maxDecibels = compObj(actual.maxDecibels, expected.maxDecibels);
+               values.fftSize = compObj(actual.fftSize, expected.fftSize);
+               values.smoothingTimeConstant = compObj(actual.smoothingTimeConstant, expected.smoothingTimeConstant);
            });
 
            it('Smoothing value', () => {
-               const { smoothing } = values;
-               smoothing.assert();
+               const { smoothingTimeConstant } = values;
+               smoothingTimeConstant.assert();
            });
 
            it('FFT Size', () => {
-               const { fft } = values;
-               fft.assert();
+               const { fftSize } = values;
+               fftSize.assert();
            });
 
            it('Min Decibels Size', () => {
-               const { minDec } = values;
-               minDec.assert();
+               const { minDecibels } = values;
+               minDecibels.assert();
            });
 
            it('Max Decibels Size', () => {
-               const { maxDec } = values;
-               maxDec.assert();
+               const { maxDecibels } = values;
+               maxDecibels.assert();
            });
        });
 
        describe('Audio Handler Gain Node Initialization', () => {
             const values = {};
             before(() => {
-                const { minGain, maxGain } = data.compare;
-                const { minValue, maxValue } = audio.gainNode.node;
-                values.minGain = compObj(minGain, minValue);
-                values.maxGain = compObj(maxGain, maxValue);
+                const actual = data.compare;
+                const expected = audio.gainNode.node;
+                values.minValue = compObj(actual.minValue, expected.minValue);
+                values.maxValue = compObj(actual.maxValue, expected.maxValue);
             });
 
             it('Min Gain Size', () => {
-                const { minGain } = values;
-                minGain.assert();
+                const { minValue } = values;
+                minValue.assert();
             });
 
             it('Max Gain Size', () => {
-                const { maxGain } = values;
-                maxGain.assert();
+                const { maxValue } = values;
+                maxValue.assert();
             });
         });
    });
