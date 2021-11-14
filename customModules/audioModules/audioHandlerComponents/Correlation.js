@@ -1,43 +1,41 @@
 const defaults = require('./defaultAudioValues').correlation;
 
 class Correlation {
-    minSamples = 0;
-    rmsThreshold = 0.01;
-    correlationThreshold = 0.01;
-    correlationDegree = 0.98;
-
     constructor(initData) {
-        this.buflen = initData.buflen;
-        this.maxSamples = Math.floor(initData.buflen / 2);
-        this.sampleRate = initData.sampleRate;
+        for (const prop in defaults) {
+            if (!initData.hasOwnProperty(prop)) {
+                initData[prop] = defaults[prop];
+            }
+        }
 
-        // if minimal sample amount is defined in initData or defaults object update the value to the new one
-        this.minSamples = this.checkSettings(initData.minSamples, defaults.minSamples, 1);
+        const { sampleRate, rmsThreshold, correlationThreshold, correlationDegree, buflen } = initData;
 
-        // if root mean square threshold is defined in initData or defaults object update the value to the new one
-        this.rmsThreshold = this.checkSettings(initData.rmsThreshold, defaults.rmsThreshold, 1);
+        this.buflen = buflen;
+        this.maxSamples = Math.floor(buflen / 2);
 
-        // if correlations threshold is defined in initData or defaults object update the value to the new one
-        this.correlationThreshold = this.checkSettings(initData.correlationThreshold, defaults.correlationThreshold, 1);
-
-        // if correlations degree is defined in initData or defaults object update the value to the new one
-        this.correlationDegree = this.checkSettings(initData.correlationDegree, defaults.correlationDegree, 1);
+        this.sampleRate = sampleRate;
+        this.rmsThreshold = rmsThreshold;
+        this.correlationThreshold = correlationThreshold;
+        this.correlationDegree = correlationDegree;
     }
 
     perform(buf) {
-        const rms = Math.sqrt(buf.reduce((total, curVal) => {
-            return total += curVal * curVal
+        let rms = Math.sqrt(buf.reduce((total, curVal) => {
+            return total + Math.pow(curVal, 2);
         }, 0) / this.buflen);
+
+        if(isNaN(rms))
+            rms = 0;
+
+        if (rms < this.rmsThreshold) // not enough signal power
+            return -1;
 
         let best_offset = -1,
             best_correlation = 0,
             correlations = new Array(this.maxSamples),
             lastCorrelation = 1;
 
-        if (rms < this.rmsThreshold) // not enough signal power
-            return -1;
-
-        for (let offset = this.minSamples; offset < this.maxSamples; offset++) {
+        for (let offset = 0; offset < this.maxSamples; offset++) {
             let correlation = 0;
 
             for (let i = 0; i < this.maxSamples; i++)
@@ -65,37 +63,6 @@ class Correlation {
             return this.sampleRate / best_offset;
 
         return -1;
-    }
-
-    // Returns a value to set to specific property or throws error
-    checkSettings(initParam, defaultParam, err) {
-        //console.log(initParam, defaultParam);
-        return initParam !== undefined ? initParam : defaultParam !== undefined ? defaultParam : this.errors(err);
-    }
-
-    errors(e) {
-        let msg = `Correlation constructor error:${e} - no '`;
-        switch (e) {
-            case 1:
-                msg += "minSamples"
-                break;
-            case 2:
-                msg += "rmsThreshold"
-                break;
-            case 3:
-                msg += "correlationThreshold"
-                break;
-            case 4:
-                msg += "correlationDegree"
-                break;
-            default:
-                throw ("Unexpected error during Correlation class initialization");
-                break;
-        }
-
-        msg += "' value passed in object containing initializadion data and object containing default values";
-
-        throw (msg);
     }
 }
 

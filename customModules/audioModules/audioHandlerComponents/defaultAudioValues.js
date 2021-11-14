@@ -1,6 +1,5 @@
 const defaultAudioValues = {
   correlation: {
-    minSamples: 100,
     rmsThreshold: 0.01,
     correlationThreshold: 0.01,
     correlationDegree: 0.98
@@ -19,7 +18,7 @@ const defaultAudioValues = {
   },
   general: {
     curveAlgorithm: 'A',
-    buflen: 4096 // Going lower than 2048 results in really low accuracy in determining frequencies
+    buflen: 8196 // Going lower than 2048 results in really low accuracy in determining frequencies
   }
 }
 
