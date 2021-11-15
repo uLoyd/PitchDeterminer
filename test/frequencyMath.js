@@ -56,6 +56,17 @@ const test = (testData, name) => {
                 assert.ok(actual === expected); // for some reason -0 !== 0 in mocha
             });
         });
+
+        it('Sound forward from A4 calculation is correct', () => {
+            testData.forEach((data) => {
+                fq = new frequencyMath(data.frequency);
+
+                const actual = fq.soundDistanceForward();
+                const expected = data.soundForwardA4;
+
+                assert.strictEqual(actual, expected, JSON.stringify(fq));
+            });
+        });
     });
 }
 

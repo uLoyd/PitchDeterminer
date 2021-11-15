@@ -5,7 +5,8 @@ exports.exact = [
         step: 0,
         soundId: 0,
         octave: 4,
-        cents: 0.001
+        cents: 0.001,
+        soundForwardA4: 0
     },
     {
         frequency: 16.35159,
@@ -13,7 +14,8 @@ exports.exact = [
         step: -57,
         soundId: 3,
         octave: 0,
-        cents: 0.001
+        cents: 0.001,
+        soundForwardA4: 9
     },
     {
         frequency: 1479.978,
@@ -21,7 +23,8 @@ exports.exact = [
         step: 21,
         soundId: 9,
         octave: 6,
-        cents: 0.001
+        cents: 0.001,
+        soundForwardA4: 3
     },
     {
         frequency: 432,
@@ -30,7 +33,8 @@ exports.exact = [
         octave: 4,
         cents: -31.766,
         step: 0,
-        soundId: 0
+        soundId: 0,
+        soundForwardA4: 0
     },
     {
         frequency: 1050.11,
@@ -39,7 +43,8 @@ exports.exact = [
         octave: 6,
         cents: 5.961,
         step: 15,
-        soundId: 3
+        soundId: 3,
+        soundForwardA4: 9
     },
     {
         frequency: 18.01,
@@ -48,7 +53,8 @@ exports.exact = [
         octave: 0,
         cents: -32.7555,
         step: -55,
-        soundId: 5
+        soundId: 5,
+        soundForwardA4: 7
     },
     {
         frequency: 440,
@@ -57,6 +63,7 @@ exports.exact = [
         octave: 4,
         cents: 0,
         step: 0,
-        soundId: 0
+        soundId: 0,
+        soundForwardA4: 0
     }
 ];
