@@ -1,6 +1,6 @@
 const assert = require('assert');
 const soundStorage = require('../controllers/helpers/soundStorageEvent');
-const frequencyMath = require('../customModules/audioModules/frequencyMath');
+const frequencyMath = require('../customModules/audioModules/FrequencyMath');
 const testA2 = require('./data/A2');
 const testE2 = require('./data/E2');
 const testB3 = require('./data/B3');

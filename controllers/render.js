@@ -1,7 +1,9 @@
-const frequencyMath = require('./../customModules/audioModules/frequencyMath.js'),
-    audioHandler = require('./../customModules/audioModules/audioHandler'),
-    audioFileHandler = require('./../customModules/audioModules/audioFileHandler'),
-    soundStorageEvent = require('./helpers/soundStorageEvent'),
+const {
+    FrequencyMath,
+    AudioHandler,
+    AudioFileHandler
+} = require('../customModules/audioModules/index');
+const soundStorageEvent = require('./helpers/soundStorageEvent'),
     audioTest = require('./audioHandleTest'),
     tuner = require('./tuner'),
     fs = require('fs');
@@ -47,7 +49,7 @@ window.onload = async () => {
         .create([0, 3, 5, 7, 9, 12]);
 
     function updatePitch(){
-        const snd = new frequencyMath(soundDataEvent.determine()).getSoundInfo();
+        const snd = new FrequencyMath(soundDataEvent.determine()).getSoundInfo();
         test.updatePitch(snd);
         fretboardInstance.addCurrentSound(snd.soundId)
             .addSoundMarksOnStrings();
@@ -58,7 +60,7 @@ window.onload = async () => {
         errorUpdate = errorUpdate ? errorUpdate : ac;
 
         if(errorUpdate > -1)
-            tun.update(new frequencyMath(errorUpdate).getFrequencyError());
+            tun.update(new FrequencyMath(errorUpdate).getFrequencyError());
     }
 
     async function changeInput(id) {
@@ -105,7 +107,7 @@ window.onload = async () => {
     }
 
     // audioHandler instance
-    let mic = new audioHandler();
+    let mic = new AudioHandler();
 
     // audioHandleTest instance - shows data in window
     const test = new audioTest(changeDevice, speakerToggleEvent);
@@ -166,18 +168,25 @@ window.onload = async () => {
     await fileHandler.initCorrelation();
     (await fileHandler.createSource()).start(0);
     */
-    /*
-    const fileHandler = new audioFileHandler({}, './controllers/audio/E2.wav');
-    await fileHandler.initCorrelation();
-    (await fileHandler.createSource()).start(0);
 
-    fileHandler.on("ProcessedFileChunk", evt =>
-        console.log(fileHandler.correlation.perform(evt)));
+    /*const fileHandler = new AudioFileHandler({}, './ppa.wav');
+    await fileHandler.initCorrelation();*/
+    //(await fileHandler.createSource()).start(0);
+
+    //fileHandler.on("ProcessedFileChunk", evt =>
+     //   console.log(fileHandler.correlation.perform(evt)));
 
     //fileHandler.processEvent();
 
-    fileHandler.processCallback(data => console.log(fileHandler.correlation.perform(data)));
-    */
+    /*fileHandler.processCallback(data => {
+        const cor = fileHandler.correlation.perform(data);
+        const fq = new frequencyMath(cor);
+
+        console.log(cor);
+        console.log(fq);
+        console.log(fq.sound);
+    });*/
+
     /*
     const fileHandler = new audioFileHandler({}, './controllers/audio/B3.wav');
     await fileHandler.initCorrelation();

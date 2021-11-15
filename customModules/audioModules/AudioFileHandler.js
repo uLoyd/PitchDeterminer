@@ -1,4 +1,4 @@
-const audioHandler = require('./audioHandler');
+const audioHandler = require('./AudioHandler');
 const { readFileSync } = require('fs');
 
 class audioFileHandler extends audioHandler {
@@ -10,6 +10,7 @@ class audioFileHandler extends audioHandler {
     toArrayBuffer(buf) {
         const ab = new ArrayBuffer(buf.length);
         let view = new Uint8Array(ab);
+
         for (let i = 0; i < buf.length; ++i) {
             view[i] = buf[i];
         }
@@ -34,7 +35,7 @@ class audioFileHandler extends audioHandler {
         super.initCorrelation(buflen, sampleRate);
     }
 
-    #process(pcm, action) {
+    process(pcm, action) {
         while(pcm.length) {
             const end = pcm.length > this.buflen ? this.buflen : pcm.length;
             action(pcm.splice(0, end));
@@ -44,13 +45,13 @@ class audioFileHandler extends audioHandler {
     async processEvent(decoded, channel = 0) {
         const { pcm } = await this.getPCMData(decoded, channel);
 
-        this.#process(pcm, (data) => { this.emit("ProcessedFileChunk", data) });
+        this.process(pcm, (data) => { this.emit("ProcessedFileChunk", data) });
     }
 
     async processCallback(callback, decoded, channel = 0) {
         const { pcm } = await this.getPCMData(decoded, channel);
 
-        this.#process(pcm, callback);
+        this.process(pcm, callback);
     }
 
     async createSource(callback) {

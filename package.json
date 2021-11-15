@@ -1,6 +1,6 @@
 {
   "name": "pitchdeterminer",
-  "version": "0.5.5",
+  "version": "0.5.6",
   "description": "Electron app determining pitch using web audio api",
   "main": "app.js",
   "dependencies": {

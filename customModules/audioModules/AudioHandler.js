@@ -1,25 +1,29 @@
-const Correlation = require('./audioHandlerComponents/Correlation');
-const audioSetup = require('./audioHandlerComponents/audioSetup');
-const defaults = require('./audioHandlerComponents/defaultAudioValues').all;
-const deviceHandler = require('./audioHandlerComponents/deviceHandler');
-const Weight = require('./weights').all;
+const {
+    Correlation,
+    AudioSetup,
+    weights,
+    defaultAudioValues,
+    DeviceHandler,
+    MediaStreamSource,
+    ScriptProcessor
+} = require('./index');
 
 const curveChoose = (x) =>{
     switch (x?.toUpperCase()){
         case 'A':
-            return new Weight.Aweight();
+            return new weights.Aweight();
         case 'B':
-            return new Weight.Bweight();
+            return new weights.Bweight();
         case 'C':
-            return new Weight.Cweight();
+            return new weights.Cweight();
         case 'D':
-            return new Weight.Dweight();
+            return new weights.Dweight();
         default:
-            return curveChoose(defaults.general.curveAlgorithm);
+            return curveChoose(defaultAudioValues.general.curveAlgorithm);
     }
 }
 
-class audioHandler extends audioSetup {
+class AudioHandler extends AudioSetup {
     correlation = null;   // Placeholder for Correlation class instance
     deviceHandler = null; // Placeholder for deviceHandler class instance
     buflen = null;        // Placeholder for buffer size
@@ -28,7 +32,7 @@ class audioHandler extends audioSetup {
     running = false;      // State (is it running) defined here as at the start AudioContext.state can
                           // be set to "running" before invocation of setupStream method
 
-    constructor({ general = defaults.general, gainNode, analyserNode } = {}) {
+    constructor({ general = defaultAudioValues.general, gainNode, analyserNode } = {}) {
         super(gainNode, analyserNode);
 
         // Creates instance of class responsible for weighting sound levels
@@ -37,7 +41,7 @@ class audioHandler extends audioSetup {
         this.buflen = general.buflen;
 
         // Initialize deviceHandling and update device list
-        this.deviceHandler = new deviceHandler( () => { this.emit("DeviceChange", this) });
+        this.deviceHandler = new DeviceHandler( () => { this.emit("DeviceChange", this) });
 
         this.changeInput = (e) => this.deviceHandler.changeInput(e);
 
@@ -62,30 +66,20 @@ class audioHandler extends audioSetup {
         const audioConstrain = await this.deviceHandler.navigatorInput();
         console.log(`Stream setting up using input device: ${audioConstrain.exact}`);
 
-        // audioTools thrown into "audio" variable to use inside navigator
-        let audio = this;
-
         const userMedia = navigator.mediaDevices.getUserMedia({
             audio: {
                 deviceId: audioConstrain
             },
             video: false
-        }).then(function(localStream) {
-            const input = audio.audioContext.createMediaStreamSource(localStream);
-            const scriptProcessor = audio.audioContext.createScriptProcessor();
-
-            // Sets up analyserNode as well as
-            // connect nodes, input, scriptProcessor
-            // and assigns callback to scriptProcessor
-            audio.streamSetup(input, scriptProcessor);
-
-            // return audioSetup instance
-            return { audio, localStream };
         });
 
-        const setup = await userMedia;
+        const stream = await userMedia;
 
-        this.stream = setup.localStream;
+        const input = new MediaStreamSource().create(this.audioContext, stream);
+        const scriptProcessor = new ScriptProcessor().create(this.audioContext);
+        this.streamSetup(input, scriptProcessor);
+
+        this.stream = stream;
         this.initCorrelation();
         this.bandRange = this.nyquistFrequency() / this.binCount;
         this.running = true;
@@ -167,4 +161,4 @@ class audioHandler extends audioSetup {
     }
 }
 
-module.exports = audioHandler;
+module.exports = AudioHandler;

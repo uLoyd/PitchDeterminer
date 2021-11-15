@@ -1,9 +1,9 @@
 const defaults = require('./defaultAudioValues').audioSetup;
 const EventEmitter = require('events');
-const GainNode = require('./audioSetupComponents/GainNode');
-const AnalyserNode = require('./audioSetupComponents/AnalyserNode');
+const GainNode = require('./audioSetupComponents/Gain');
+const AnalyserNode = require('./audioSetupComponents/Analyser');
 
-class audioSetup extends EventEmitter {
+class AudioSetup extends EventEmitter {
     default = defaults;
     audioContext = null;
     analyserNode = null;
@@ -12,8 +12,8 @@ class audioSetup extends EventEmitter {
     constructor(gainNode = new GainNode(), analyserNode = new AnalyserNode()) {
         super();
 
-        this.gainNode = gainNode;
-        this.analyserNode = analyserNode;
+        this.gain = gainNode;
+        this.analyser = analyserNode;
 
         this.startAudioContext();
     }
@@ -30,31 +30,31 @@ class audioSetup extends EventEmitter {
     startAudioContext() {
         this.audioContext = new AudioContext();
 
-        this.gainNode.create(this.audioContext);
-        this.analyserNode.create(this.audioContext);
+        this.gain.create(this.audioContext);
+        this.analyser.create(this.audioContext);
 
         this.sampleRate = this.audioContext.sampleRate;
-        this.binCount = this.analyserNode.node.frequencyBinCount;
+        this.binCount = this.analyser.node.frequencyBinCount;
 
         this.emit("AudioContextStarted", this);
     }
 
     streamSetup(input, scriptProcessor) {
-        this.analyserNode.connectTo(input);
-        this.analyserNode.connect(scriptProcessor);
+        this.analyser.connectTo(input.node);
+        this.analyser.connect(scriptProcessor.node);
 
         scriptProcessor.connect(this.audioContext.destination);
 
-        this.gainNode.connect(this.audioContext.destination);
+        this.gain.connect(this.audioContext.destination);
 
-        scriptProcessor.onaudioprocess = function () {
+        scriptProcessor.node.onaudioprocess = function () {
             this.emit("AudioProcessUpdate", this);
         }.bind(this);
     }
 
     async streamClose() {
-        await this.gainNode.node.disconnect();
-        await this.analyserNode.node.disconnect();
+        await this.gain.node.disconnect();
+        await this.analyser.node.disconnect();
         await this.audioContext.close();
     }
 
@@ -68,13 +68,13 @@ class audioSetup extends EventEmitter {
 
     // Just a shorter call for analyser.ByteFrequencyData
     BFD(data) {
-        this.analyserNode.node.getByteFrequencyData(data);
+        this.analyser.node.getByteFrequencyData(data);
     }
 
     // Just a shorter call for analyser.FloatTimeDomainData
     FTD(buf) {
-        this.analyserNode.node.getFloatTimeDomainData(buf);
+        this.analyser.node.getFloatTimeDomainData(buf);
     }
 }
 
-module.exports = audioSetup;
+module.exports = AudioSetup;

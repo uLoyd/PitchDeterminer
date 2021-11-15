@@ -1,5 +1,5 @@
 const assert = require('assert');
-const frequencyMath = require('../customModules/audioModules/frequencyMath');
+const frequencyMath = require('../customModules/audioModules/FrequencyMath');
 const { exact } = require('./data/frequencyData');
 
 const test = (testData, name) => {

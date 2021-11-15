@@ -1,8 +1,8 @@
 const assert = require('assert');
 const path = require('path');
 const Application = require('spectron').Application;
-const audioHandler = require('../customModules/audioModules/audioHandler');
-const { AnalyserNode, GainNode } = require('../customModules/audioModules/index');
+const audioHandler = require('../customModules/audioModules/AudioHandler');
+const { Analyser, Gain } = require('../customModules/audioModules/index');
 const testData = require('./data/AudioHandlerInitData');
 require("web-audio-test-api"); // web-audio-api mock
 
@@ -26,8 +26,8 @@ testData.forEach(async (data) => {
        before(() => {
            audio = new audioHandler({
                general: data.params.general,
-               gainNode: new GainNode(data.params.gainSettings),
-               analyserNode: new AnalyserNode(data.params.analyserSettings)
+               gain: new Gain(data.params.gainSettings),
+               analyser: new Analyser(data.params.analyserSettings)
            });
 
            app.start();
@@ -48,11 +48,11 @@ testData.forEach(async (data) => {
        it('Audio handler sound curve algorithm instance', () =>
            assert.strictEqual(audio.soundCurve instanceof data.compare.soundCurve, true));
 
-       describe('Audio Handler Analyser Node Initialization', () => {
+       describe('Audio Handler Analyser  Initialization', () => {
            const values = {};
            before(() => {
                const expected = data.compare;
-               const actual = audio.analyserNode.node;
+               const actual = audio.analyser.node;
                values.minDecibels = compObj(actual.minDecibels, expected.minDecibels);
                values.maxDecibels = compObj(actual.maxDecibels, expected.maxDecibels);
                values.fftSize = compObj(actual.fftSize, expected.fftSize);
@@ -80,11 +80,11 @@ testData.forEach(async (data) => {
            });
        });
 
-       describe('Audio Handler Gain Node Initialization', () => {
+       describe('Audio Handler Gain  Initialization', () => {
             const values = {};
             before(() => {
                 const actual = data.compare;
-                const expected = audio.gainNode.node;
+                const expected = audio.gain.node;
                 values.minValue = compObj(actual.minValue, expected.minValue);
                 values.maxValue = compObj(actual.maxValue, expected.maxValue);
             });

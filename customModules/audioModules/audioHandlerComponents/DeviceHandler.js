@@ -17,7 +17,7 @@ class Device {
     }
 }
 
-class deviceHandler {
+class DeviceHandler {
     currentInput = null;
     currentOutput = null;
     deviceChangeCallback = () => {};
@@ -29,7 +29,6 @@ class deviceHandler {
 
         try{
             navigator.mediaDevices.ondevicechange = this.deviceChangeEvent.bind(this);
-            navigator.mediaDevices.dispatchEvent(new Event('devicechange'));
         }
         catch (e){
 
@@ -108,4 +107,4 @@ class deviceHandler {
     }
 }
 
-module.exports = deviceHandler;
+module.exports = DeviceHandler;

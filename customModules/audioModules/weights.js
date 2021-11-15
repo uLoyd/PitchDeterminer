@@ -14,11 +14,11 @@ class Weighting{
         this.offset = 20 * Math.log10(offsetWeight.weighted);
     }
 
-    #getDividend(frequency){
+    getDividend(frequency){
         return this.of * this.dividend * Math.pow(frequency, this.dividendFrequencyPower);
     }
 
-    #getDivider(frequency){
+    getDivider(frequency){
         const f2 = Math.pow(frequency, 2);
         let result = (this.dividerF1 + f2) * (this.dividend + f2);
 
@@ -35,7 +35,7 @@ class Weighting{
     }
 
     dbWeight(frequency, accuracy){
-        let weighted = this.#getDividend(frequency) / this.#getDivider(frequency);
+        let weighted = this.getDividend(frequency) / this.getDivider(frequency);
         let dbw = 20 * Math.log10(weighted) + this.offset;
 
         if(accuracy){
