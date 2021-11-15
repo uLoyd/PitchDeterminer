@@ -8,6 +8,6 @@ module.exports.MediaStreamSource = require('./audioHandlerComponents/audioSetupC
 module.exports.IAudioNode = require('./audioHandlerComponents/audioSetupComponents/IAudioNode');
 module.exports.Correlation = require('./audioHandlerComponents/Correlation');
 module.exports.DeviceHandler = require('./audioHandlerComponents/DeviceHandler');
-module.exports.AudioFileHandler = require('./AudioFileHandler');
 module.exports.AudioHandler = require('./AudioHandler');
+module.exports.AudioFileHandler = require('./AudioFileHandler');
 module.exports.FrequencyMath = require('./FrequencyMath');

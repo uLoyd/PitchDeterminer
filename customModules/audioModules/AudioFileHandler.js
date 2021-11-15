@@ -1,7 +1,7 @@
-const audioHandler = require('./AudioHandler');
+const { AudioHandler } = require('./index');
 const { readFileSync } = require('fs');
-
-class audioFileHandler extends audioHandler {
+console.log(AudioHandler);
+class audioFileHandler extends AudioHandler {
     constructor(initData, filePath) {
         super(initData);
         this.filePath = filePath;

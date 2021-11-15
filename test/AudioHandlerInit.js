@@ -1,8 +1,7 @@
 const assert = require('assert');
 const path = require('path');
 const Application = require('spectron').Application;
-const audioHandler = require('../customModules/audioModules/AudioHandler');
-const { Analyser, Gain } = require('../customModules/audioModules/index');
+const { Analyser, Gain, AudioHandler } = require('../customModules/audioModules/index');
 const testData = require('./data/AudioHandlerInitData');
 require("web-audio-test-api"); // web-audio-api mock
 
@@ -24,7 +23,7 @@ testData.forEach(async (data) => {
        let audio;
 
        before(() => {
-           audio = new audioHandler({
+           audio = new AudioHandler({
                general: data.params.general,
                gain: new Gain(data.params.gainSettings),
                analyser: new Analyser(data.params.analyserSettings)
