@@ -51,6 +51,22 @@ class AudioHandler extends AudioSetup {
         //this.setupStream();
     }
 
+    async getMediaStream(constrain) {
+        // Constrain specifying audio device
+        // if value here will be "undefined" then something's not right
+        // but the stream will start up with default available device (await is a must)
+        const defaultAudioConstrain = await this.deviceHandler.navigatorInput();
+        constrain = constrain ?? {
+            audio: {
+                deviceId: defaultAudioConstrain
+            },
+            video: false
+        }
+
+        console.log(`Stream setting up using input device:`, constrain.audio);
+        return await navigator.mediaDevices.getUserMedia(constrain);
+    }
+
     async setupStream() {
         // Checking if there are any available input devices (await is a must)
         if (!(await this.deviceHandler.checkForInput()))
@@ -60,20 +76,7 @@ class AudioHandler extends AudioSetup {
         // so this method will restart the audioContext itself
         this.selfCheckAudioContext();
 
-        // Constrain specifying audio device
-        // if value here will be "undefined" then something's not right
-        // but the stream will start up with default available device (await is a must)
-        const audioConstrain = await this.deviceHandler.navigatorInput();
-        console.log(`Stream setting up using input device: ${audioConstrain.exact}`);
-
-        const userMedia = navigator.mediaDevices.getUserMedia({
-            audio: {
-                deviceId: audioConstrain
-            },
-            video: false
-        });
-
-        const stream = await userMedia;
+        const stream = await this.getMediaStream();
 
         const input = new MediaStreamSource().create(this.audioContext, stream);
         const scriptProcessor = new ScriptProcessor().create(this.audioContext);

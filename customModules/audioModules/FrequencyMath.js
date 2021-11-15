@@ -7,7 +7,7 @@ class FrequencyMath {
     static logr = Math.log(FrequencyMath.r);
 
     constructor(fx) {
-        const { soundId, octave, distance } = FrequencyMath.info(fx);
+        const { soundId, octave } = FrequencyMath.info(fx);
         this.sound = sounds[soundId];
         this.octave = octave;
         this.flatNote = flats[soundId] ?? null;

@@ -6,8 +6,8 @@ const AnalyserNode = require('./audioSetupComponents/Analyser');
 class AudioSetup extends EventEmitter {
     default = defaults;
     audioContext = null;
-    analyserNode = null;
-    gainNode = null;
+    analyser = null;
+    gain = null;
 
     constructor(gainNode = new GainNode(), analyserNode = new AnalyserNode()) {
         super();
