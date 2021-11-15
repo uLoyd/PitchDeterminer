@@ -48,7 +48,7 @@ class DeviceHandler {
 
             .then(function(devices) {
                 devices.forEach(function(dev) {
-                    const [/*kind,*/ type, direction] = dev.kind.match(/(\w+)(input|output)/i);
+                    const [kind, type, direction] = dev.kind.match(/(\w+)(input|output)/i);
 
                     if (type === "audio") // Checks only audio input. No use for video
                         idArr.push(new Device(dev, direction));

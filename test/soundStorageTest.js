@@ -1,5 +1,5 @@
 const assert = require('assert');
-const soundStorage = require('../controllers/helpers/soundStorageEvent');
+const SoundStorage = require('../customModules/audioModules/SoundStorageEvent');
 const frequencyMath = require('../customModules/audioModules/FrequencyMath');
 const testA2 = require('./data/A2');
 const testE2 = require('./data/E2');
@@ -17,7 +17,7 @@ testData.forEach(async (data) => {
         let fq;
 
         before(() => {
-            storage = new soundStorage();
+            storage = new SoundStorage();
             fq = new frequencyMath();
         });
 

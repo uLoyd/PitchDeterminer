@@ -68,6 +68,7 @@ class AudioHandler extends AudioSetup {
     }
 
     async setupStream() {
+        console.log(await this.deviceHandler.getCurrentOrFirst());
         // Checking if there are any available input devices (await is a must)
         if (!(await this.deviceHandler.checkForInput()))
             throw ('No input audio input devices available');

@@ -1,10 +1,11 @@
 const {
     FrequencyMath,
     AudioHandler,
-    AudioFileHandler
+    AudioFileHandler,
+    SoundStorageEvent
 } = require('../customModules/audioModules/index');
-const soundStorageEvent = require('./helpers/soundStorageEvent'),
-    audioTest = require('./audioHandleTest'),
+
+const audioTest = require('./audioHandleTest'),
     tuner = require('./tuner'),
     fs = require('fs');
 
@@ -12,7 +13,7 @@ const { Fretboard } = require('./../customModules/fretboard/Fretboard');
 const { Sound, sounds } = require('./../customModules/fretboard/Sound');
 
 window.onload = async () => {
-    let soundDataEvent = new soundStorageEvent();
+    let soundDataEvent = new SoundStorageEvent();
     const fretboardInstance = new Fretboard({
         container: document.getElementById('fretboard'),
         frets: 12,

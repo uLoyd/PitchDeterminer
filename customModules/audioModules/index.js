@@ -11,3 +11,5 @@ module.exports.DeviceHandler = require('./audioHandlerComponents/DeviceHandler')
 module.exports.AudioHandler = require('./AudioHandler');
 module.exports.AudioFileHandler = require('./AudioFileHandler');
 module.exports.FrequencyMath = require('./FrequencyMath');
+module.exports.SoundStorage = require('./SoundStorage');
+module.exports.SoundStorageEvent = require('./SoundStorageEvent');
