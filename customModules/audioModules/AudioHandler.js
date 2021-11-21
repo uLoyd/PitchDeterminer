@@ -99,12 +99,6 @@ class AudioHandler extends AudioSetup {
         });
     }
 
-    // Returns True when the AudioContext is working
-    // In state "suspended" & "closed" returns false
-    getState() {
-        return this.audioContext.state === 'running';
-    }
-
     nyquistFrequency(){
         return this.sampleRate / 2;
     }
@@ -116,7 +110,7 @@ class AudioHandler extends AudioSetup {
 
         let currentFrequency = band / 2;                             // Takes the middle frequency of a band
 
-        this.BFD(data);                                   // Get's byte frequency data from audioSetup instance
+        this.BFD(data);                                              // Get's byte frequency data from audioSetup instance
 
         const vol = data.reduce((result, level) => {
             const dbw = this.soundCurve.dbLevel(currentFrequency, accuracy, level);

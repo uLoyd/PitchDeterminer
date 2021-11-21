@@ -6,7 +6,6 @@ class SoundStorageEvent extends SoundStorage {
         this.sampleLimit = sampleLimit;
         this.sampleTarget = sampleTarget;
         this.lastFrequency = null;
-        this.determined = null;
     }
 
     add(fx) {
