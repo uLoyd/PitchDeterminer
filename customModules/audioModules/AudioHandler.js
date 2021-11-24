@@ -104,7 +104,7 @@ class AudioHandler extends AudioSetup {
     }
 
     getVolume(accuracy){
-        const data = new Uint8Array(this.binCount);
+        const data = this.BFDUint8();
         //const nyquist = this.nyquistFrequency();                   // Max possible frequency
         const band = parseFloat(this.bandRange.toFixed(accuracy));   // Calculates a frequency band range
 
@@ -120,11 +120,11 @@ class AudioHandler extends AudioSetup {
         }, 0);
 
         return (Math.log10(vol) * 10).toFixed(accuracy);
+        //console.log(data.reduce((total, current) => { return total + Math.pow(current, 2) / (256 * this.binCount); }, 0) / 64);
     }
 
     correlate() {
-        let buf = new Float32Array(this.buflen);
-        this.FTD(buf);
+        const buf = this.FTDFloat32(this.buflen);
 
         return this.correlation.perform(buf);
     }

@@ -66,14 +66,28 @@ class AudioSetup extends EventEmitter {
         await this.audioContext.resume();
     }
 
-    // Just a shorter call for analyser.ByteFrequencyData
+    // Just a shorter call for analyser.getByteFrequencyData
     BFD(data) {
         this.analyser.node.getByteFrequencyData(data);
     }
 
-    // Just a shorter call for analyser.FloatTimeDomainData
+    BFDUint8(binCount = this.binCount){
+        const data = new Uint8Array(binCount);
+        this.BFD(data);
+
+        return data;
+    }
+
+    // Just a shorter call for analyser.getFloatTimeDomainData
     FTD(buf) {
         this.analyser.node.getFloatTimeDomainData(buf);
+    }
+
+    FTDFloat32(buflen) {
+        const buf = new Float32Array(buflen);
+        this.FTD(buf);
+
+        return buf;
     }
 }
 
