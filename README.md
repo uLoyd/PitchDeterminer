@@ -241,3 +241,71 @@ If no input devices are accessible _undefined_ will be returned.
 A class representing navigators mediaDevices. It has no methods, holding only
 values: _id_: device id, _label_: device label, and _dir_: device direction
 Array of instances of this class is returned from the _getDeviceList_ method of DeviceHandler.
+
+
+## SoundStorage
+Class supposed to serve as a storage for outputs of the Correlation class holding
+methods helping correct sound frequency estimations in short periods of time.
+
+#### constructor(bias = 0.03)
+The only parameter for the constructor is bias which will be assigned to the
+_this.biasThreshold_ member which purpose is removing outlier values during sound estimation.
+By default it is set to 0.03. The lower the value the higher similarity sound values will have to 
+have the most frequent value in _this.freqArr_ for those to be taken into account during estimation.
+
+#### add(fx)
+Adds single sound data from the Correlation to the _this.freqArr_ member with 2 decimal points accuracy.
+
+#### average()
+Returns rounded average of all the values in _this.freqArr_
+
+#### most(arr)
+Returns most frequent value in given array
+
+#### determine()
+Returns determined sound frequency based on the hold samples within _this.freqArr_.
+It is calculated by calculating a bias of _most frequent value * this.biasThreshold_.
+From there an average value is calculated based on all the values within the biased similarity
+to that most frequent value.
+
+#### selfCheck()
+Returns current length of the array _this.freqArr_ holding samples.
+
+#### emptyData()
+Empties _this.freqArr_ and returns back the SoundStorage instance
+
+
+## SoundStorageEvent
+This class has the same purpose as SoundStorage extending it 
+with a difference of utilizing EventEmitter allowing more diverse interactions with the storage.
+
+####constructor(sampleTarget = 20, sampleLimit = 40, bias = 0.03)
+The bias has the same purpose as in SoundStorage. Introduced here sampleTarget
+is a value representing _this.freqArr_ length at which "SampleTarget" event will be triggered.
+The sampleLimit works the way as sampleTarget dispatching "SampleLimit" event upon reaching defined
+_this.freqArr_ length.
+
+#### add()
+Checks if current _this.freqArr_ requires an event emission.
+After that section a base class _add(fx)_ method is called.
+
+#### getCurrentBias()
+Returns current bias value based on user defined bias and most frequent sample value.
+
+#### getOutliers()
+Returns an array containing values that currently do not pass the similarity check based
+on the bias.
+
+#### removeOutliers()
+Remove values of _this.getOutliers()_ from the ORIGINAL _this.freqArr_ hold by the instance.
+
+#### determine()
+Although it works in a similar fashion to the base class here it returns -1 in case of less than
+3 samples hold in the _this.freqArr_ as this amount most likely is not sufficient for a proper 
+estimation. Finally method returns a square root of square powers of ALL the values without applying bias.
+It is encouraged to extend this class and override this method up to user requirements. To apply the bias
+before determining the frequency array it's sufficient to call _removeOutliers()_ before calling 
+this method.
+
+#### basicDetermine()
+Base class _determine()_ method is still available through this endpoint.
