@@ -25,7 +25,7 @@ class Correlation {
         }, 0) / this.buflen);
 
         if(isNaN(rms))
-            rms = 0;
+            rms = -1;
 
         if (rms < this.rmsThreshold) // not enough signal power
             return -1;

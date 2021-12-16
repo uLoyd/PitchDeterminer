@@ -169,3 +169,75 @@ where if callback was defined the action is exactly the same callback, and in ca
 of undefined callback it sets BufferSource buffer as the -soon to be- decoded file
 while also connecting it to AudioContext.destination.
 Finaly the method returns BufferSource instance created in the beginning.
+
+
+## Correlation
+Sole purpose of this class is performing autocorrelation on audio buffer,
+allowing a set up of custom thresholds. The output of perfom method is supposed to be
+a frequency of the sound (the fundamental frequency). This means it processes the
+the signal in monophonic context.
+
+#### constructor({sampleRate, rmsThreshold, correlationThreshold, correlationdDegree, buflen})
+Creates a Correlation instance setting up rms and correlation thresholds. Sample rate is require
+for the last step of the autocorrelation as based on this value the frequency will be calculated.
+It is possible and encouraged to pass only the buflen and sampleRate values as the remaining
+values can be automatically set to default.
+
+#### perform(buf)
+This method receives buffer with data that will be processed up to the length
+specified in the _this.buflen_ member. If RMS will be too low, meaning the signal is too weakk,
+-1 will be returned. In case autocorrelation algorithm result will be higher than
+_this.correlationThreshold_ the output will be the fundamental frequency of the passed buffer, 
+otherwise it will return -1.
+
+
+## DeviceHandler
+Main purpose of this class is interaction with _navigator.mediaDevices_ and for hat reason
+it uses a private helper class _Device_.
+
+#### constructor(callback)
+Callback passed to the constructor will be called on every _ondevicechage_ event triggered
+from _navigator.mediaDevices_.
+
+#### deviceChangeEvent()
+This method is called on every device change and is responsible for invoking the user callback
+passed previously to the constructor.
+
+#### async getDeviceList()
+Returns an array of devices (_Device_ class instances) available through _navigator_
+that contains _MediaDeviceInfo_ as well as it's direction, input or output.
+
+#### async getCurrentOrFirst()
+Returns a object containing a pair of devices - in (input) and out (output).
+If values _this.currentInput_ and _this.currentOutput_ are set than this devices will be 
+the value in the object. In case current device is not set than a first available one in respective
+direction will be set up in place of the ones supposed to bo holded by the instance.
+
+#### async changeDevice(dir, e)
+In this method _dir_ is a string stating the direction of the device that's going 
+to be change. Parameter _e_ is optional device id. If present than _this.current<direction>_
+will be set to the device found in device list with requested id, or undefined in case of id that
+was not found. In case of no id passed to the method a first available device in requested
+direction will be chosen. Lastly the user defined callback handling device change will be called to
+which current device list of all available devices wil be passed along with the current
+input and output devices hold by the instance itself.
+
+#### async changeInput(e)
+Shorthand for _await deviceHandlerInstance.changeDevice('input', e)_
+
+#### async changeOutput(e)
+Shorthand for _await deviceHandlerInstance.changeDevice('output', e)_
+
+#### async checkForInput()
+Returns boolean, true if there's at least one available input device and 
+false if there's none.
+
+#### async navigatorInput()
+Returns a constraint for navigator used in audio stream setup stating
+exact input device. The device will be _this.currentInput_ if set, or first available one.
+If no input devices are accessible _undefined_ will be returned.
+
+### Device
+A class representing navigators mediaDevices. It has no methods, holding only
+values: _id_: device id, _label_: device label, and _dir_: device direction
+Array of instances of this class is returned from the _getDeviceList_ method of DeviceHandler.
