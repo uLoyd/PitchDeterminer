@@ -379,8 +379,8 @@ of the default value for the argument.
 
 #### static info(fx: double) -> Object
 Returns object that holds data about sound given in the parameter with members:  
-_distance: int_: distance of the sound relative to A4 sound
-_octave: int_: octave of given sound
+_distance: int_: distance of the sound relative to A4 sound  
+_octave: int_: octave of given sound  
 _soundId: unsigned_: index of the tone symbol (alphabetical order)
 
 #### static getOctaveFromDistance(distance: int) -> int
