@@ -103,7 +103,7 @@ Stream from _getMediaStream_ method is stored in class member _this.stream_.
 After that a Correlation instance is created and stored in _this.correlation_ member. 
 
 #### nyquistFrequency()
-Returns AudioContext divided by two which is... the nyquist frequency.
+Returns AudioContext sample rate divided by two which is... the nyquist frequency.
 
 #### getVolume(Number: accuracy)
 Purely empirical and subjective method that aggregates all the bands from the
@@ -215,7 +215,7 @@ direction will be set up in place of the ones supposed to bo holded by the insta
 
 #### async changeDevice(dir, e)
 In this method _dir_ is a string stating the direction of the device that's going 
-to be change. Parameter _e_ is optional device id. If present than _this.current<direction>_
+to be change. Parameter _e_ is optional device id. If present than _this.current-direction_
 will be set to the device found in device list with requested id, or undefined in case of id that
 was not found. In case of no id passed to the method a first available device in requested
 direction will be chosen. Lastly the user defined callback handling device change will be called to
@@ -279,7 +279,7 @@ Empties _this.freqArr_ and returns back the SoundStorage instance
 This class has the same purpose as SoundStorage extending it 
 with a difference of utilizing EventEmitter allowing more diverse interactions with the storage.
 
-####constructor(sampleTarget = 20, sampleLimit = 40, bias = 0.03)
+#### constructor(sampleTarget = 20, sampleLimit = 40, bias = 0.03)
 The bias has the same purpose as in SoundStorage. Introduced here sampleTarget
 is a value representing _this.freqArr_ length at which "SampleTarget" event will be triggered.
 The sampleLimit works the way as sampleTarget dispatching "SampleLimit" event upon reaching defined
@@ -296,6 +296,10 @@ Returns current bias value based on user defined bias and most frequent sample v
 Returns an array containing values that currently do not pass the similarity check based
 on the bias.
 
+#### outlierPosition()
+Returns index of the first sample that doesn't fulfil similarity check based
+on the bias.
+
 #### removeOutliers()
 Remove values of _this.getOutliers()_ from the ORIGINAL _this.freqArr_ hold by the instance.
 
@@ -307,5 +311,116 @@ It is encouraged to extend this class and override this method up to user requir
 before determining the frequency array it's sufficient to call _removeOutliers()_ before calling 
 this method.
 
+#### emptyData()
+Calls _emptyData()_ method of the base class.
+
 #### basicDetermine()
 Base class _determine()_ method is still available through this endpoint.
+
+## FrequencyMath
+Class responsible for frequency calculations, as well as translating
+those to musical notation. It operates based on frequency in Hz or a distance
+of a note from sound A4. Class performs calculations in a context of equal tempered
+scale. It holds values about specific sound by holding data 
+in members:
+
+#### sound: String
+Sound symbol of the tone [C - B] with only sharp notes in case of a half tone.
+
+#### octave: int
+Octave of the tone
+
+#### flatNote: String(Optional)
+If sound can be represented as flat note than this member hold a string of it.
+
+#### flatOctave: int(optional)
+If sound has a flat note representation that has different octave (only C/Bb)
+it holds octave of the flat note.
+
+#### initialFrequency: double
+Frequency used to initialize class instance. In case of static constructor usage
+the frequency hold by this member is the perfect pitch of the sound passed to the
+constructor.
+
+#### constructor(fx: double)
+To initialize an instance only value needed is the frequency. Based on the frequency
+all the members will be initialized with correct values based on the frequency. In case
+of a pitch that's not exact the closest sound will be stored in the class instance.
+
+#### static soundConstructor(sound: String, octave: int) -> FrequencyMath
+Performs the same operations as standard constructor with a difference of
+the arguments passed to it as it calculates frequency of the sound from parameters,
+and then it returns FrequencyMath instance initialized with standard constructor taking 
+frequency as the argument.
+
+#### static getDistanceFromFrequency(fx: double) -> int
+Returns the distance of not from frequency passed as the parameter, relative to the A sound.
+
+#### getDistanceFromNote(note: String, octave: int) -> int
+Returns distance of a given sound relative to A4 sound. The parameters by default are set
+to the sound hold by the instance itself.
+
+#### static getDistanceFromNote(note: String, octave: int) -> int
+Performs the same operations as non-static version with only difference being the lack
+of the default values for the arguments.
+
+#### getNoteFromDistance(distance: int) -> int
+Returns index of sound symbol based on the distance from the A4 sounds.
+
+_Index of an array of sounds in ALPHABETICAL orders that is from A to G#, not from C to B._
+
+#### getFrequencyFromDistance(distance: int) -> double
+Returns frequency of a sound based on the distance from A4 sound.
+Parameters default value is a distance of the sound hold by the class instance.
+
+#### static getFrequencyFromDistance(distance: int) -> double
+Performs the same operations as non-static version with only difference being the lack
+of the default value for the argument.
+
+#### static info(fx: double) -> Object
+Returns object that holds data about sound given in the parameter with members:  
+_distance: int_: distance of the sound relative to A4 sound
+_octave: int_: octave of given sound
+_soundId: unsigned_: index of the tone symbol (alphabetical order)
+
+#### static getOctaveFromDistance(distance: int) -> int
+Returns octave of a sound based on it's distance from the A4 sound
+
+#### distanceBetweenNotes(sound1: FrequencyMath, sound2: FrequencyMath) -> int
+Returns a distance between two sounds. By default, the first sound is initialized
+as A4 sound, and the second on is the sound instance hold by the instance on which
+the method was called.
+
+#### soundDistanceForward(sound1: FrequencyMath, sound2: FrequencyMath) -> int
+Default arguments are the same as in case of _distanceBetweenNotes()_ method.
+Returns distance between sound1 and the next (forward) sound2 occurrence in the scale.
+Due to the forwarding octaves are not compared.
+
+#### getIntervalCents(frequency1: double, frequency2: double) -> double
+Returns cents between two frequencies in relation Frequency1/Frequency2.
+The default value of _frequency2_ is the member _initialFrequency_ hold
+by the class instance.
+
+#### getFrequencyError(fx: double) -> Object
+Returns object containing data about the given sound.
+By default, the frequency value is set to _initialFrequency_ member.  
+Object contains members:  
+_frequency: double_: _initialFrequency_ member of the class instance  
+_perfectPitch: double_: perfect pitch of the potentially inexact frequency hold by _initialFrequency_  
+_error: double_: difference in Hz between given frequency and perfect pitch  
+_centsError: double_: difference in cents between given frequency and perfect pitch  
+_totalCentsBetweenNotes: double_: difference in cents between given frequency and note half a tone higher
+if the initial one is too high, or half tone lower when it is too low.
+
+#### getSoundInfo(fx: double) -> Object
+Works in a similar manner as _static info()_ method, but holds
+more data in returned object. By default, the fx value is equal to _initialFrequency_ member.
+The members of the object are:  
+_frequency: double_: frequency passed to the method  
+_note: String_: tone symbol  
+_step: int_: distance of the sound relative to the A4 sound  
+_soundId: unsigned_: index of the tone symbol (alphabetical order)  
+_octave: int_: octave of the sound
+
+#### toString() -> String
+Returns string as {tone symbol}{octave}
