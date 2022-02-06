@@ -1,3 +1,4 @@
+/* eslint-disable */
 const EventEmitter = require('events');
 
 // Doesn't use any events. EventEmitter is here only  for a derived class

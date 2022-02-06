@@ -1,3 +1,4 @@
+/* eslint-disable */
 const defaults = require('./defaultAudioValues').correlation;
 
 class Correlation {

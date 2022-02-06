@@ -1,10 +1,9 @@
-const defaults = require('./defaultAudioValues').audioSetup;
+/* eslint-disable */
 const EventEmitter = require('events');
 const GainNode = require('./audioSetupComponents/Gain');
 const AnalyserNode = require('./audioSetupComponents/Analyser');
 
 class AudioSetup extends EventEmitter {
-    default = defaults;
     audioContext = null;
     analyser = null;
     gain = null;

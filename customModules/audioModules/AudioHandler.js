@@ -1,3 +1,4 @@
+/* eslint-disable */
 const {
     Correlation,
     AudioSetup,
@@ -63,12 +64,12 @@ class AudioHandler extends AudioSetup {
             video: false
         }
 
-        console.log(`Stream setting up using input device:`, constrain.audio);
+        //console.log(`Stream setting up using input device:`, constrain.audio);
         return await navigator.mediaDevices.getUserMedia(constrain);
     }
 
     async setupStream() {
-        console.log(await this.deviceHandler.getCurrentOrFirst());
+        //console.log(await this.deviceHandler.getCurrentOrFirst());
         // Checking if there are any available input devices (await is a must)
         if (!(await this.deviceHandler.checkForInput()))
             throw ('No input audio input devices available');
@@ -153,7 +154,7 @@ class AudioHandler extends AudioSetup {
 
     async resume() {
         await this.streamResume();
-        console.log("Stream resumed");
+        //console.log("Stream resumed");
         this.running = true;
         this.emit("StreamResume", this);
     }

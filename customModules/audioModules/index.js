@@ -1,3 +1,4 @@
+/* eslint-disable */
 module.exports.weights = require('./weights').all;
 module.exports.defaultAudioValues = require('./audioHandlerComponents/defaultAudioValues').all;
 module.exports.IAudioNode = require('./audioHandlerComponents/audioSetupComponents/IAudioNode');

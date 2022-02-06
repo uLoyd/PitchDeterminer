@@ -1,3 +1,4 @@
+/* eslint-disable */
 const sounds = ['A', 'A#', 'B', 'C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#'];
 const flats =  [null, 'Bb', 'Cb', null, 'Db', null, 'Eb', 'Fb', null, 'Gb', null, 'Ab'];
 const A4 = 440; // Sound A in 4th octave by ISO standard is 440 Hz

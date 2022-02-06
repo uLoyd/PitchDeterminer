@@ -1,3 +1,4 @@
+/* eslint-disable */
 const IAudioNode = require("./IAudioNode");
 
 class MediaStreamSource extends IAudioNode {
