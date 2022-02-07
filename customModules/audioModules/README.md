@@ -35,7 +35,7 @@ TODO right now:
 Main class responsible for setting up AudioHandler and AudioFileHandler
 holding two main obligatory nodes used by AudioContext which are AnalyserNode and GainNode.
 This class extends EventEmitter as after various steps instance dispatches related to them events.
-#### constructor(IAudioNode: GainNode, IAudioNode: GainNode)
+#### constructor(IAudioNode: Gain, IAudioNode: Analyser)
 Receives AudioNode and GainNode instances, saves them to class members 
 stored as *this.gain* and *this.analyser* then immediately calls *startAudioContext* method
 

@@ -146,6 +146,9 @@ class AudioHandler extends AudioSetup {
     }
 
     async end() {
+        if(!this.running)
+            return;
+
         await this.streamClose();
         this.stream = null;
         this.running = false;
