@@ -17,6 +17,8 @@ class Device {
         this.id = dev.deviceId;
         this.label = dev.label;
         this.dir = dir;
+        this.isInput = dir === 'input';
+        this.isOutput = !this.isInput;
     }
 }
 
@@ -48,7 +50,6 @@ class DeviceHandler {
         const idArr = [];
 
         await navigator.mediaDevices.enumerateDevices()
-
             .then(function(devices) {
                 devices.forEach(function(dev) {
                     const [kind, type, direction] = dev.kind.match(/(\w+)(input|output)/i);
