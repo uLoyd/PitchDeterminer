@@ -8,6 +8,8 @@ class Device {
             this.id = id;
             this.label = label;
             this.dir = dir;
+            this.isInput = dir === 'input';
+            this.isOutput = !this.isInput;
         }
     }
 
@@ -64,8 +66,8 @@ class DeviceHandler {
         const devices = await this.getDeviceList();
 
         return {
-            in: this.currentInput ?? devices.find(x => x.dir === 'input'),
-            out: this.currentOutput ?? devices.find(x => x.dir === 'output')
+            in: this.currentInput ?? devices.find(x => x.isInput),
+            out: this.currentOutput ?? devices.find(x => x.isOutput)
         }
     }
 
@@ -87,7 +89,7 @@ class DeviceHandler {
     async checkForInput() {
         const devList = await this.getDeviceList();
 
-        return devList.some(x => x.dir === 'input');
+        return devList.some(x => x.isInput);
     }
 
     // Return constrain for setting up the stream
