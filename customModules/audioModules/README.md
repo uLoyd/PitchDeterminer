@@ -80,12 +80,13 @@ it's currently in a closed state
 Extends AudioSetup as AudioContext is crucial for all the functionalities provided by this class. Handles live audio inputs like microphones or instruments connected to
 audio interfaces as well as output to any available devices.
 
-#### constructor({ general: { buflen: Number, curveAlgorithm: String }, gainNode: GainNode, analyserNode: AnalyserNode })
+#### constructor({ general: { buflen: Number, curveAlgorithm: String }, gainNode: GainNode, analyserNode: AnalyserNode, correlationSettings: { rmsThreshold, correlationThreshold, correlationDegree } })
 Constructor receives object containing:
 - general: object containing buffer length used in correlation and curveAlgorithm to which audio spectrum will
 be able to be cast
 - GainNode passed to the base class constructor
 - AnalyserNode passed to the base class constructor\
+- correlationSettings: object holding values for Correlation class initialization\
 After base class constructor call, setting buffer length and sound curve algorithm new DeviceHandler class
 is initialized and stored in member _deviceHandler_ which will be used to access Audio IO devices.
 
