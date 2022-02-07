@@ -33,12 +33,19 @@ class AudioHandler extends AudioSetup {
     running = false;      // State (is it running) defined here as at the start AudioContext.state can
                           // be set to "running" before invocation of setupStream method
 
-    constructor({ general = defaultAudioValues.general, gainNode, analyserNode, correlationSettings } = {}) {
+    constructor({ general = defaultAudioValues.general, gainNode, analyserNode, correlationSettings = {} } = {}) {
         super(gainNode, analyserNode);
 
         // Creates instance of class responsible for weighting sound levels
         this.soundCurve = curveChoose(general.curveAlgorithm);
         this.correlationSettings = correlationSettings;
+
+        for(const prop in defaultAudioValues.correlation)
+        {
+            if(!this.correlationSettings.hasOwnProperty(prop))
+                this.correlationSettings[prop] = defaultAudioValues.correlation[prop];
+        }
+
         this.buflen = general.buflen;
 
         // Initialize deviceHandling and update device list
