@@ -51,6 +51,13 @@ testData.forEach(async (data) => {
            const values = {};
            before(() => {
                const expected = data.compare;
+               audio.analyser.node = {
+                   smoothingTimeConstant: 0,
+                   fftSize: 0,
+                   minDecibels: 0,
+                   maxDecibels: 0
+               };
+               audio.analyser.applySettings();
                const actual = audio.analyser.node;
                values.minDecibels = compObj(actual.minDecibels, expected.minDecibels);
                values.maxDecibels = compObj(actual.maxDecibels, expected.maxDecibels);
@@ -83,7 +90,13 @@ testData.forEach(async (data) => {
             const values = {};
             before(() => {
                 const actual = data.compare;
+                audio.gain.node = {
+                    minValue: 0,
+                    maxValue: 0
+                };
+                audio.gain.applySettings();
                 const expected = audio.gain.node;
+
                 values.minValue = compObj(actual.minValue, expected.minValue);
                 values.maxValue = compObj(actual.maxValue, expected.maxValue);
             });

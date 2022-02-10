@@ -73,6 +73,7 @@ window.onload = async () => {
         tun.clear();
         console.log("Restarting with new settings");
         await mic.setupStream();
+        console.log(mic);
     }
 
     async function changeOutput(id, force) {

@@ -11,12 +11,12 @@ module.exports = [
             }
         },
         compare: {
-            fft: 512,
-            minDec: analyser.minDec,
-            maxDec: analyser.maxDec,
-            smoothing: analyser.smoothing,
-            minGain: gain.minGain,
-            maxGain: gain.maxGain,
+            fftSize: 512,
+            minDecibels: analyser.minDecibels,
+            maxDecibels: analyser.maxDecibels,
+            smoothingTimeConstant: analyser.smoothing,
+            minValue: gain.minValue,
+            maxValue: gain.maxValue,
             soundCurve: Weight.Aweight,
             buflen: defaults.general.buflen
         }
@@ -29,23 +29,23 @@ module.exports = [
                 curveAlgorithm: 'B'
             },
             gainSettings: {
-                minGain: 1,
-                maxGain: 2
+                minValue: 1,
+                maxValue: 2
             },
             analyserSettings: {
-                smoothing: 1,
+                smoothingTimeConstant: 1,
                 fftSize: 1024,
-                minDec: -50,
-                maxDec: -10
+                minDecibels: -50,
+                maxDecibels: -10
             }
         },
         compare: {
-            minGain: 1,
-            maxGain: 2,
-            smoothing: 1,
-            fft: 1024,
-            minDec: -50,
-            maxDec: -10,
+            minValue: 1,
+            maxValue: 2,
+            smoothingTimeConstant: 1,
+            fftSize: 1024,
+            minDecibels: -50,
+            maxDecibels: -10,
             buflen: 512,
             soundCurve: Weight.Bweight
         }
@@ -58,23 +58,23 @@ module.exports = [
                 curveAlgorithm: 'C'
             },
             gainSettings: {
-                minGain: 0.3,
-                maxGain: 0.6
+                minValue: 0.3,
+                maxValue: 0.6
             },
             analyserSettings: {
-                smoothing: 5,
+                smoothingTimeConstant: 5,
                 fftSize: 512,
-                minDec: -45,
-                maxDec: -20
+                minDecibels: -45,
+                maxDecibels: -20
             }
         },
         compare: {
-            minGain: 0.3,
-            maxGain: 0.6,
-            smoothing: 5,
-            fft: 512,
-            minDec: -45,
-            maxDec: -20,
+            minValue: 0.3,
+            maxValue: 0.6,
+            smoothingTimeConstant: 5,
+            fftSize: 512,
+            minDecibels: -45,
+            maxDecibels: -20,
             buflen: 2048,
             soundCurve: Weight.Cweight
         }
