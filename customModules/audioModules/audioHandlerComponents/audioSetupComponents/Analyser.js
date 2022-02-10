@@ -3,7 +3,8 @@ const IAudioNode = require('./IAudioNode');
 const defaults = require('../defaultAudioValues').audioSetup.analyser;
 
 class Analyser extends IAudioNode {
-    constructor(settings) {
+    constructor(settings = {}) {
+        console.log('con', settings);
         super(settings, defaults);
     }
 

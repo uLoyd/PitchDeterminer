@@ -3,7 +3,7 @@ class IAudioNode {
     settings = null;
     node = null;
 
-    constructor(settings = {}, defaults = {}) {
+    constructor(settings, defaults = {}) {
         for (const prop in defaults) {
             if (!settings.hasOwnProperty(prop)) {
                 settings[prop] = defaults[prop];
@@ -17,11 +17,9 @@ class IAudioNode {
         return this;
     }
 
-    applySettings() {
+    applySettings(node = this.node) {
         for (const prop in this.settings) {
-            if (this.node.hasOwnProperty(prop)) {
-                this.node[prop] = this.settings[prop];
-            }
+            node[prop] = this.settings[prop];
         }
 
         return this;

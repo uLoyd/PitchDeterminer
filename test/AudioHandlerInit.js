@@ -25,8 +25,8 @@ testData.forEach(async (data) => {
        before(() => {
            audio = new AudioHandler({
                general: data.params.general,
-               gain: new Gain(data.params.gainSettings),
-               analyser: new Analyser(data.params.analyserSettings)
+               gainNode: new Gain(data.params.gainSettings),
+               analyserNode: new Analyser(data.params.analyserSettings)
            });
 
            app.start();
@@ -90,25 +90,16 @@ testData.forEach(async (data) => {
             const values = {};
             before(() => {
                 const actual = data.compare;
-                audio.gain.node = {
-                    minValue: 0,
-                    maxValue: 0
-                };
+                audio.gain.node.gain.value = 0;
                 audio.gain.applySettings();
-                const expected = audio.gain.node;
+                const expected = audio.gain.node.gain;
 
-                values.minValue = compObj(actual.minValue, expected.minValue);
-                values.maxValue = compObj(actual.maxValue, expected.maxValue);
+                values.value = compObj(actual.value, expected.value);
             });
 
-            it('Min Gain Size', () => {
-                const { minValue } = values;
-                minValue.assert();
-            });
-
-            it('Max Gain Size', () => {
-                const { maxValue } = values;
-                maxValue.assert();
+            it('Gain value', () => {
+                const { value } = values;
+                value.assert();
             });
         });
    });

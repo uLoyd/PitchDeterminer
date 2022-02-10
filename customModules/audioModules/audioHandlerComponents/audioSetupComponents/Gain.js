@@ -3,7 +3,7 @@ const IAudioNode = require('./IAudioNode');
 const defaults = require('../defaultAudioValues').audioSetup.gain;
 
 class Gain extends IAudioNode {
-    constructor(settings) {
+    constructor(settings = {}) {
         super(settings, defaults)
     }
 
@@ -11,7 +11,7 @@ class Gain extends IAudioNode {
         this.node = context.createGain();
 
         if(applySettings)
-            this.applySettings();
+            this.applySettings(this.node.gain);
 
         return this;
     }

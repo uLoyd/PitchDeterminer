@@ -8,15 +8,15 @@ module.exports = [
         params: {
             analyserSettings: {
                 fftSize: 512
-            }
+            },
+            gainSettings: {}
         },
         compare: {
             fftSize: 512,
             minDecibels: analyser.minDecibels,
             maxDecibels: analyser.maxDecibels,
-            smoothingTimeConstant: analyser.smoothing,
-            minValue: gain.minValue,
-            maxValue: gain.maxValue,
+            smoothingTimeConstant: analyser.smoothingTimeConstant,
+            value: gain.value,
             soundCurve: Weight.Aweight,
             buflen: defaults.general.buflen
         }
@@ -29,8 +29,7 @@ module.exports = [
                 curveAlgorithm: 'B'
             },
             gainSettings: {
-                minValue: 1,
-                maxValue: 2
+                value: 1
             },
             analyserSettings: {
                 smoothingTimeConstant: 1,
@@ -40,8 +39,7 @@ module.exports = [
             }
         },
         compare: {
-            minValue: 1,
-            maxValue: 2,
+            value: 1,
             smoothingTimeConstant: 1,
             fftSize: 1024,
             minDecibels: -50,
@@ -58,8 +56,7 @@ module.exports = [
                 curveAlgorithm: 'C'
             },
             gainSettings: {
-                minValue: 0.3,
-                maxValue: 0.6
+                value: 0.3
             },
             analyserSettings: {
                 smoothingTimeConstant: 5,
@@ -69,8 +66,7 @@ module.exports = [
             }
         },
         compare: {
-            minValue: 0.3,
-            maxValue: 0.6,
+            value: 0.3,
             smoothingTimeConstant: 5,
             fftSize: 512,
             minDecibels: -45,

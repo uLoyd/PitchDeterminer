@@ -7,8 +7,7 @@ const defaultAudioValues = {
   },
   audioSetup: {
     gain: {
-      minValue: 0.7,
-      maxValue: 0.85
+      value: 1,
     },
     analyser: {
       smoothingTimeConstant: 0.9,
