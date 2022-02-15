@@ -122,8 +122,6 @@ class AudioHandler extends AudioSetup {
 
         let currentFrequency = band / 2;                             // Takes the middle frequency of a band
 
-        this.BFD(data);                                              // Get's byte frequency data from audioSetup instance
-
         const vol = data.reduce((result, level) => {
             const dbw = this.soundCurve.dbLevel(currentFrequency, accuracy, level);
             currentFrequency += band;    // Move to next frequency band
@@ -160,6 +158,9 @@ class AudioHandler extends AudioSetup {
     // therefore using end() method seems more reliable
     // Basically it stops whole processing but mediaStream is still passed to the audio element
     async pause() {
+        if(!this.running)
+            return;
+
         await this.streamPause();
         console.warn("Stream paused. This function might not work as expected");
         this.running = false;
@@ -167,6 +168,9 @@ class AudioHandler extends AudioSetup {
     }
 
     async resume() {
+        if(this.running)
+            return;
+
         await this.streamResume();
         //console.log("Stream resumed");
         this.running = true;

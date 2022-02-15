@@ -82,9 +82,9 @@ class DeviceHandler {
         this.deviceChangeCallback(await this.getDeviceList(), this.currentInput, this.currentOutput);
     }
 
-    changeInput = async (e) => this.changeDevice('input', e);
+    changeInput = async (e) => await this.changeDevice('input', e);
 
-    changeOutput = async (e) => this.changeDevice('output', e);
+    changeOutput = async (e) => await this.changeDevice('output', e);
 
     // Returns bool. True - there's at least 1 input device available
     async checkForInput() {

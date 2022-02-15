@@ -16,7 +16,7 @@ so at the moment it's accurate enough down to at least 2Hz differences.
 - Fixed bug with repeatedly changing input device while the mic is enabled resulting in problems with audioContext
 - ~~Untangled logic, so it's a bit more simple and less convoluted now imo~~ I was so wrong
 - Added A-, B-, C- and D-weighting classes
-- Changed audio volume measurment using weighting classes
+- Changed audio volume measurement using weighting classes
 - Added methods returning nyquist frequency and band range of current audioHandler setup
 - Added possibility to change output device
 
@@ -89,7 +89,7 @@ let mic = new AudioHandler();
 
 // Retrieves a list of available devices
 let deviceList = await mic.deviceHandler.getDeviceList();
-// All the devices in list have "isInput" and "isOutput" bollean flags
+// All the devices in list have "isInput" and "isOutput" boulean flags
 let inputs = deviceList.filter(device => device.isInput);
 // Change default ('first available') input to the third one
 mic.changeInput(inputs[2].id);
@@ -217,7 +217,7 @@ to false and emits event "StreamPause" at the end
 
 #### async resume()
 Calls base class method _streamResume()_, sets _running_ member of class
-to true and emites event "StreamResume" at the end
+to true and emits event "StreamResume" at the end
 
 ## AudioFileHandler
 Extends AudioHandler class therefore retains possibility to handle 
@@ -227,7 +227,7 @@ obtaining pulse-code modulation data.
 
 #### constructor(initData, filePath)
 Given that this class extends AudioHandler the initData argument is 
-the object passed to the base class. Additionally it accepts filePath argument
+the object passed to the base class. Additionally, it accepts filePath argument
 which, as the name suggests, should be the path to a file which will be processed.
 
 Example of logging correlated data and playing the audio from a file:
@@ -372,6 +372,8 @@ If no input devices are accessible _undefined_ will be returned.
 A class representing navigators mediaDevices. It has no methods, holding only
 values: _id_: device id, _label_: device label, and _dir_: device direction
 Array of instances of this class is returned from the _getDeviceList_ method of DeviceHandler.
+Along the device direction there are also two boolean flags related to it: _isOutput_ and _isInput_
+for more convenient array checks and filtering.
 
 
 ## SoundStorage
@@ -381,7 +383,7 @@ methods helping correct sound frequency estimations in short periods of time.
 #### constructor(bias = 0.03)
 The only parameter for the constructor is bias which will be assigned to the
 _this.biasThreshold_ member which purpose is removing outlier values during sound estimation.
-By default it is set to 0.03. The lower the value the higher similarity sound values will have to 
+By default, it is set to 0.03. The lower the value the higher similarity sound values will have to 
 have the most frequent value in _this.freqArr_ for those to be taken into account during estimation.
 
 #### add(fx)
@@ -437,7 +439,7 @@ Remove values of _this.getOutliers()_ from the ORIGINAL _this.freqArr_ hold by t
 #### determine()
 Although it works in a similar fashion to the base class here it returns -1 in case of less than
 3 samples hold in the _this.freqArr_ as this amount most likely is not sufficient for a proper 
-estimation. Finally method returns a square root of square powers of ALL the values without applying bias.
+estimation. Finally, method returns a square root of square powers of ALL the values without applying bias.
 It is encouraged to extend this class and override this method up to user requirements. To apply the bias
 before determining the frequency array it's sufficient to call _removeOutliers()_ before calling 
 this method.
@@ -541,7 +543,7 @@ _perfectPitch: double_: perfect pitch of the potentially inexact frequency hold 
 _error: double_: difference in Hz between given frequency and perfect pitch  
 _centsError: double_: difference in cents between given frequency and perfect pitch  
 _totalCentsBetweenNotes: double_: difference in cents between given frequency and note half a tone higher
-if the initial one is too high, or half tone lower when it is too low.
+if the initial one is too high, or half a tone lower when it is too low.
 
 #### getSoundInfo(fx: double) -> Object
 Works in a similar manner as _static info()_ method, but holds

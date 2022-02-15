@@ -25,10 +25,7 @@ class Correlation {
             return total + Math.pow(curVal, 2);
         }, 0) / this.buflen);
 
-        if(isNaN(rms))
-            rms = -1;
-
-        if (rms < this.rmsThreshold) // not enough signal power
+        if(isNaN(rms) || rms < this.rmsThreshold) // not enough signal power
             return -1;
 
         let best_offset = -1,
