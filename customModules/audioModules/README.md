@@ -29,12 +29,81 @@ TODO right now:
 - [x] Changes in soundStorage module for storing and determining frequencies (in progress)
 - [ ] Anything else that will pop up later
 
+## Setup, sample initialization
+Electron's browser window should've contextIsolation set to false as well as 
+nodeIntegration set to true.
+``` javascript
+window = new browserWindow({
+    webPreferences: {
+        contextIsolation: false,
+        nodeIntegration: true
+    }
+});        
+```
+
+Then in rendering process sample initialization logging value of a correlated
+buffer from the default device could look like this:
+
+```javascript
+const { AudioHandler } = require('audio-works');
+
+let mic = new AudioHandler();
+
+mic.on('AudioProcessUpdate', (evt) => {
+    console.log(evt.correlate())    
+}); // Event called from ScriptProcessor on new buffer chunk
+
+await mic.setupStream(); // Start the mediaStreamSource
+
+setTimeout(1000, () => {
+    mic.end();
+}); // close the stream after 1 second
+```
+
+It is also possible to output received signal by creating the html Audio object
+and setting it's srcObject property to the stream hold by the AudioHandler.
+
+```javascript
+const { AudioHandler } = require('audio-works');
+
+let mic = new AudioHandler();
+let audio = new Audio();
+
+mic.on('SetupDone', (evt) => {
+   audio.srcObject = evt.stream; 
+}); // Event emitted after setupStream()
+
+await mic.setupStream(); // setupStream() is asynchronus but all the following
+                         // actions can be done on emission of the "SetupDone" event
+                         // so that await in such a case could be omitted
+```
+
+To change the device it's enough to pass an id of said device to the
+_changeInput_ methods of the AudioHandler. List of devices can be accessed
+through DeviceHandler hold by the AudioHandler as _deviceHandler_ property.
+
+```javascript
+const { AudioHandler } = require('audio-works');
+
+let mic = new AudioHandler();
+
+// Retrieves a list of available devices
+let deviceList = await mic.deviceHandler.getDeviceList();
+// All the devices in list have "isInput" and "isOutput" bollean flags
+let inputs = deviceList.filter(device => device.isInput);
+// Change default ('first available') input to the third one
+mic.changeInput(inputs[2].id);
+
+await mic.setupStream();
+```
+
 ## Classes
 
 ### AudioSetup
 Main class responsible for setting up AudioHandler and AudioFileHandler
 holding two main obligatory nodes used by AudioContext which are AnalyserNode and GainNode.
 This class extends EventEmitter as after various steps instance dispatches related to them events.
+
 #### constructor(IAudioNode: Gain, IAudioNode: Analyser)
 Receives AudioNode and GainNode instances, saves them to class members 
 stored as *this.gain* and *this.analyser* then immediately calls *startAudioContext* method
@@ -89,6 +158,28 @@ be able to be cast
 - correlationSettings: object holding values for Correlation class initialization\
 After base class constructor call, setting buffer length and sound curve algorithm new DeviceHandler class
 is initialized and stored in member _deviceHandler_ which will be used to access Audio IO devices.
+```javascript 
+const { AudioHandler, Gain, Analyser } = require('audio-works');
+
+let mic = new AudioHandler({ // All the values are optional.
+    general: {               // Omitting some values in objects
+        buflen: 8192,        // containing more properties will result 
+        curveAlgorithm: 'A'  // in assigment of default value
+    },                       // only to the missing properties
+    gainNode: new Gain({value: 1.5}),
+    analyserNode: new Analyser({
+        smoothingTimeConstant: 0.9,
+        fftSize: 32768,
+        minDecibels: -90,
+        maxDecibels: -10
+    }),
+    correlation: {
+        rmsThreshold: 0.01,
+        correlationThreshold: 0.01,
+        correlationDegree: 0.98
+    });
+});
+```
 
 #### async getMediaStream(Object: constraint)
 Returns output of _navigator.mediaDevices.getUserMedia()_ method to which is passed the 
@@ -134,6 +225,45 @@ live audio input but adds methods meant for audio file decoding,
 creating standard BufferSources with primary goal of audio output, or
 obtaining pulse-code modulation data.
 
+#### constructor(initData, filePath)
+Given that this class extends AudioHandler the initData argument is 
+the object passed to the base class. Additionally it accepts filePath argument
+which, as the name suggests, should be the path to a file which will be processed.
+
+Example of logging correlated data and playing the audio from a file:
+```javascript
+const { AudioFileHandler } = require('audio-works');
+
+const fileHandler = new AudioFileHandler({}, './audioFiles/sample.wav');
+await fileHandler.initCorrelation(); // this call is needed as we don't
+                                     // call setupStream() method
+
+// -- Event driven approach --
+fileHandler.on('ProcessedFileChunk', (evt) => {
+    // perform() is called directly on the correlation object stored
+    // in fileHandler, unlike calling "correlate()" in AudioHandler,
+    // as there's no mediaStream stored in the "stream" property,
+    // therefore it requires to manually push the data chunk passed 
+    // to the listener in evt data to be correlated.
+   console.log(fileHandler.correlation.perform(evt)); 
+});
+
+const audioSource = await fileHandler.createSource();
+audioSource.start(0);
+
+fileHandler.processEvent(); // start processing
+
+// -- Callback approach --
+const audioSource = await fileHandler.createSource();
+audioSource.start(0);
+
+fileHandler.processCallback((data) => {
+     console.log(fileHandler.correlation.perform(data));    
+});
+// While using callback processing starts immediately so there's
+// no call like "processEvent()" in this case
+```
+
 #### toArrayBuffer(Buffer/Array: buf)
 Returns array/buffer/audio buffer as ArrayBuffer type.
 
@@ -169,16 +299,16 @@ Creates BufferSource node from the AudioContext, then calls _this.decode(action)
 where if callback was defined the action is exactly the same callback, and in case
 of undefined callback it sets BufferSource buffer as the -soon to be- decoded file
 while also connecting it to AudioContext.destination.
-Finaly the method returns BufferSource instance created in the beginning.
+Finally, the method returns BufferSource instance created in the beginning.
 
 
 ## Correlation
 Sole purpose of this class is performing autocorrelation on audio buffer,
-allowing a set up of custom thresholds. The output of perfom method is supposed to be
-a frequency of the sound (the fundamental frequency). This means it processes the
+allowing a set-up of custom thresholds. The output of perform method is supposed to be
+a frequency of the sound (the fundamental frequency). This means it processes
 the signal in monophonic context.
 
-#### constructor({sampleRate, rmsThreshold, correlationThreshold, correlationdDegree, buflen})
+#### constructor({sampleRate, rmsThreshold, correlationThreshold, correlationDegree, buflen})
 Creates a Correlation instance setting up rms and correlation thresholds. Sample rate is require
 for the last step of the autocorrelation as based on this value the frequency will be calculated.
 It is possible and encouraged to pass only the buflen and sampleRate values as the remaining
@@ -197,7 +327,7 @@ Main purpose of this class is interaction with _navigator.mediaDevices_ and for 
 it uses a private helper class _Device_.
 
 #### constructor(callback)
-Callback passed to the constructor will be called on every _ondevicechage_ event triggered
+Callback passed to the constructor will be called on every _ondevicechange_ event triggered
 from _navigator.mediaDevices_.
 
 #### deviceChangeEvent()
@@ -273,7 +403,7 @@ to that most frequent value.
 Returns current length of the array _this.freqArr_ holding samples.
 
 #### emptyData()
-Empties _this.freqArr_ and returns back the SoundStorage instance
+Empties _this.freqArr_ and returns the SoundStorage instance back.
 
 
 ## SoundStorageEvent
