@@ -1,4 +1,3 @@
-/* eslint-disable */
 class Device {
     constructor(id, label, dir) {
         if (typeof id === 'object' && id !== null) {

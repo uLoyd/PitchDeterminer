@@ -1,4 +1,3 @@
-/* eslint-disable */
 const defaultAudioValues = {
   correlation: {
     rmsThreshold: 0.01,

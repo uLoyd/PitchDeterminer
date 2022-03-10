@@ -1,4 +1,3 @@
-/* eslint-disable */
 const { AudioHandler } = require('./index');
 const { readFileSync } = require('fs');
 

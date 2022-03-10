@@ -1,4 +1,3 @@
-/* eslint-disable */
 class Weighting{
     constructor(power, of, underRoot){
         this.dividend = Math.pow(12200, 2);

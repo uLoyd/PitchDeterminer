@@ -121,7 +121,7 @@ window.onload = async () => {
 
     mic.on("AudioProcessUpdate", (evt) => {
         const volume = evt.getVolume(2);
-
+        //evt.volume(evt.BFDUint8());
         test.updateVolume(volume);
 
         const ac = evt.correlate();

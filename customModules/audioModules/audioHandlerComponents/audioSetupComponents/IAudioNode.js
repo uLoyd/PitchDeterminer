@@ -1,4 +1,3 @@
-/* eslint-disable */
 class IAudioNode {
     settings = null;
     node = null;

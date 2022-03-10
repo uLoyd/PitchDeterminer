@@ -1,4 +1,3 @@
-/* eslint-disable */
 const {
     Correlation,
     AudioSetup,
@@ -115,7 +114,7 @@ class AudioHandler extends AudioSetup {
         return this.sampleRate / 2;
     }
 
-    getVolume(accuracy){
+    getVolume(accuracy) {
         const data = this.BFDUint8();
         //const nyquist = this.nyquistFrequency();                   // Max possible frequency
         const band = parseFloat(this.bandRange.toFixed(accuracy));   // Calculates a frequency band range

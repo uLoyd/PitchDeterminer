@@ -1,4 +1,3 @@
-/* eslint-disable */
 const EventEmitter = require('events');
 
 // Doesn't use any events. EventEmitter is here only  for a derived class
@@ -41,7 +40,6 @@ class SoundStorage extends EventEmitter {
                     // by which the result ("res" variable) value will be divided
 
         let res = arrCopy.reduce((sum, val) => { // Summing all the values that pass the "similarity check"
-
             if (Math.abs(most - val) <= bias) {    // Checking if the current value is "similar"
                 it++;                                 // enough to the most frequent value
                 return val + sum;
@@ -49,7 +47,7 @@ class SoundStorage extends EventEmitter {
                 return sum;
             }
         }, 0);
-        //console.log(this.freqArr.length);
+
         return res / it; // Returning the average of all the data that passed the similarity check
     }
 

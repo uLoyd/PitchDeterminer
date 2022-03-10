@@ -1,4 +1,3 @@
-/* eslint-disable */
 const EventEmitter = require('events');
 const GainNode = require('./audioSetupComponents/Gain');
 const AnalyserNode = require('./audioSetupComponents/Analyser');

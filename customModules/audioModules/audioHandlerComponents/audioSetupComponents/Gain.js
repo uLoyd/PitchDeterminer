@@ -1,4 +1,3 @@
-/* eslint-disable */
 const IAudioNode = require('./IAudioNode');
 const defaults = require('../defaultAudioValues').audioSetup.gain;
 

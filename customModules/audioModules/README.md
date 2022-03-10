@@ -23,9 +23,9 @@ so at the moment it's accurate enough down to at least 2Hz differences.
 TODO right now:
 - [ ] Add methods to frequencyMath
 - [x] Untangle deviceHandler and other redundant methods etc.
-- [ ] Adding possibility to automatically switch to default avaible device if currently used one gets disconnected
+- [ ] Adding possibility to automatically switch to default available device if currently used one gets disconnected
 - [x] General code refactor
-- [x] Output audio (the latency is/will be +- 1 second so not great but it's Node + Chromium ¯\\_(ツ)_/¯
+- [x] Output audio (the latency is/will be +- 1 second so not great, but it's Node + Chromium ¯\\_(ツ)_/¯
 - [x] Changes in soundStorage module for storing and determining frequencies (in progress)
 - [ ] Anything else that will pop up later
 
@@ -89,7 +89,7 @@ let mic = new AudioHandler();
 
 // Retrieves a list of available devices
 let deviceList = await mic.deviceHandler.getDeviceList();
-// All the devices in list have "isInput" and "isOutput" boulean flags
+// All the devices in list have "isInput" and "isOutput" boolean flags
 let inputs = deviceList.filter(device => device.isInput);
 // Change default ('first available') input to the third one
 mic.changeInput(inputs[2].id);

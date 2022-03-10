@@ -1,4 +1,3 @@
-/* eslint-disable */
 const SoundStorage = require('./SoundStorage');
 
 class SoundStorageEvent extends SoundStorage {
