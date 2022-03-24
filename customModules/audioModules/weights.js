@@ -1,6 +1,6 @@
 class Weighting{
     constructor(power, of, underRoot){
-        this.dividend = Math.pow(12200, 2);
+        this.dividend = Math.pow(12194, 2);
         this.dividerF1 = Math.pow(20.6, 2);
         this.of = of;
 
@@ -63,7 +63,7 @@ class AWeighting extends Weighting{
 
 class BWeighting extends Weighting{
     constructor() {
-        super(3, 1.1019764, [158.5]);
+        super(3, 1.0196576, [158.5]);
     }
 }
 
