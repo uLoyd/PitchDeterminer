@@ -47,13 +47,8 @@ class Weighting{
     }
 
     dbLevel(frequency, accuracy, level){
-        let dbw;
-
-        if(typeof frequency === 'object' && frequency !== null) // in case of D-weight dbWeight is overridden
-            dbw = frequency;
-        else
-            dbw = this.dbWeight(frequency, accuracy);
-
+        let dbw = (typeof frequency === 'object' && frequency !== null) ?
+            frequency : this.dbWeight(frequency, accuracy);
         dbw.dblevel = parseFloat(Math.pow(10, (dbw.dbweighted + level) / 10).toFixed(accuracy));
 
         return dbw;

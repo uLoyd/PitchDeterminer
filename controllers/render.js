@@ -2,6 +2,7 @@ const {
     FrequencyMath,
     AudioHandler,
     AudioFileHandler,
+    AudioEvents,
     SoundStorageEvent
 } = require('../customModules/audioModules/index');
 
@@ -117,9 +118,9 @@ window.onload = async () => {
 
     const tun = new tuner();
 
-    mic.on("DeviceChange", test.updateDeviceList.bind(test));
+    mic.on(AudioEvents.deviceChange, test.updateDeviceList.bind(test));
 
-    mic.on("AudioProcessUpdate", (evt) => {
+    mic.on(AudioEvents.audioProcessUpdate, (evt) => {
         const volume = evt.getVolume(2);
         //evt.volume(evt.BFDUint8());
         test.updateVolume(volume);
@@ -131,12 +132,12 @@ window.onload = async () => {
             updateTuner();
         }
         else if(soundDataEvent.selfCheck() > 3)
-            soundDataEvent.emit("SampleLimit", soundDataEvent);
+            soundDataEvent.emit(AudioEvents.sampleLimit, soundDataEvent);
         else
             soundDataEvent.emptyData();
     });
 
-    mic.on("StreamEnd", (evt) => {
+    mic.on(AudioEvents.streamEnd, (evt) => {
         const { micBut, speakerBut } = test.elements;
         test.buttonToggle(micBut, false);
         test.buttonToggle(speakerBut, false);
@@ -148,18 +149,18 @@ window.onload = async () => {
         document.querySelector('audio').srcObject = null;
     });
 
-    mic.on("SetupDone", async (evt) => {
+    mic.on(AudioEvents.setupDone, async (evt) => {
         const { micBut } = test.elements;
         micBut.element.onclick = evt.end.bind(evt);
         test.buttonToggle(micBut, true);
     });
 
-    soundDataEvent.on("SampleLimit", (evt) => {
+    soundDataEvent.on(AudioEvents.sampleLimit, (evt) => {
         updatePitch();
         evt.emptyData();
     });
 
-    soundDataEvent.on("SampleTarget", () => {
+    soundDataEvent.on(AudioEvents.sampleTarget, () => {
         updatePitch();
     });
 

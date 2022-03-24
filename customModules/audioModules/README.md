@@ -557,3 +557,20 @@ _octave: int_: octave of the sound
 
 #### toString() -> String
 Returns string as {tone symbol}{octave}
+
+## AudioEvents
+Class serving as an enum for events emitted from components.  
+The sole purpose of it is to diminish required changes in case of changes in  
+event string values, as well as more transparent place to find all the events.  
+All the members are static so that no class initialization is required.  
+Members:
+- audioContextStarted
+- audioProcessUpdate
+- processedFileChunk
+- deviceChange
+- setupDone
+- streamEnd
+- streamPause
+- streamResume
+- sampleLimit
+- sampleTarget

@@ -5,7 +5,8 @@ const {
     defaultAudioValues,
     DeviceHandler,
     MediaStreamSource,
-    ScriptProcessor
+    ScriptProcessor,
+    AudioEvents
 } = require('./index');
 
 const curveChoose = (x) =>{
@@ -48,7 +49,7 @@ class AudioHandler extends AudioSetup {
         this.buflen = general.buflen;
 
         // Initialize deviceHandling and update device list
-        this.deviceHandler = new DeviceHandler( () => { this.emit("DeviceChange", this) });
+        this.deviceHandler = new DeviceHandler( () => { this.emit(AudioEvents.deviceChange, this) });
 
         this.changeInput = (e) => this.deviceHandler.changeInput(e);
 
@@ -96,7 +97,7 @@ class AudioHandler extends AudioSetup {
         this.running = true;
         this.streamReady = true;
 
-        this.emit("SetupDone", this);
+        this.emit(AudioEvents.setupDone, this);
     }
 
     initCorrelation(buflen = this.buflen, sampleRate = this.sampleRate) {
@@ -150,7 +151,7 @@ class AudioHandler extends AudioSetup {
         this.stream = null;
         this.running = false;
         this.streamReady = false;
-        this.emit("StreamEnd", this);
+        this.emit(AudioEvents.streamEnd, this);
     }
 
     // So it appears chromium is so "backward compatible" that it doesn't suspend correctly
@@ -163,7 +164,7 @@ class AudioHandler extends AudioSetup {
         await this.streamPause();
         console.warn("Stream paused. This function might not work as expected");
         this.running = false;
-        this.emit("StreamPause", this);
+        this.emit(AudioEvents.streamPause, this);
     }
 
     async resume() {
@@ -171,9 +172,8 @@ class AudioHandler extends AudioSetup {
             return;
 
         await this.streamResume();
-        //console.log("Stream resumed");
         this.running = true;
-        this.emit("StreamResume", this);
+        this.emit(AudioEvents.streamResume, this);
     }
 }
 

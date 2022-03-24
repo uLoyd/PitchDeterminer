@@ -1,4 +1,4 @@
-const { AudioHandler } = require('./index');
+const { AudioHandler, AudioEvents } = require('./index');
 const { readFileSync } = require('fs');
 
 class audioFileHandler extends AudioHandler {
@@ -45,7 +45,7 @@ class audioFileHandler extends AudioHandler {
     async processEvent(decoded, channel = 0) {
         const { pcm } = await this.getPCMData(decoded, channel);
 
-        this.process(pcm, (data) => { this.emit("ProcessedFileChunk", data) });
+        this.process(pcm, (data) => { this.emit(AudioEvents.processedFileChunk, data) });
     }
 
     async processCallback(callback, decoded, channel = 0) {

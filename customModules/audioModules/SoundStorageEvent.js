@@ -1,4 +1,4 @@
-const SoundStorage = require('./SoundStorage');
+const { AudioEvents, SoundStorage } = require('./index');
 
 class SoundStorageEvent extends SoundStorage {
     constructor(sampleTarget = 20, sampleLimit = 40, bias = 0.03) {
@@ -11,12 +11,12 @@ class SoundStorageEvent extends SoundStorage {
     add(fx) {
         if (this.freqArr.length >= this.sampleLimit) {
             this.lastFrequency = fx;
-            this.emit("SampleLimit", this);
+            this.emit(AudioEvents.sampleLimit, this);
             return;
         }
 
         else if(this.freqArr.length === this.sampleTarget){
-            this.emit("SampleTarget", this);
+            this.emit(AudioEvents.sampleTarget, this);
         }
 
         super.add(fx);

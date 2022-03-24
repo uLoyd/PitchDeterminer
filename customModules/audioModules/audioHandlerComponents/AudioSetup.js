@@ -1,13 +1,12 @@
 const EventEmitter = require('events');
-const GainNode = require('./audioSetupComponents/Gain');
-const AnalyserNode = require('./audioSetupComponents/Analyser');
+const { Gain, Analyser, AudioEvents } = require('../index');
 
 class AudioSetup extends EventEmitter {
     audioContext = null;
     analyser = null;
     gain = null;
 
-    constructor(gainNode = new GainNode(), analyserNode = new AnalyserNode()) {
+    constructor(gainNode = new Gain(), analyserNode = new Analyser()) {
         super();
 
         this.gain = gainNode;
@@ -34,7 +33,7 @@ class AudioSetup extends EventEmitter {
         this.sampleRate = this.audioContext.sampleRate;
         this.binCount = this.analyser.node.frequencyBinCount;
 
-        this.emit("AudioContextStarted", this);
+        this.emit(AudioEvents.audioContextStared, this);
     }
 
     streamSetup(input, scriptProcessor) {
@@ -46,7 +45,7 @@ class AudioSetup extends EventEmitter {
         this.gain.connect(this.audioContext.destination);
 
         scriptProcessor.node.onaudioprocess = function () {
-            this.emit("AudioProcessUpdate", this);
+            this.emit(AudioEvents.audioProcessUpdate, this);
         }.bind(this);
     }
 

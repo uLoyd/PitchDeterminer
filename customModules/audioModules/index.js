@@ -1,3 +1,4 @@
+module.exports.AudioEvents = require('./audioHandlerComponents/AudioEvents');
 module.exports.weights = require('./weights').all;
 module.exports.defaultAudioValues = require('./audioHandlerComponents/defaultAudioValues').all;
 module.exports.IAudioNode = require('./audioHandlerComponents/audioSetupComponents/IAudioNode');
