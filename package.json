@@ -4,7 +4,7 @@
   "description": "Electron app determining pitch using web audio api",
   "main": "app.js",
   "dependencies": {
-    "electron": "^11.5.0",
+    "electron": "^13.6.6",
     "electron-remote": "^1.3.0"
   },
   "devDependencies": {
