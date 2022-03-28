@@ -45,11 +45,11 @@ Then in rendering process sample initialization logging value of a correlated
 buffer from the default device could look like this:
 
 ```javascript
-const { AudioHandler } = require('audio-works');
+const { AudioHandler, AudioEvents } = require('audio-works');
 
 let mic = new AudioHandler();
 
-mic.on('AudioProcessUpdate', (evt) => {
+mic.on(AudioEvents.audioProcessUpdate, (evt) => {
     console.log(evt.correlate())    
 }); // Event called from ScriptProcessor on new buffer chunk
 
@@ -64,12 +64,12 @@ It is also possible to output received signal by creating the html Audio object
 and setting it's srcObject property to the stream hold by the AudioHandler.
 
 ```javascript
-const { AudioHandler } = require('audio-works');
+const { AudioHandler, AudioEvents } = require('audio-works');
 
 let mic = new AudioHandler();
 let audio = new Audio();
 
-mic.on('SetupDone', (evt) => {
+mic.on(AudioEvents.setupDone, (evt) => {
    audio.srcObject = evt.stream; 
 }); // Event emitted after setupStream()
 
@@ -158,6 +158,7 @@ be able to be cast
 - correlationSettings: object holding values for Correlation class initialization\
 After base class constructor call, setting buffer length and sound curve algorithm new DeviceHandler class
 is initialized and stored in member _deviceHandler_ which will be used to access Audio IO devices.
+
 ```javascript 
 const { AudioHandler, Gain, Analyser } = require('audio-works');
 
@@ -232,14 +233,14 @@ which, as the name suggests, should be the path to a file which will be processe
 
 Example of logging correlated data and playing the audio from a file:
 ```javascript
-const { AudioFileHandler } = require('audio-works');
+const { AudioFileHandler, AudioEvents } = require('audio-works');
 
 const fileHandler = new AudioFileHandler({}, './audioFiles/sample.wav');
 await fileHandler.initCorrelation(); // this call is needed as we don't
                                      // call setupStream() method
 
 // -- Event driven approach --
-fileHandler.on('ProcessedFileChunk', (evt) => {
+fileHandler.on(AudioEvents.processedFileChunk, (evt) => {
     // perform() is called directly on the correlation object stored
     // in fileHandler, unlike calling "correlate()" in AudioHandler,
     // as there's no mediaStream stored in the "stream" property,
