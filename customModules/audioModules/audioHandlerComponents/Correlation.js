@@ -1,66 +1,79 @@
-const defaults = require('./defaultAudioValues').correlation;
+const defaults = require("./defaultAudioValues").correlation;
 
 class Correlation {
-    constructor(initData) {
-        for (const prop in defaults) {
-            if (!initData.hasOwnProperty(prop)) {
-                initData[prop] = defaults[prop];
-            }
-        }
-
-        const { sampleRate, rmsThreshold, correlationThreshold, correlationDegree, buflen } = initData;
-
-        this.buflen = buflen;
-        this.maxSamples = Math.floor(buflen / 2);
-
-        this.sampleRate = sampleRate;
-        this.rmsThreshold = rmsThreshold;
-        this.correlationThreshold = correlationThreshold;
-        this.correlationDegree = correlationDegree;
+  constructor(initData) {
+    for (const prop in defaults) {
+      if (!initData.hasOwnProperty(prop)) {
+        initData[prop] = defaults[prop];
+      }
     }
 
-    perform(buf) {
-        let rms = Math.sqrt(buf.reduce((total, curVal) => {
-            return total + Math.pow(curVal, 2);
-        }, 0) / this.buflen);
+    const {
+      sampleRate,
+      rmsThreshold,
+      correlationThreshold,
+      correlationDegree,
+      buflen,
+    } = initData;
 
-        if(isNaN(rms) || rms < this.rmsThreshold) // not enough signal power
-            return -1;
+    this.buflen = buflen;
+    this.maxSamples = Math.floor(buflen / 2);
 
-        let best_offset = -1,
-            best_correlation = 0,
-            correlations = new Array(this.maxSamples),
-            lastCorrelation = 1;
+    this.sampleRate = sampleRate;
+    this.rmsThreshold = rmsThreshold;
+    this.correlationThreshold = correlationThreshold;
+    this.correlationDegree = correlationDegree;
+  }
 
-        for (let offset = 0; offset < this.maxSamples; offset++) {
-            let correlation = 0;
+  perform(buf) {
+    let rms = Math.sqrt(
+      buf.reduce((total, curVal) => {
+        return total + Math.pow(curVal, 2);
+      }, 0) / this.buflen
+    );
 
-            for (let i = 0; i < this.maxSamples; i++)
-                correlation += Math.abs((buf[i]) - (buf[i + offset]));
+    if (isNaN(rms) || rms < this.rmsThreshold)
+      // not enough signal power
+      return -1;
 
-            correlation = 1 - (correlation / this.maxSamples);
+    let best_offset = -1,
+      best_correlation = 0,
+      correlations = new Array(this.maxSamples),
+      lastCorrelation = 1;
 
-            correlations[offset] = correlation;
+    for (let offset = 0; offset < this.maxSamples; offset++) {
+      let correlation = 0;
 
-            if (correlation > this.correlationDegree && correlation > lastCorrelation) {
-                if (correlation > best_correlation) {
-                    best_correlation = correlation;
-                    best_offset = offset;
-                }
-                else {
-                    const shift = (correlations[best_offset + 1] - correlations[best_offset - 1]) / correlations[best_offset];
-                    return this.sampleRate / (best_offset + (8 * shift));
-                }
-            }
+      for (let i = 0; i < this.maxSamples; i++)
+        correlation += Math.abs(buf[i] - buf[i + offset]);
 
-            lastCorrelation = correlation;
+      correlation = 1 - correlation / this.maxSamples;
+
+      correlations[offset] = correlation;
+
+      if (
+        correlation > this.correlationDegree &&
+        correlation > lastCorrelation
+      ) {
+        if (correlation > best_correlation) {
+          best_correlation = correlation;
+          best_offset = offset;
+        } else {
+          const shift =
+            (correlations[best_offset + 1] - correlations[best_offset - 1]) /
+            correlations[best_offset];
+          return this.sampleRate / (best_offset + 8 * shift);
         }
+      }
 
-        if (best_correlation > this.correlationThreshold)
-            return this.sampleRate / best_offset;
-
-        return -1;
+      lastCorrelation = correlation;
     }
+
+    if (best_correlation > this.correlationThreshold)
+      return this.sampleRate / best_offset;
+
+    return -1;
+  }
 }
 
 module.exports = Correlation;

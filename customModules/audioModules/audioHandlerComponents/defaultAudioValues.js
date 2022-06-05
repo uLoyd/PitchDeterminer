@@ -2,7 +2,7 @@ const defaultAudioValues = {
   correlation: {
     rmsThreshold: 0.01,
     correlationThreshold: 0.01,
-    correlationDegree: 0.98
+    correlationDegree: 0.98,
   },
   audioSetup: {
     gain: {
@@ -12,14 +12,14 @@ const defaultAudioValues = {
       smoothingTimeConstant: 0.9,
       fftSize: 32768, // max possible size
       minDecibels: -90,
-      maxDecibels: -10
-    }
+      maxDecibels: -10,
+    },
   },
   general: {
-    curveAlgorithm: 'A',
-    buflen: 8192 // Going lower than 2048 results in really low accuracy in determining frequencies
-  }
-}
+    curveAlgorithm: "A",
+    buflen: 8192, // Going lower than 2048 results in really low accuracy in determining frequencies
+  },
+};
 
 module.exports.all = defaultAudioValues;
 module.exports.audioSetup = defaultAudioValues.audioSetup;

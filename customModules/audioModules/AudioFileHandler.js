@@ -1,70 +1,77 @@
-const { AudioHandler, AudioEvents } = require('./index');
-const { readFileSync } = require('fs');
+const { AudioHandler, AudioEvents } = require("./index");
+const { readFileSync } = require("fs");
 
 class audioFileHandler extends AudioHandler {
-    constructor(initData, filePath) {
-        super(initData);
-        this.filePath = filePath;
+  constructor(initData, filePath) {
+    super(initData);
+    this.filePath = filePath;
+  }
+
+  toArrayBuffer(buf) {
+    const ab = new ArrayBuffer(buf.length);
+    let view = new Uint8Array(ab);
+
+    for (let i = 0; i < buf.length; ++i) {
+      view[i] = buf[i];
     }
+    return ab;
+  }
 
-    toArrayBuffer(buf) {
-        const ab = new ArrayBuffer(buf.length);
-        let view = new Uint8Array(ab);
+  // returns AudioBuffer instance
+  async decode(callback) {
+    const fileData = readFileSync(this.filePath); // audioContext.decodeAudioData wants the whole file as param
+    return await this.audioContext.decodeAudioData(
+      this.toArrayBuffer(fileData),
+      callback
+    );
+  }
 
-        for (let i = 0; i < buf.length; ++i) {
-            view[i] = buf[i];
-        }
-        return ab;
+  // Pulse-Code Modulation
+  async getPCMData(data, channel) {
+    data = data ?? (await this.decode());
+    const pcm = Array.from(data.getChannelData(channel));
+    return { data, pcm };
+  }
+
+  async initCorrelation(buflen = this.buflen) {
+    const { sampleRate } = await this.decode();
+    super.initCorrelation(buflen, sampleRate);
+  }
+
+  process(pcm, action) {
+    while (pcm.length) {
+      const end = pcm.length > this.buflen ? this.buflen : pcm.length;
+      action(pcm.splice(0, end));
     }
+  }
 
-    // returns AudioBuffer instance
-    async decode(callback) {
-        const fileData = readFileSync(this.filePath); // audioContext.decodeAudioData wants the whole file as param
-        return await this.audioContext.decodeAudioData(this.toArrayBuffer(fileData), callback);
-    }
+  async processEvent(decoded, channel = 0) {
+    const { pcm } = await this.getPCMData(decoded, channel);
 
-    // Pulse-Code Modulation
-    async getPCMData(data, channel) {
-        data = data ?? await this.decode();
-        const pcm = Array.from(data.getChannelData(channel));
-        return { data, pcm };
-    };
+    this.process(pcm, (data) => {
+      this.emit(AudioEvents.processedFileChunk, data);
+    });
+  }
 
-    async initCorrelation(buflen = this.buflen) {
-        const { sampleRate } = await this.decode();
-        super.initCorrelation(buflen, sampleRate);
-    }
+  async processCallback(callback, decoded, channel = 0) {
+    const { pcm } = await this.getPCMData(decoded, channel);
 
-    process(pcm, action) {
-        while(pcm.length) {
-            const end = pcm.length > this.buflen ? this.buflen : pcm.length;
-            action(pcm.splice(0, end));
-        }
-    }
+    this.process(pcm, callback);
+  }
 
-    async processEvent(decoded, channel = 0) {
-        const { pcm } = await this.getPCMData(decoded, channel);
+  async createSource(callback) {
+    const source = this.audioContext.createBufferSource();
 
-        this.process(pcm, (data) => { this.emit(AudioEvents.processedFileChunk, data) });
-    }
+    const action =
+      callback ??
+      async function (buf) {
+        source.buffer = buf;
+        source.connect(this.audioContext.destination);
+      }.bind(this);
 
-    async processCallback(callback, decoded, channel = 0) {
-        const { pcm } = await this.getPCMData(decoded, channel);
-
-        this.process(pcm, callback);
-    }
-
-    async createSource(callback) {
-        const source = this.audioContext.createBufferSource();
-
-        const action = callback ?? async function (buf) {
-            source.buffer = buf;
-            source.connect(this.audioContext.destination);
-        }.bind(this);
-
-        await this.decode(action);
-        return source;
-    }
+    await this.decode(action);
+    return source;
+  }
 }
 
 module.exports = audioFileHandler;

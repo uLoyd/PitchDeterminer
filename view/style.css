@@ -1,4 +1,4 @@
-body{
+body {
   background-color: #444;
   min-height: 700px;
   min-width: 1300px;
@@ -6,17 +6,17 @@ body{
   width: 95vw;
 }
 
-header{
+header {
   height: 20%;
   background-color: #333;
   width: 100%;
 }
 
-button{
+button {
   cursor: pointer;
 }
 
-.volume{
+.volume {
   float: left;
 }
 
@@ -49,7 +49,7 @@ button{
   position: absolute;
   background-color: #f9f9f9;
   min-width: 160px;
-  box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
+  box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2);
   z-index: 1;
 }
 
@@ -72,7 +72,7 @@ button{
 
 /* Add a grey background color to dropdown links on hover */
 .dropdwn-content button:hover {
-  background-color: #BFB6B6;
+  background-color: #bfb6b6;
 }
 
 /* Show the dropdown menu on hover */
@@ -80,12 +80,13 @@ button{
   display: block;
 }
 
-.mic{
+.mic {
   font-size: 2.5rem;
   color: white;
 }
 
-#micBut, #speakerBut {
+#micBut,
+#speakerBut {
   background-color: #555;
   border: none;
   float: right;
@@ -95,20 +96,20 @@ button{
   border-radius: 7px;
 }
 
-#volume{
+#volume {
   background-color: green;
   width: 0%;
   height: 100%;
 }
 
-#volumeMeter{
+#volumeMeter {
   border: 2px solid black;
   background-color: white;
   width: 30%;
   height: 30%;
 }
 
-.example{
+.example {
   height: 50%;
   width: 49%;
   color: white;
@@ -119,22 +120,22 @@ button{
   background-color: #333;
 }
 
-#lastNote{
+#lastNote {
   font-size: 5em;
 }
 
-#tuner{
+#tuner {
   font-size: 3em;
   margin-left: 2%;
 }
 
-#pitcherror{
+#pitcherror {
   width: 100%;
   height: 50%;
   background-color: #821e1e;
 }
 
-#accuracy{
+#accuracy {
   height: 5vh;
   width: 5vh;
   position: relative;
@@ -146,7 +147,7 @@ button{
   margin-left: 47.5%;
 }
 
-#goodpitch{
+#goodpitch {
   width: 15%;
   height: 100%;
   margin-left: 43.5%;
@@ -154,56 +155,68 @@ button{
   z-index: 1;
 }
 
-span{
+span {
   float: left;
   clear: left;
 }
 
-.na{ /* Note A */
-  background-color: #1F55BC;
+.na {
+  /* Note A */
+  background-color: #1f55bc;
 }
 
-.nas{ /* Note A# */
+.nas {
+  /* Note A# */
   background-color: #228692;
 }
 
-.nb{ /* Note B */
+.nb {
+  /* Note B */
   background-color: #1a826e;
 }
 
-.nc{ /* Note C */
+.nc {
+  /* Note C */
   background-color: #055340;
 }
 
-.ncs{ /* Note C# */
-  background-color: #AA51A1;
+.ncs {
+  /* Note C# */
+  background-color: #aa51a1;
 }
 
-.nd{ /* Note D */
+.nd {
+  /* Note D */
   background-color: #b15366;
 }
 
-.nds{ /* Note D# */
+.nds {
+  /* Note D# */
   background-color: #525229;
 }
 
-.ne{ /* Note E */
+.ne {
+  /* Note E */
   background-color: #249041;
 }
 
-.nf{ /* Note F */
+.nf {
+  /* Note F */
   background-color: #90673e;
 }
 
-.nfs{ /* Note F# */
+.nfs {
+  /* Note F# */
   background-color: #e3004b;
 }
 
-.ng{ /* Note G */
+.ng {
+  /* Note G */
   background-color: #ea6d35;
 }
 
-.ngs{ /* Note G# */
+.ngs {
+  /* Note G# */
   background-color: #0e3803;
 }
 
@@ -219,7 +232,7 @@ span{
   border-bottom: 0.5px solid black;
 }
 
-.fret_mark{
+.fret_mark {
   width: 80%;
   text-align: center;
 }
@@ -230,7 +243,8 @@ span{
   width: 4%;
 }
 
-.fixed_tuning, .fixed_octave{
+.fixed_tuning,
+.fixed_octave {
   text-align: center;
   border: solid 1px black;
 }

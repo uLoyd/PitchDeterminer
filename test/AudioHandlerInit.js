@@ -1,106 +1,229 @@
-const assert = require('assert');
-const path = require('path');
-const Application = require('spectron').Application;
-const { Analyser, Gain, AudioHandler } = require('../customModules/audioModules/index');
-const testData = require('./data/AudioHandlerInitData');
-require("web-audio-test-api"); // web-audio-api mock
+const assert = require("assert");
+const path = require("path");
+const Application = require("spectron").Application;
+const {
+  Analyser,
+  Gain,
+  AudioHandler,
+  Device,
+  DeviceHandler,
+  Correlation,
+} = require("../customModules/audioModules/index");
+const testData = require("./data/AudioHandlerInitData");
+require("web-audio-test-api");
+const { Dweight } = require("../customModules/audioModules/weights"); // web-audio-api mock
 
 const app = new Application({
-    path: /*electronPath*/ './app.js',
-    args: [path.join(__dirname, '..')]
+  path: /*electronPath*/ "./app.js",
+  args: [path.join(__dirname, "..")],
 });
 
 const compObj = (value, expected) => {
-    return {
-        value,
-        expected,
-        assert: () => assert.strictEqual(this.value, this.expected, `v:${this.value}; e:${this.expected}`)
-    }
-}
+  return {
+    value,
+    expected,
+    assert: () =>
+      assert.strictEqual(
+        this.value,
+        this.expected,
+        `v:${this.value}; e:${this.expected}`
+      ),
+  };
+};
 
 testData.forEach(async (data) => {
-    describe(`Audio Handler Initialization with params: ${data.title}`, function () {
-       let audio;
+  describe(`Audio Handler Initialization with params: ${data.title}`, function () {
+    let audio;
+    const fakeDeviceHandler = new DeviceHandler(() => {});
+    fakeDeviceHandler.getDeviceList = function () {
+      return [
+        new Device(1, "test1", "input"),
+        new Device(2, "test2", "input"),
+        new Device(3, "test3", "input"),
+        new Device(4, "test4", "input"),
+        new Device(5, "test5", "output"),
+        new Device(6, "test6", "output"),
+        new Device(7, "test7", "output"),
+        new Device(8, "test8", "output"),
+      ];
+    };
 
-       before(() => {
-           audio = new AudioHandler({
-               general: data.params.general,
-               gainNode: new Gain(data.params.gainSettings),
-               analyserNode: new Analyser(data.params.analyserSettings)
-           });
+    const willThrow = async function (callback, params) {
+      try {
+        await callback(...params);
+        assert.ok(false);
+      } catch (e) {
+        assert.ok(true);
+      }
+    };
 
-           app.start();
-       });
+    before(() => {
+      audio = new AudioHandler({
+        general: data.params.general,
+        gainNode: new Gain(data.params.gainSettings),
+        analyserNode: new Analyser(data.params.analyserSettings),
+      });
 
-       after(async (done) => {
-           if (app && app.isRunning()) {
-               await app.stop();
-           }
-           done();
-       });
+      audio.deviceHandler = fakeDeviceHandler;
 
-       it('Audio handler exists', () => assert.ok(audio));
+      app.start();
+    });
 
-       it('Audio handler buflen value', () =>
-           assert.strictEqual(audio.buflen, data.compare.buflen));
+    after(async (done) => {
+      if (app && app.isRunning()) {
+        await app.stop();
+      }
+      done();
+    });
 
-       it('Audio handler sound curve algorithm instance', () =>
-           assert.strictEqual(audio.soundCurve instanceof data.compare.soundCurve, true));
+    it("Audio handler exists", () => assert.ok(audio));
 
-       describe('Audio Handler Analyser  Initialization', () => {
-           const values = {};
-           before(() => {
-               const expected = data.compare;
-               audio.analyser.node = {
-                   smoothingTimeConstant: 0,
-                   fftSize: 0,
-                   minDecibels: 0,
-                   maxDecibels: 0
-               };
-               audio.analyser.applySettings();
-               const actual = audio.analyser.node;
-               values.minDecibels = compObj(actual.minDecibels, expected.minDecibels);
-               values.maxDecibels = compObj(actual.maxDecibels, expected.maxDecibels);
-               values.fftSize = compObj(actual.fftSize, expected.fftSize);
-               values.smoothingTimeConstant = compObj(actual.smoothingTimeConstant, expected.smoothingTimeConstant);
-           });
+    it("Audio handler buflen value", () =>
+      assert.strictEqual(audio.buflen, data.compare.buflen));
 
-           it('Smoothing value', () => {
-               const { smoothingTimeConstant } = values;
-               smoothingTimeConstant.assert();
-           });
+    it("Audio handler sound curve algorithm instance", () =>
+      assert.strictEqual(
+        audio.soundCurve instanceof data.compare.soundCurve,
+        true
+      ));
 
-           it('FFT Size', () => {
-               const { fftSize } = values;
-               fftSize.assert();
-           });
+    it("Audio handler Nyquist Frequency", () => {
+      audio.sampleRate = 44000;
+      assert.strictEqual(audio.nyquistFrequency(), 22000);
+    });
 
-           it('Min Decibels Size', () => {
-               const { minDecibels } = values;
-               minDecibels.assert();
-           });
+    it("Audio handler creates Correlation instance", () => {
+      assert.strictEqual(audio.correlation, null);
+      audio.initCorrelation();
+      assert.strictEqual(audio.correlation instanceof Correlation, true);
+    });
 
-           it('Max Decibels Size', () => {
-               const { maxDecibels } = values;
-               maxDecibels.assert();
-           });
-       });
+    it("Audio handler returns the same device list as DeviceHandler", async () => {
+      const actualList = await audio.getDeviceList();
+      const expectedList = await fakeDeviceHandler.getDeviceList();
+      assert.strictEqual(actualList.length, expectedList.length);
 
-       describe('Audio Handler Gain  Initialization', () => {
-            const values = {};
-            before(() => {
-                const actual = data.compare;
-                audio.gain.node.gain.value = 0;
-                audio.gain.applySettings();
-                const expected = audio.gain.node.gain;
+      for (let i = 0; i < actualList.length; ++i) {
+        assert.strictEqual(actualList[i].id, expectedList[i].id);
+        assert.strictEqual(actualList[i].label, expectedList[i].label);
+        assert.strictEqual(actualList[i].dir, expectedList[i].dir);
+      }
+    });
 
-                values.value = compObj(actual.value, expected.value);
-            });
+    it("Audio handler will not try to pause or end stream if state is not set to running", async () => {
+      audio.running = false;
 
-            it('Gain value', () => {
-                const { value } = values;
-                value.assert();
-            });
-        });
-   });
+      await audio.pause();
+      assert.ok(true);
+
+      await audio.end();
+      assert.ok(true);
+    });
+
+    it("Audio handler will try to pause if state is set to running", async () => {
+      audio.running = true;
+      await willThrow(audio.pause, []);
+    });
+
+    it("Audio handler will try to end stream if state is set to running", async () => {
+      audio.running = true;
+      await willThrow(audio.end, []);
+    });
+
+    it("Audio handler will try to resume stream if state is not set to running", async () => {
+      audio.running = false;
+      await willThrow(audio.resume, []);
+    });
+
+    it("Audio handler will not try to resume stream if state is set to running", async () => {
+      audio.running = true;
+      await audio.resume();
+      assert.ok(true);
+    });
+
+    it("Audio handler will throw during stream setup if there's no available input device", async () => {
+      fakeDeviceHandler.getDeviceList = function () {
+        return [];
+      };
+      await willThrow(audio.setupStream, []);
+    });
+
+    it(
+      "Audio handler getVolume will return value around 262 for A/B/C sound curves " +
+        "with band range of 8Hz and linear buffer of 256 elements (0-255)",
+      async () => {
+        audio.BFDUint8 = function () {
+          return [...Array(256).keys()];
+        };
+        audio.bandRange = 2048 / 256;
+        const vol = audio.getVolume(2);
+
+        if (audio.soundCurve instanceof Dweight) {
+          assert.ok(true);
+          return;
+        }
+
+        assert.ok(vol > 260 && vol < 264);
+      }
+    );
+
+    describe("Audio Handler Analyser  Initialization", () => {
+      const values = {};
+      before(() => {
+        const expected = data.compare;
+        audio.analyser.node = {
+          smoothingTimeConstant: 1,
+          fftSize: 2,
+          minDecibels: 3,
+          maxDecibels: 4,
+        };
+        audio.analyser.applySettings();
+        const actual = audio.analyser.node;
+        values.minDecibels = compObj(actual.minDecibels, expected.minDecibels);
+        values.maxDecibels = compObj(actual.maxDecibels, expected.maxDecibels);
+        values.fftSize = compObj(actual.fftSize, expected.fftSize);
+        values.smoothingTimeConstant = compObj(
+          actual.smoothingTimeConstant,
+          expected.smoothingTimeConstant
+        );
+      });
+
+      it("Smoothing value", () => {
+        const { smoothingTimeConstant } = values;
+        smoothingTimeConstant.assert();
+      });
+
+      it("FFT Size", () => {
+        const { fftSize } = values;
+        fftSize.assert();
+      });
+
+      it("Min Decibels Size", () => {
+        const { minDecibels } = values;
+        minDecibels.assert();
+      });
+
+      it("Max Decibels Size", () => {
+        const { maxDecibels } = values;
+        maxDecibels.assert();
+      });
+    });
+
+    describe("Audio Handler Gain  Initialization", () => {
+      const values = {};
+      before(() => {
+        const actual = data.compare;
+        audio.gain.node.gain.value = 0;
+        audio.gain.applySettings();
+        const expected = audio.gain.node.gain;
+
+        values.value = compObj(actual.value, expected.value);
+      });
+
+      it("Gain value", () => {
+        const { value } = values;
+        value.assert();
+      });
+    });
+  });
 });

@@ -1,0 +1,14 @@
+# Ignore artifacts:
+build
+coverage
+.nyc_output
+.idea
+.github
+bootstrap-4.0.0-dist
+package.json
+package-lock.json
+img
+
+# Ignore all HTML files:
+*.html
+*.bat

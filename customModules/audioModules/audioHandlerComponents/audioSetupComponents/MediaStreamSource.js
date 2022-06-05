@@ -1,19 +1,17 @@
 const IAudioNode = require("./IAudioNode");
 
 class MediaStreamSource extends IAudioNode {
-    constructor(settings, defaults) {
-        super(settings, defaults);
-    }
+  constructor(settings, defaults) {
+    super(settings, defaults);
+  }
 
-    create(context, params, applySettings = false) {
-        this.node = context.createMediaStreamSource(params);
+  create(context, params, applySettings = false) {
+    this.node = context.createMediaStreamSource(params);
 
-        if(applySettings)
-            super.applySettings();
+    if (applySettings) super.applySettings();
 
-        return this;
-    }
-
+    return this;
+  }
 }
 
 module.exports = MediaStreamSource;

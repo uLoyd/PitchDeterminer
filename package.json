@@ -10,6 +10,7 @@
   "devDependencies": {
     "mocha": "^9.0.3",
     "nyc": "^15.1.0",
+    "prettier": "2.6.2",
     "spectron": "^15.0.0",
     "web-audio-test-api": "^0.5.2"
   },
