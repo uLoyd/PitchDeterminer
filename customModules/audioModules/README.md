@@ -178,7 +178,7 @@ Constructor receives object containing:
   is initialized and stored in member _deviceHandler_ which will be used to access Audio IO devices.
 
 ```javascript
-const { AudioHandler, Gain, Analyser } = require('audio-works');
+const { AudioHandler, Gain, Analyser } = require("audio-works");
 
 let mic = new AudioHandler({ // All the values are optional.
     general: {               // Omitting some values in objects

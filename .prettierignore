@@ -12,3 +12,4 @@ img
 # Ignore all HTML files:
 *.html
 *.bat
+*.md

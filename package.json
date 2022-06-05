@@ -16,6 +16,8 @@
   },
   "scripts": {
     "test": "mocha --exit",
+    "check": "npx prettier --check .",
+    "format": "npx prettier --write .",
     "start": "electron ."
   },
   "repository": {
