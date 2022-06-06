@@ -17,7 +17,7 @@
   "scripts": {
     "test": "mocha --exit",
     "check": "npx prettier --check .",
-    "validate": "/node_modules/.bin/prettier --check . --list-different && npm run test",
+    "validate": "npm run check && npm run test",
     "format": "npx prettier --write .",
     "start": "electron ."
   },
