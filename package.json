@@ -16,6 +16,7 @@
   },
   "scripts": {
     "test": "mocha --exit",
+    "coverage": "nyc npm run test",
     "check": "npx prettier --check .",
     "validate": "npm run check && npm run test",
     "format": "npx prettier --write .",
