@@ -1,4 +1,4 @@
-exports.exact = [
+module.exports = [
   {
     frequency: 440,
     note: "A",

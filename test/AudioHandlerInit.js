@@ -1,6 +1,4 @@
 const assert = require("assert");
-const path = require("path");
-const Application = require("spectron").Application;
 const {
   Analyser,
   Gain,
@@ -12,11 +10,6 @@ const {
 const testData = require("./data/AudioHandlerInitData");
 require("web-audio-test-api");
 const { Dweight } = require("../customModules/audioModules/weights"); // web-audio-api mock
-
-const app = new Application({
-  path: /*electronPath*/ "./app.js",
-  args: [path.join(__dirname, "..")],
-});
 
 const compObj = (value, expected) => {
   return {
@@ -65,15 +58,6 @@ testData.forEach(async (data) => {
       });
 
       audio.deviceHandler = fakeDeviceHandler;
-
-      app.start();
-    });
-
-    after(async (done) => {
-      if (app && app.isRunning()) {
-        await app.stop();
-      }
-      done();
     });
 
     it("Audio handler exists", () => assert.ok(audio));
