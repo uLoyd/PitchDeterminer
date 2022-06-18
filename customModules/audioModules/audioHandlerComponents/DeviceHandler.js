@@ -2,8 +2,8 @@ class Device {
   // basically an enum
   static direction = {
     input: "input",
-    output: "output"
-  }
+    output: "output",
+  };
 
   constructor(id, label, dir) {
     if (typeof id === "object" && id !== null) {
@@ -79,7 +79,9 @@ class DeviceHandler {
       ? devList.find((x) => x.id === deviceId && x.dir === direction)
       : devList.find((x) => x.dir === direction);
 
-    direction === Device.direction.input ? (this.currentInput = dev) : (this.currentOutput = dev);
+    direction === Device.direction.input
+      ? (this.currentInput = dev)
+      : (this.currentOutput = dev);
 
     this.deviceChangeCallback(
       await this.getDeviceList(),
@@ -88,9 +90,11 @@ class DeviceHandler {
     );
   }
 
-  changeInput = async (deviceId) => await this.changeDevice(Device.direction.input, deviceId);
+  changeInput = async (deviceId) =>
+    await this.changeDevice(Device.direction.input, deviceId);
 
-  changeOutput = async (deviceId) => await this.changeDevice(Device.direction.output, deviceId);
+  changeOutput = async (deviceId) =>
+    await this.changeDevice(Device.direction.output, deviceId);
 
   // Returns bool. True - there's at least 1 input device available
   async checkForInput() {

@@ -2,7 +2,11 @@ const assert = require("assert");
 const testA2 = require("./data/A2");
 const testE2 = require("./data/E2");
 const testB3 = require("./data/B3");
-const { SoundStorageEvent, FrequencyMath, SoundStorage } = require("../customModules/audioModules");
+const {
+  SoundStorageEvent,
+  FrequencyMath,
+  SoundStorage,
+} = require("../customModules/audioModules");
 
 const testData = [
   { content: testA2, name: "A2" },
@@ -52,7 +56,7 @@ testData.forEach(async (data) => {
         const samples = storage.selfCheck();
 
         if (samples >= storage.sampleTarget) {
-          new FrequencyMath(440)
+          new FrequencyMath(440);
           const value = new FrequencyMath(storage.basicDetermine()).toString();
           assert.strictEqual(value, expected);
         }
@@ -62,12 +66,12 @@ testData.forEach(async (data) => {
     it("Method getting outliers works", () => {
       const values = [1, 53, 53, 54, 54, 100];
 
-      values.forEach(value => storage.add(value));
+      values.forEach((value) => storage.add(value));
 
       const outliers = storage.getOutliers();
       const expectedOutliers = [1, 100];
 
-      outliers.forEach(outlier => {
+      outliers.forEach((outlier) => {
         assert.ok(expectedOutliers.includes(outlier), outlier);
       });
     });
@@ -75,13 +79,16 @@ testData.forEach(async (data) => {
     it("Method getting outliers positions works", () => {
       const values = [1, 53, 53, 54, 54, 100];
 
-      values.forEach(value => storage.add(value));
+      values.forEach((value) => storage.add(value));
 
       const outlierPositions = storage.outlierPosition();
       const expectedOutlierPositions = [0, values.length - 1];
 
-      outlierPositions.forEach(outlierPosition => {
-        assert.ok(expectedOutlierPositions.includes(outlierPosition), outlierPosition);
+      outlierPositions.forEach((outlierPosition) => {
+        assert.ok(
+          expectedOutlierPositions.includes(outlierPosition),
+          outlierPosition
+        );
       });
     });
 
@@ -91,7 +98,7 @@ testData.forEach(async (data) => {
       const sum = values.reduce((total, value) => total + value, 0);
       const avg = sum / values.length;
 
-      values.forEach(value => baseStorage.add(value));
+      values.forEach((value) => baseStorage.add(value));
 
       const actualAverage = baseStorage.average();
       assert.strictEqual(avg, actualAverage);
@@ -102,9 +109,11 @@ testData.forEach(async (data) => {
       const values = [1.257, 2.654, 3.234, 4.765, 5.987];
       const expectedValues = [1.26, 2.65, 3.23, 4.76, 5.99];
 
-      values.forEach(value => baseStorage.add(value));
+      values.forEach((value) => baseStorage.add(value));
 
-      baseStorage.freqArr.forEach(element => assert.ok(expectedValues.includes(element)));
+      baseStorage.freqArr.forEach((element) =>
+        assert.ok(expectedValues.includes(element))
+      );
     });
 
     it("Base method determine returns null if there are no samples", () => {

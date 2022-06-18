@@ -12,7 +12,7 @@ const audioTest = require("./audioHandleTest"),
 
 const { Fretboard } = require("./../customModules/fretboard/Fretboard");
 const { Sound, sounds } = require("./../customModules/fretboard/Sound");
-const {Device} = require("../customModules/audioModules");
+const { Device } = require("../customModules/audioModules");
 
 window.onload = async () => {
   let soundDataEvent = new SoundStorageEvent();

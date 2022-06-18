@@ -1,4 +1,4 @@
-const {Device} = require("../../customModules/audioModules");
+const { Device } = require("../../customModules/audioModules");
 module.exports = [
   {
     name: "Input Device",

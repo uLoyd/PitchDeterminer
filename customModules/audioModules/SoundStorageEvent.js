@@ -49,9 +49,8 @@ class SoundStorageEvent extends SoundStorage {
   outlierPosition() {
     const outliers = this.getOutliers();
 
-    return this.freqArr.reduce(function(output, storedValue, index) {
-      if (outliers.includes(storedValue))
-      {
+    return this.freqArr.reduce(function (output, storedValue, index) {
+      if (outliers.includes(storedValue)) {
         output.push(index);
       }
       return output;
