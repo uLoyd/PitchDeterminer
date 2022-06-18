@@ -2,7 +2,7 @@
 
 ## **WIP**
 
-Library meant for Electron to determine note based on the signal received from mic or file.
+Library meant for Electron (ver. 11.x - 13.x) to determine note based on the signal received from mic or file.
 
 Currently tested determining sounds down to C1 ~ 32.7Hz (Less than 2Hz difference between C1 and B0)
 so at the moment it's accurate enough down to at least 2Hz differences.
