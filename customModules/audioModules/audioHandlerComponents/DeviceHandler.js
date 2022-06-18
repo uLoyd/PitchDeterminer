@@ -1,4 +1,10 @@
 class Device {
+  // basically an enum
+  static direction = {
+    input: "input",
+    output: "output"
+  }
+
   constructor(id, label, dir) {
     if (typeof id === "object" && id !== null) {
       this.constructorForDeviceObject(id, label);
@@ -6,7 +12,7 @@ class Device {
       this.id = id;
       this.label = label;
       this.dir = dir;
-      this.isInput = dir === "input";
+      this.isInput = dir === Device.direction.input;
       this.isOutput = !this.isInput;
     }
   }
@@ -15,7 +21,7 @@ class Device {
     this.id = dev.deviceId;
     this.label = dev.label;
     this.dir = dir;
-    this.isInput = dir === "input";
+    this.isInput = dir === Device.direction.input;
     this.isOutput = !this.isInput;
   }
 }
@@ -67,13 +73,13 @@ class DeviceHandler {
   }
 
   // e = device ID!
-  async changeDevice(dir, e) {
+  async changeDevice(direction, deviceId) {
     const devList = await this.getDeviceList();
-    const dev = e
-      ? devList.find((x) => x.id === e && x.dir === dir)
-      : devList.find((x) => x.dir === dir);
+    const dev = deviceId
+      ? devList.find((x) => x.id === deviceId && x.dir === direction)
+      : devList.find((x) => x.dir === direction);
 
-    dir === "input" ? (this.currentInput = dev) : (this.currentOutput = dev);
+    direction === Device.direction.input ? (this.currentInput = dev) : (this.currentOutput = dev);
 
     this.deviceChangeCallback(
       await this.getDeviceList(),
@@ -82,9 +88,9 @@ class DeviceHandler {
     );
   }
 
-  changeInput = async (e) => await this.changeDevice("input", e);
+  changeInput = async (deviceId) => await this.changeDevice(Device.direction.input, deviceId);
 
-  changeOutput = async (e) => await this.changeDevice("output", e);
+  changeOutput = async (deviceId) => await this.changeDevice(Device.direction.output, deviceId);
 
   // Returns bool. True - there's at least 1 input device available
   async checkForInput() {

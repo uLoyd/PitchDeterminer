@@ -1,4 +1,5 @@
 const { createDomElement } = require("../customModules/fretboard/utils");
+const {Device} = require("../customModules/audioModules");
 
 class htmlElement {
   // Redundant, created just for own convenience
@@ -67,9 +68,9 @@ class audioHandleTest {
 
     devArr.forEach((entry) => {
       const target =
-        entry.dir === "input" ? this.elements.audioIn : this.elements.audioOut;
+        entry.dir === Device.direction.input ? this.elements.audioIn : this.elements.audioOut;
       const selected =
-        entry.dir === "input"
+        entry.dir === Device.direction.input
           ? entry.id === currentInput?.id
           : entry.id === currentOutput?.id;
 

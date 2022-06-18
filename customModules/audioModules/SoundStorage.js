@@ -7,12 +7,13 @@ class SoundStorage extends EventEmitter {
     // 0.03 is just a random default bias for similarity check. Works alright.
     super();
     this.freqArr = [];
-    this.biasThreshold = bias ?? null; // Change biasThreshold if a parameter was passed
+    this.biasThreshold = bias;
   }
 
   add(fx) {
     fx = Number(fx.toFixed(2)); // Rounds frequency to two points
     this.freqArr.push(fx);
+    return this;
   }
 
   average() {
@@ -47,8 +48,8 @@ class SoundStorage extends EventEmitter {
     let res = arrCopy.reduce((sum, val) => {
       // Summing all the values that pass the "similarity check"
       if (Math.abs(most - val) <= bias) {
-        // Checking if the current value is "similar"
-        it++; // enough to the most frequent value
+        // Checking if the current value is "similar" enough to the most frequent value
+        it++;
         return val + sum;
       } else {
         return sum;

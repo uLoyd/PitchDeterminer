@@ -294,16 +294,16 @@ fileHandler.processCallback((data) => {
 // no call like "processEvent()" in this case
 ```
 
-#### toArrayBuffer(Buffer/Array: buf)
+#### toArrayBuffer(Buffer/Array: buf) -> ArrayBuffer
 
-Returns array/buffer/audio buffer as ArrayBuffer type.
+Returns received [Array | Buffer | AudioBuffer] as ArrayBuffer type.
 
-#### async decode(callback)
+#### async decode(callback) -> AudioBuffer
 
 Reads whole file, casts it to ArrayBuffer which is then passed along with
 a callback to the AudioContext method _decodeAudioData_ that's returned from the method.
 
-#### async getPCMData(data, channel)
+#### async getPCMData(data: AudioBuffer, channel: uint) -> Object{ data: AudioBuffer, pcm: Array[int] }
 
 Data is supposed to be the output of _AudioContext.decodeAudioData_ method
 which is actually the default value in case of no parameter passed to this method.
@@ -311,26 +311,32 @@ Channel argument specifies which channel to read from the data.
 Returns object { data, pcm } where data is the original decode file data and
 pcm is the pulse-code modulation from the specified channel.
 
-#### process(pcm, action)
+#### async initCorrelation(buflen = this.buflen: uint) -> void
+
+Correlation object is created during the setup of audio stream in base class.
+This case does not apply to the FileHandler variant and so to create the 
+Correlation instance inside the AudioFileHandler instance this method call is required.
+
+#### process(pcm, action) -> void
 
 Action argument is supposed to be a callback handling chunks of data.
 This method loops through the pcm data performing on each chunk of data specified
 action.
 
-#### async processEvent(decoded, channel)
+#### async processEvent(decoded, channel) -> void
 
 Decoded and channel arguments are the same ones used in _getPCMData_ method
 as those are passed to it to retrieve the pcm data which is then passed to the
 _process_ method with default callback simply emitting event "ProcessedFileChunk"
 that contains said chunk.
 
-#### async processCallback(callback, decoded, channel)
+#### async processCallback(callback, decoded, channel) -> void
 
 Same method as _processEvent_ with only difference of obligatory callback
 passed as the first argument that's going to be passed to the _process_ method
 to handle the pcm data chunks.
 
-#### async createSource(callback)
+#### async createSource(callback) -> AudioBufferSourceNode
 
 Creates BufferSource node from the AudioContext, then calls _this.decode(action)_
 where if callback was defined the action is exactly the same callback, and in case
@@ -352,7 +358,7 @@ for the last step of the autocorrelation as based on this value the frequency wi
 It is possible and encouraged to pass only the buflen and sampleRate values as the remaining
 values can be automatically set to default.
 
-#### perform(buf)
+#### perform(buf) -> double
 
 This method receives buffer with data that will be processed up to the length
 specified in the _this.buflen_ member. If RMS will be too low, meaning the signal is too weakk,
@@ -370,24 +376,24 @@ it uses a private helper class _Device_.
 Callback passed to the constructor will be called on every _ondevicechange_ event triggered
 from _navigator.mediaDevices_.
 
-#### deviceChangeEvent()
+#### deviceChangeEvent() -> void
 
 This method is called on every device change and is responsible for invoking the user callback
 passed previously to the constructor.
 
-#### async getDeviceList()
+#### async getDeviceList() -> Array[Device]
 
 Returns an array of devices (_Device_ class instances) available through _navigator_
 that contains _MediaDeviceInfo_ as well as it's direction, input or output.
 
-#### async getCurrentOrFirst()
+#### async getCurrentOrFirst() -> Object{ in: Device, out: Device }
 
 Returns a object containing a pair of devices - in (input) and out (output).
 If values _this.currentInput_ and _this.currentOutput_ are set than this devices will be
 the value in the object. In case current device is not set than a first available one in respective
 direction will be set up in place of the ones supposed to bo holded by the instance.
 
-#### async changeDevice(dir, e)
+#### async changeDevice(direction: string, deviceId: string) -> void
 
 In this method _dir_ is a string stating the direction of the device that's going
 to be change. Parameter _e_ is optional device id. If present than _this.current-direction_
@@ -397,20 +403,20 @@ direction will be chosen. Lastly the user defined callback handling device chang
 which current device list of all available devices wil be passed along with the current
 input and output devices hold by the instance itself.
 
-#### async changeInput(e)
+#### async changeInput(e) -> void
 
 Shorthand for _await deviceHandlerInstance.changeDevice('input', e)_
 
-#### async changeOutput(e)
+#### async changeOutput(e) -> void
 
 Shorthand for _await deviceHandlerInstance.changeDevice('output', e)_
 
-#### async checkForInput()
+#### async checkForInput() -> bool
 
 Returns boolean, true if there's at least one available input device and
 false if there's none.
 
-#### async navigatorInput()
+#### async navigatorInput() -> Union[Object{ exact: string }, undefined]
 
 Returns a constraint for navigator used in audio stream setup stating
 exact input device. The device will be _this.currentInput_ if set, or first available one.
@@ -422,7 +428,9 @@ A class representing navigators mediaDevices. It has no methods, holding only
 values: _id_: device id, _label_: device label, and _dir_: device direction
 Array of instances of this class is returned from the _getDeviceList_ method of DeviceHandler.
 Along the device direction there are also two boolean flags related to it: _isOutput_ and _isInput_
-for more convenient array checks and filtering.
+for more convenient array checks and filtering.  
+For more convenient direction description instead of raw strings class contains a static
+object serving as enum which can be accessed as ```Device.direction.(input|output)```.
 
 ## SoundStorage
 
@@ -436,30 +444,30 @@ _this.biasThreshold_ member which purpose is removing outlier values during soun
 By default, it is set to 0.03. The lower the value the higher similarity sound values will have to
 have the most frequent value in _this.freqArr_ for those to be taken into account during estimation.
 
-#### add(fx)
+#### add(fx) -> self
 
 Adds single sound data from the Correlation to the _this.freqArr_ member with 2 decimal points accuracy.
 
-#### average()
+#### average() -> double
 
 Returns rounded average of all the values in _this.freqArr_
 
-#### most(arr)
+#### most(arr) -> double
 
 Returns most frequent value in given array
 
-#### determine()
+#### determine() -> double
 
 Returns determined sound frequency based on the hold samples within _this.freqArr_.
 It is calculated by calculating a bias of _most frequent value \* this.biasThreshold_.
 From there an average value is calculated based on all the values within the biased similarity
 to that most frequent value.
 
-#### selfCheck()
+#### selfCheck() -> int
 
 Returns current length of the array _this.freqArr_ holding samples.
 
-#### emptyData()
+#### emptyData() -> self
 
 Empties _this.freqArr_ and returns the SoundStorage instance back.
 
@@ -475,30 +483,29 @@ is a value representing _this.freqArr_ length at which "SampleTarget" event will
 The sampleLimit works the way as sampleTarget dispatching "SampleLimit" event upon reaching defined
 _this.freqArr_ length.
 
-#### add()
+#### add() -> void
 
 Checks if current _this.freqArr_ requires an event emission.
 After that section a base class _add(fx)_ method is called.
 
-#### getCurrentBias()
+#### getCurrentBias() -> Object{ most: double, bias: double }
 
 Returns current bias value based on user defined bias and most frequent sample value.
 
-#### getOutliers()
+#### getOutliers() -> Array[double]
 
 Returns an array containing values that currently do not pass the similarity check based
 on the bias.
 
-#### outlierPosition()
+#### outlierPosition() -> Array[int]
 
-Returns index of the first sample that doesn't fulfil similarity check based
-on the bias.
+Returns array of indexes of values that does not pass the similarity check.
 
-#### removeOutliers()
+#### removeOutliers() -> self
 
 Remove values of _this.getOutliers()_ from the ORIGINAL _this.freqArr_ hold by the instance.
 
-#### determine()
+#### determine() -> double
 
 Although it works in a similar fashion to the base class here it returns -1 in case of less than
 3 samples hold in the _this.freqArr_ as this amount most likely is not sufficient for a proper
@@ -507,11 +514,11 @@ It is encouraged to extend this class and override this method up to user requir
 before determining the frequency array it's sufficient to call _removeOutliers()_ before calling
 this method.
 
-#### emptyData()
+#### emptyData() -> self
 
 Calls _emptyData()_ method of the base class.
 
-#### basicDetermine()
+#### basicDetermine() -> double
 
 Base class _determine()_ method is still available through this endpoint.
 

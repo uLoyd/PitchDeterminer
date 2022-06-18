@@ -28,7 +28,7 @@ class SoundStorageEvent extends SoundStorage {
     };
   }
 
-  // returns values that are outside of the expected ones
+  // Return values that are outside the expected ones
   getOutliers() {
     const { most, bias } = this.getCurrentBias();
     return this.freqArr
@@ -36,7 +36,7 @@ class SoundStorageEvent extends SoundStorage {
       .filter((x) => x);
   }
 
-  // removes values that are outside of the expected ones
+  // Remove values that are outside the expected ones
   removeOutliers() {
     const { most, bias } = this.getCurrentBias();
     this.freqArr = this.freqArr
@@ -47,8 +47,15 @@ class SoundStorageEvent extends SoundStorage {
   }
 
   outlierPosition() {
-    const { most, bias } = this.getCurrentBias();
-    return this.freqArr.findIndex((x) => Math.abs(most - x) <= bias);
+    const outliers = this.getOutliers();
+
+    return this.freqArr.reduce(function(output, storedValue, index) {
+      if (outliers.includes(storedValue))
+      {
+        output.push(index);
+      }
+      return output;
+    }, []);
   }
 
   // works... a bit better I guess

@@ -45,14 +45,14 @@ describe(`DeviceHandler:`, () => {
   };
   let deviceHandler;
   const fakeDeviceList = [
-    new Device(1, "test1", "input"),
-    new Device(2, "test2", "input"),
-    new Device(3, "test3", "input"),
-    new Device(4, "test4", "input"),
-    new Device(5, "test5", "output"),
-    new Device(6, "test6", "output"),
-    new Device(7, "test7", "output"),
-    new Device(8, "test8", "output"),
+    new Device(1, "test1", Device.direction.input),
+    new Device(2, "test2", Device.direction.input),
+    new Device(3, "test3", Device.direction.input),
+    new Device(4, "test4", Device.direction.input),
+    new Device(5, "test5", Device.direction.output),
+    new Device(6, "test6", Device.direction.output),
+    new Device(7, "test7", Device.direction.output),
+    new Device(8, "test8", Device.direction.output),
   ];
   const fakeDeviceListFunc1 = function () {
     return fakeDeviceList;

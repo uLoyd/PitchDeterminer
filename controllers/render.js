@@ -12,6 +12,7 @@ const audioTest = require("./audioHandleTest"),
 
 const { Fretboard } = require("./../customModules/fretboard/Fretboard");
 const { Sound, sounds } = require("./../customModules/fretboard/Sound");
+const {Device} = require("../customModules/audioModules");
 
 window.onload = async () => {
   let soundDataEvent = new SoundStorageEvent();
@@ -97,7 +98,7 @@ window.onload = async () => {
   async function changeDevice() {
     if (!mic.running) return;
 
-    this.dir === "input"
+    this.dir === Device.direction.input
       ? await changeInput(this.id)
       : await changeOutput(this.id);
   }

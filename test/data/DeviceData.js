@@ -1,10 +1,11 @@
+const {Device} = require("../../customModules/audioModules");
 module.exports = [
   {
     name: "Input Device",
     data: {
       deviceId: 1,
       label: "test1",
-      dir: "input",
+      dir: Device.direction.input,
       isInput: true,
       isOutput: false,
     },
@@ -14,7 +15,7 @@ module.exports = [
     data: {
       deviceId: 2,
       label: "test2",
-      dir: "output",
+      dir: Device.direction.output,
       isInput: false,
       isOutput: true,
     },
