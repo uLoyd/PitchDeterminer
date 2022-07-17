@@ -93,7 +93,7 @@ const { AudioHandler, Device } = require("audio-works");
 let mic = new AudioHandler();
 
 // Retrieves a list of available devices
-let inputs = await mic.getDeviceList(Device.dir.input);
+let inputs = await mic.getDeviceList(Device.direction.input);
 // Change default ('first available') input to the third one
 mic.changeInput(inputs[2].id);
 
