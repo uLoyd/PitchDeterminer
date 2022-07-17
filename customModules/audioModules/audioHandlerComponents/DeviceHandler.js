@@ -46,45 +46,47 @@ class DeviceHandler {
     this.deviceChangeCallback();
   }
 
-  async getDeviceList() {
+  async getFullDeviceList() {
     const idArr = [];
 
-    await navigator.mediaDevices.enumerateDevices().then(function (devices) {
-      devices.forEach(function (dev) {
-        const [kind, type, direction] = dev.kind.match(/(\w+)(input|output)/i);
+    const devices = await navigator.mediaDevices.enumerateDevices();
+    devices.forEach((device) => {
+      const [kind, type, direction] = device.kind.match(/(\w+)(input|output)/i);
 
-        if (type === "audio")
-          // Checks only audio input. No use for video
-          idArr.push(new Device(dev, direction));
-      });
+      if (type === "audio")
+        // Checks only audio input. No use for video
+        idArr.push(new Device(device, direction));
     });
 
     return idArr;
   }
 
+  async getDeviceList(requestedDirection) {
+    return (await this.getFullDeviceList()).filter(
+      (device) => device.dir === requestedDirection
+    );
+  }
+
   // Returns currently set i/o devices or first matching device from device list
   async getCurrentOrFirst() {
-    const devices = await this.getDeviceList();
+    const devices = await this.getFullDeviceList();
 
     return {
-      in: this.currentInput ?? devices.find((x) => x.isInput),
-      out: this.currentOutput ?? devices.find((x) => x.isOutput),
+      in: this.currentInput ?? devices.find((device) => device.isInput),
+      out: this.currentOutput ?? devices.find((device) => device.isOutput),
     };
   }
 
-  // e = device ID!
   async changeDevice(direction, deviceId) {
-    const devList = await this.getDeviceList();
-    const dev = deviceId
-      ? devList.find((x) => x.id === deviceId && x.dir === direction)
-      : devList.find((x) => x.dir === direction);
+    const devList = await this.getDeviceList(direction);
+    const dev = devList.find((device) => device.id === (deviceId ?? device.id));
 
     direction === Device.direction.input
       ? (this.currentInput = dev)
       : (this.currentOutput = dev);
 
     this.deviceChangeCallback(
-      await this.getDeviceList(),
+      await this.getFullDeviceList(),
       this.currentInput,
       this.currentOutput
     );
@@ -98,9 +100,9 @@ class DeviceHandler {
 
   // Returns bool. True - there's at least 1 input device available
   async checkForInput() {
-    const devList = await this.getDeviceList();
+    const devList = await this.getDeviceList(Device.direction.input);
 
-    return devList.some((x) => x.isInput);
+    return !!devList.length;
   }
 
   // Return constrain for setting up the stream

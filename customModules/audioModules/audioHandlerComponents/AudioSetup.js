@@ -63,8 +63,8 @@ class AudioSetup extends EventEmitter {
   }
 
   // Just a shorter call for analyser.getByteFrequencyData
-  BFD(data) {
-    this.analyser.node.getByteFrequencyData(data);
+  BFD(dataContainer) {
+    this.analyser.node.getByteFrequencyData(dataContainer);
   }
 
   BFDUint8(binCount = this.binCount) {

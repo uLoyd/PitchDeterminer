@@ -146,8 +146,10 @@ class AudioHandler extends AudioSetup {
     return this.correlation.perform(buf);
   }
 
-  async getDeviceList() {
-    return await this.deviceHandler.getDeviceList();
+  async getDeviceList(direction) {
+    if (!direction) return await this.deviceHandler.getFullDeviceList();
+
+    return await this.deviceHandler.getDeviceList(direction);
   }
 
   async end() {

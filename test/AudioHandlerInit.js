@@ -28,7 +28,7 @@ testData.forEach(async (data) => {
   describe(`Audio Handler Initialization with params: ${data.title}`, function () {
     let audio;
     const fakeDeviceHandler = new DeviceHandler(() => {});
-    fakeDeviceHandler.getDeviceList = function () {
+    fakeDeviceHandler.getFullDeviceList = function () {
       return [
         new Device(1, "test1", Device.direction.input),
         new Device(2, "test2", Device.direction.input),
@@ -47,6 +47,20 @@ testData.forEach(async (data) => {
         assert.ok(false);
       } catch (e) {
         assert.ok(true);
+      }
+    };
+
+    const testDeviceLists = async function (direction) {
+      const actualList = await audio.getDeviceList(direction);
+      const expectedList = await fakeDeviceHandler
+        .getFullDeviceList()
+        .filter((device) => device.dir === (direction ?? device.dir));
+      assert.strictEqual(actualList.length, expectedList.length);
+
+      for (let i = 0; i < actualList.length; ++i) {
+        assert.strictEqual(actualList[i].id, expectedList[i].id);
+        assert.strictEqual(actualList[i].label, expectedList[i].label);
+        assert.strictEqual(actualList[i].dir, expectedList[i].dir);
       }
     };
 
@@ -83,15 +97,15 @@ testData.forEach(async (data) => {
     });
 
     it("Audio handler returns the same device list as DeviceHandler", async () => {
-      const actualList = await audio.getDeviceList();
-      const expectedList = await fakeDeviceHandler.getDeviceList();
-      assert.strictEqual(actualList.length, expectedList.length);
+      await testDeviceLists();
+    });
 
-      for (let i = 0; i < actualList.length; ++i) {
-        assert.strictEqual(actualList[i].id, expectedList[i].id);
-        assert.strictEqual(actualList[i].label, expectedList[i].label);
-        assert.strictEqual(actualList[i].dir, expectedList[i].dir);
-      }
+    it("Audio handler returns the same input devices as DeviceHandler", async () => {
+      await testDeviceLists(Device.direction.input);
+    });
+
+    it("Audio handler returns the same output devices as DeviceHandler", async () => {
+      await testDeviceLists(Device.direction.output);
     });
 
     it("Audio handler will not try to pause or end stream if state is not set to running", async () => {

@@ -88,14 +88,12 @@ _changeInput_ methods of the AudioHandler. List of devices can be accessed
 through DeviceHandler hold by the AudioHandler as _deviceHandler_ property.
 
 ```javascript
-const { AudioHandler } = require("audio-works");
+const { AudioHandler, Device } = require("audio-works");
 
 let mic = new AudioHandler();
 
 // Retrieves a list of available devices
-let deviceList = await mic.deviceHandler.getDeviceList();
-// All the devices in list have "isInput" and "isOutput" boolean flags
-let inputs = deviceList.filter((device) => device.isInput);
+let inputs = await mic.getDeviceList(Device.dir.input);
 // Change default ('first available') input to the third one
 mic.changeInput(inputs[2].id);
 
@@ -110,12 +108,12 @@ Main class responsible for setting up AudioHandler and AudioFileHandler
 holding two main obligatory nodes used by AudioContext which are AnalyserNode and GainNode.
 This class extends EventEmitter as after various steps instance dispatches related to them events.
 
-#### constructor(IAudioNode: Gain, IAudioNode: Analyser)
+#### constructor(gain: Gain, analyser: Analyser)
 
 Receives AudioNode and GainNode instances, saves them to class members
 stored as _this.gain_ and _this.analyser_ then immediately calls _startAudioContext_ method
 
-#### startAudioContext()
+#### startAudioContext() -> void
 
 Creates new AudioContext instance that is stored as _this.audioContext_, then
 Analyser and Gain nodes passed to the instances in constructor are created.
@@ -123,49 +121,50 @@ With AnalyserNode set up sample rate and bin count are stored as class members i
 _this.sampleRate_ and _this.binCount_
 Finally event "AudioContextStarted" is dispatched notifying about finished initial setup.
 
-#### streamSetup(IAudioNode: MediaStreamSource, IAudioNode: ScripProcessor)
+#### streamSetup(MediaStreamSource: IAudioNode, ScripProcessor: IAudioNode) -> void
 
 Connects Analyser to MediaStreamSource, then connects ScripProcessor to the
 Analyser. AudioContext.destination is being connected to both GainNode and ScripProcessor.
 Finally, ScripProcessor.onaudioprocess callback is defined which dispatches "AudioProcessUpdate" event
 holding instance of AudioSetup which holds the ScriptProcessor.
 
-#### async streamClose()
+#### async streamClose() -> void
 
 Disconnects GainNode and AnalyserNode, then closes AudioContext.
 
-#### async streamPause()
+#### async streamPause() -> void
 
-Suspends AudioContext.\
+Suspends AudioContext.  
 **With Chromium backward compatibility it is heavily unreliable**
 
-#### async streamResume()
+#### async streamResume() -> void
 
 Basically just a shorthand for _await this.audioContext.resume()_
 
-#### BFD(DataContainer)
+#### BFD(dataContainer: Uint8Array) -> void
 
-Shorthand for _this.analyser.node.getByteFrequencyData(DataContainer)_
+Shorthand for _this.analyser.node.getByteFrequencyData(dataContainer)_
 
-#### FTD(Buffer)
+#### FTD(buffer: Float32Array) -> void
 
 Shorthand for _this.analyser.node.getFloatTimeDomainData(Buffer)_
 
-#### checkAudioContext()
+#### checkAudioContext() -> string
 
 Shorthand for _this.audioContext.state()_
 
-#### selfCheckAudioContext()
+#### selfCheckAudioContext() -> bool
 
-Checks state of instances AudioContext and starts it up again if
-it's currently in a closed state
+Checks state of AudioContext instance and starts it up again if
+it's currently in a closed state.
 
 ## AudioHandler
 
-Extends AudioSetup as AudioContext is crucial for all the functionalities provided by this class. Handles live audio inputs like microphones or instruments connected to
+Extends AudioSetup as AudioContext is crucial for all the functionalities provided by this class. 
+Handles live audio inputs like microphones or instruments connected to
 audio interfaces as well as output to any available devices.
 
-#### constructor({ general: { buflen: Number, curveAlgorithm: String }, gainNode: GainNode, analyserNode: AnalyserNode, correlationSettings: { rmsThreshold, correlationThreshold, correlationDegree } })
+#### constructor({ general: { buflen: int, curveAlgorithm: string }, gainNode: GainNode, analyserNode: AnalyserNode, correlationSettings: { rmsThreshold: double in range<0, 1), correlationThreshold: double in range<0, 1), correlationDegree: double in range<0, 1) } })
 
 Constructor receives object containing:
 
@@ -200,13 +199,13 @@ let mic = new AudioHandler({ // All the values are optional.
 });
 ```
 
-#### async getMediaStream(Object: constraint)
+#### async getMediaStream(constraint: Object) -> MediaStream
 
 Returns output of _navigator.mediaDevices.getUserMedia()_ method to which is passed the
 constraint. If no constraint was passed to the method than default one is used (no video, only
 first default audio device)
 
-#### async setupStream()
+#### async setupStream() -> void
 
 If no input device is available method throws 'No input audio input devices available'.
 If audioContext is closed it automatically starts a new one.
@@ -215,33 +214,34 @@ of base class.
 Stream from _getMediaStream_ method is stored in class member _this.stream_.
 After that a Correlation instance is created and stored in _this.correlation_ member.
 
-#### nyquistFrequency()
+#### nyquistFrequency() -> double
 
 Returns AudioContext sample rate divided by two which is... the nyquist frequency.
 
-#### getVolume(Number: accuracy)
+#### getVolume(accuracy: int) -> double
 
 Purely empirical and subjective method that aggregates all the bands from the
 byte frequency data cast into a weighting curve then passed through logarithm of base 10
 and finally multiplied by ten...\
 The accuracy passed to the method represents decimal points of returned value.
 
-#### correlate()
+#### correlate() -> double
 
-Returns output of correlation performed on float time domain data of the currently
+Returns output of correlation (frequency in Hz) performed on float time domain data of the currently
 stored buffer.
 
-#### async getDeviceList()
+#### async getDeviceList(direction: Optional[string] = "input" || "output") -> Array[Device]
 
-Shorthand for _this.deviceHandler.getDeviceList()_.\
-Returns array of Device instances related to available audio IO devices.
+Returns array of Device instances related to available audio IO devices.  
+If no direction is specified all devices will be returned, otherwise only the devices
+in specified direction.
 
-#### async pause()
+#### async pause() -> void
 
 Calls base class method _streamPause()_, sets _running_ member of class
 to false and emits event "StreamPause" at the end
 
-#### async resume()
+#### async resume() -> void
 
 Calls base class method _streamResume()_, sets _running_ member of class
 to true and emits event "StreamResume" at the end
@@ -253,7 +253,7 @@ live audio input but adds methods meant for audio file decoding,
 creating standard BufferSources with primary goal of audio output, or
 obtaining pulse-code modulation data.
 
-#### constructor(initData, filePath)
+#### constructor(initData, filePath: string)
 
 Given that this class extends AudioHandler the initData argument is
 the object passed to the base class. Additionally, it accepts filePath argument
@@ -298,7 +298,7 @@ fileHandler.processCallback((data) => {
 
 Returns received [Array | Buffer | AudioBuffer] as ArrayBuffer type.
 
-#### async decode(callback) -> AudioBuffer
+#### async decode(callback: function) -> AudioBuffer
 
 Reads whole file, casts it to ArrayBuffer which is then passed along with
 a callback to the AudioContext method _decodeAudioData_ that's returned from the method.
@@ -317,26 +317,26 @@ Correlation object is created during the setup of audio stream in base class.
 This case does not apply to the FileHandler variant and so to create the 
 Correlation instance inside the AudioFileHandler instance this method call is required.
 
-#### process(pcm, action) -> void
+#### process(pcm: pcm: Array[int], action: function) -> void
 
 Action argument is supposed to be a callback handling chunks of data.
 This method loops through the pcm data performing on each chunk of data specified
 action.
 
-#### async processEvent(decoded, channel) -> void
+#### async processEvent(decoded: AudioBuffer, channel: uint) -> void
 
 Decoded and channel arguments are the same ones used in _getPCMData_ method
 as those are passed to it to retrieve the pcm data which is then passed to the
 _process_ method with default callback simply emitting event "ProcessedFileChunk"
 that contains said chunk.
 
-#### async processCallback(callback, decoded, channel) -> void
+#### async processCallback(callback: function, decoded: AudioBuffer, channel: uint) -> void
 
 Same method as _processEvent_ with only difference of obligatory callback
 passed as the first argument that's going to be passed to the _process_ method
 to handle the pcm data chunks.
 
-#### async createSource(callback) -> AudioBufferSourceNode
+#### async createSource(callback: function) -> AudioBufferSourceNode
 
 Creates BufferSource node from the AudioContext, then calls _this.decode(action)_
 where if callback was defined the action is exactly the same callback, and in case
@@ -351,14 +351,14 @@ allowing a set-up of custom thresholds. The output of perform method is supposed
 a frequency of the sound (the fundamental frequency). This means it processes
 the signal in monophonic context.
 
-#### constructor({sampleRate, rmsThreshold, correlationThreshold, correlationDegree, buflen})
+#### constructor({sampleRate: uint, rmsThreshold: double in range<0,1), correlationThreshold: double in range<0,1), correlationDegree: double in range<0,1), buflen: uint})
 
 Creates a Correlation instance setting up rms and correlation thresholds. Sample rate is require
 for the last step of the autocorrelation as based on this value the frequency will be calculated.
 It is possible and encouraged to pass only the buflen and sampleRate values as the remaining
 values can be automatically set to default.
 
-#### perform(buf) -> double
+#### perform(buf: Float32Array) -> double
 
 This method receives buffer with data that will be processed up to the length
 specified in the _this.buflen_ member. If RMS will be too low, meaning the signal is too weakk,
@@ -371,7 +371,7 @@ otherwise it will return -1.
 Main purpose of this class is interaction with _navigator.mediaDevices_ and for hat reason
 it uses a private helper class _Device_.
 
-#### constructor(callback)
+#### constructor(callback: function)
 
 Callback passed to the constructor will be called on every _ondevicechange_ event triggered
 from _navigator.mediaDevices_.
@@ -381,10 +381,16 @@ from _navigator.mediaDevices_.
 This method is called on every device change and is responsible for invoking the user callback
 passed previously to the constructor.
 
-#### async getDeviceList() -> Array[Device]
+#### async getFullDeviceList() -> Array[Device]
 
 Returns an array of devices (_Device_ class instances) available through _navigator_
 that contains _MediaDeviceInfo_ as well as it's direction, input or output.
+
+#### async getDeviceList(requestedDirection: string) -> Array[Device]
+
+Returns an array of devices in requested direction (_Device_ class instances) available through _navigator_
+that contains _MediaDeviceInfo_ as well as it's direction, input or output.  
+_Should be used with Device.direction.(input|output) to not use raw strings_
 
 #### async getCurrentOrFirst() -> Object{ in: Device, out: Device }
 
@@ -393,21 +399,22 @@ If values _this.currentInput_ and _this.currentOutput_ are set than this devices
 the value in the object. In case current device is not set than a first available one in respective
 direction will be set up in place of the ones supposed to bo holded by the instance.
 
-#### async changeDevice(direction: string, deviceId: string) -> void
+#### async changeDevice(direction: string, deviceId: Optional[string]) -> void
 
-In this method _dir_ is a string stating the direction of the device that's going
-to be change. Parameter _e_ is optional device id. If present than _this.current-direction_
+In this method _direction_ is a string stating the direction of the device that's going
+to be changed. If present than _this.current-direction-device_
 will be set to the device found in device list with requested id, or undefined in case of id that
-was not found. In case of no id passed to the method a first available device in requested
+was not found. In case of no id passed to the method the first available device in requested
 direction will be chosen. Lastly the user defined callback handling device change will be called to
 which current device list of all available devices wil be passed along with the current
-input and output devices hold by the instance itself.
+input and output devices hold by the instance itself.  
+_Should be used with Device.direction.(input|output) to not use raw strings_
 
-#### async changeInput(e) -> void
+#### async changeInput(deviceId: string) -> void
 
 Shorthand for _await deviceHandlerInstance.changeDevice('input', e)_
 
-#### async changeOutput(e) -> void
+#### async changeOutput(deviceId: string) -> void
 
 Shorthand for _await deviceHandlerInstance.changeDevice('output', e)_
 
@@ -437,14 +444,14 @@ object serving as enum which can be accessed as ```Device.direction.(input|outpu
 Class supposed to serve as a storage for outputs of the Correlation class holding
 methods helping correct sound frequency estimations in short periods of time.
 
-#### constructor(bias = 0.03)
+#### constructor(bias = 0.03: double in range <0, 1))
 
 The only parameter for the constructor is bias which will be assigned to the
 _this.biasThreshold_ member which purpose is removing outlier values during sound estimation.
 By default, it is set to 0.03. The lower the value the higher similarity sound values will have to
 have the most frequent value in _this.freqArr_ for those to be taken into account during estimation.
 
-#### add(fx) -> self
+#### add(fx: double) -> self
 
 Adds single sound data from the Correlation to the _this.freqArr_ member with 2 decimal points accuracy.
 
@@ -476,7 +483,7 @@ Empties _this.freqArr_ and returns the SoundStorage instance back.
 This class has the same purpose as SoundStorage extending it
 with a difference of utilizing EventEmitter allowing more diverse interactions with the storage.
 
-#### constructor(sampleTarget = 20, sampleLimit = 40, bias = 0.03)
+#### constructor(sampleTarget = 20: uint, sampleLimit = 40: uint, bias = 0.03: double in range <0, 1))
 
 The bias has the same purpose as in SoundStorage. Introduced here sampleTarget
 is a value representing _this.freqArr_ length at which "SampleTarget" event will be triggered.
@@ -530,7 +537,7 @@ of a note from sound A4. Class performs calculations in a context of equal tempe
 scale. It holds values about specific sound by holding data
 in members:
 
-#### sound: String
+#### sound: string
 
 Sound symbol of the tone [C - B] with only sharp notes in case of a half tone.
 
@@ -538,11 +545,11 @@ Sound symbol of the tone [C - B] with only sharp notes in case of a half tone.
 
 Octave of the tone
 
-#### flatNote: String(Optional)
+#### flatNote: Optional[string]
 
 If sound can be represented as flat note than this member hold a string of it.
 
-#### flatOctave: int(optional)
+#### flatOctave: Optional[int]
 
 If sound has a flat note representation that has different octave (only C/Bb)
 it holds octave of the flat note.
@@ -559,7 +566,7 @@ To initialize an instance only value needed is the frequency. Based on the frequ
 all the members will be initialized with correct values based on the frequency. In case
 of a pitch that's not exact the closest sound will be stored in the class instance.
 
-#### static soundConstructor(sound: String, octave: int) -> FrequencyMath
+#### static soundConstructor(sound: string, octave: int) -> FrequencyMath
 
 Performs the same operations as standard constructor with a difference of
 the arguments passed to it as it calculates frequency of the sound from parameters,
@@ -570,12 +577,12 @@ frequency as the argument.
 
 Returns the distance of not from frequency passed as the parameter, relative to the A sound.
 
-#### getDistanceFromNote(note: String, octave: int) -> int
+#### getDistanceFromNote(note: string, octave: int) -> int
 
 Returns distance of a given sound relative to A4 sound. The parameters by default are set
 to the sound hold by the instance itself.
 
-#### static getDistanceFromNote(note: String, octave: int) -> int
+#### static getDistanceFromNote(note: string, octave: int) -> int
 
 Performs the same operations as non-static version with only difference being the lack
 of the default values for the arguments.
@@ -643,12 +650,12 @@ Works in a similar manner as _static info()_ method, but holds
 more data in returned object. By default, the fx value is equal to _initialFrequency_ member.
 The members of the object are:  
 _frequency: double_: frequency passed to the method  
-_note: String_: tone symbol  
+_note: string_: tone symbol  
 _step: int_: distance of the sound relative to the A4 sound  
 _soundId: unsigned_: index of the tone symbol (alphabetical order)  
 _octave: int_: octave of the sound
 
-#### toString() -> String
+#### toString() -> string
 
 Returns string as {tone symbol}{octave}
 
