@@ -1,6 +1,10 @@
 name: Coverage
 
-on: [push, pull_request]
+on:
+  push:
+    branches: [ master, CI_experiments ]
+  pull_request:
+    branches: [ master, CI_experiments ]
 
 jobs:
   build:

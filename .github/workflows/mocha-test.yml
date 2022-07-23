@@ -5,9 +5,9 @@ name: Node.js UTs
 
 on:
   push:
-    branches: [ master ]
+    branches: [ master, CI_experiments ]
   pull_request:
-    branches: [ master ]
+    branches: [ master, CI_experiments ]
 
 jobs:
   build:
