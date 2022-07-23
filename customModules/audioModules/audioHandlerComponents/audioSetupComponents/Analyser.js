@@ -1,4 +1,4 @@
-'use strict';
+"use strict";
 
 const IAudioNode = require("./IAudioNode");
 const defaults = require("../defaultAudioValues").audioSetup.analyser;

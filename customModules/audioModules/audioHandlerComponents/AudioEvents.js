@@ -1,4 +1,4 @@
-'use strict';
+"use strict";
 
 // basically an enum
 class AudioEvents {

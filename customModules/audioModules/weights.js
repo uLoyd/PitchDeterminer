@@ -1,4 +1,4 @@
-'use strict';
+"use strict";
 
 class Weighting {
   constructor(power, of, underRoot) {

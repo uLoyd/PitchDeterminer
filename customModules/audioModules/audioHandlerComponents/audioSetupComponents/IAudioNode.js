@@ -1,6 +1,6 @@
-'use strict';
+"use strict";
 
-const {utils} = require("../../index");
+const { utils } = require("../../index");
 
 class IAudioNode {
   settings = null;

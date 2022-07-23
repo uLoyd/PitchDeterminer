@@ -1,4 +1,4 @@
-'use strict';
+"use strict";
 
 const { AudioHandler, AudioEvents } = require("./index");
 const { convertToArrayBuffer } = require("./index").utils;
@@ -15,8 +15,8 @@ class audioFileHandler extends AudioHandler {
   async decode(callback) {
     const fileData = readFileSync(this.filePath); // audioContext.decodeAudioData wants the whole file as param
     return await this.audioContext.decodeAudioData(
-        convertToArrayBuffer(Uint8Array, fileData, this.maxSmallContainerSize),
-        callback
+      convertToArrayBuffer(Uint8Array, fileData, this.maxSmallContainerSize),
+      callback
     );
   }
 

@@ -1,4 +1,4 @@
-'use strict';
+"use strict";
 
 const {
   Correlation,
@@ -10,7 +10,7 @@ const {
   ScriptProcessor,
   AudioEvents,
 } = require("./index");
-const {fillDefaults} = require("./utilities/utilities");
+const { fillDefaults } = require("./utilities/utilities");
 
 const curveChoose = (x) => {
   switch (x?.toUpperCase()) {
@@ -109,7 +109,8 @@ class AudioHandler extends AudioSetup {
   }
 
   initCorrelation(buflen = this.buflen, sampleRate = this.sampleRate) {
-    const { rmsThreshold, correlationThreshold, correlationDegree } = this.correlationSettings;
+    const { rmsThreshold, correlationThreshold, correlationDegree } =
+      this.correlationSettings;
     this.correlation = new Correlation({
       buflen,
       sampleRate,
