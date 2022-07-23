@@ -17,6 +17,7 @@
   "scripts": {
     "test": "mocha",
     "coverage": "nyc npm run test",
+    "coverage_xml": "nyc --reporter=Cobertura mocha",
     "check": "npx prettier --check .",
     "validate": "npm run check && npm run test",
     "format": "npx prettier --write .",
