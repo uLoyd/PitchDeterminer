@@ -12,11 +12,11 @@ jobs:
 
     steps:
       - name: Fetch
-      - uses: actions/checkout@v2
+        uses: actions/checkout@v2
       - name: Get_Coverage
         run: nyc --reporter=Cobertura mocha
       - name: CodeCov_Coverage
-      - uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v3
         with:
           files: ./coverage/cobertura-coverage.xml
           flags: unittests
