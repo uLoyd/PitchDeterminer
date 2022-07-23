@@ -1,3 +1,5 @@
+'use strict';
+
 const IAudioNode = require("./IAudioNode");
 
 class ScriptProcessor extends IAudioNode {

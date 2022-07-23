@@ -21,15 +21,6 @@ describe(`Audio File Handler`, function () {
     };
   };
 
-  const willThrow = async function (callback, params) {
-    try {
-      await callback(...params);
-      assert.ok(false);
-    } catch (e) {
-      assert.ok(true);
-    }
-  };
-
   const assertProcessOutput = function (expected, actual) {
     assert.strictEqual(expected.length, actual.length);
 
@@ -50,20 +41,6 @@ describe(`Audio File Handler`, function () {
 
     audio.decode = fakeDecode;
     audio.buflen = 1;
-  });
-
-  it("toArrayBuffer returns ArrayBuffer", () => {
-    const actual = audio.toArrayBuffer([0, 1, 2, 3, 4]);
-    assert.ok(actual instanceof ArrayBuffer);
-  });
-
-  it("toArrayBuffer elements are unchanged", () => {
-    const initialArray = [0, 1, 2, 3, 4];
-    const actual = audio.toArrayBuffer(initialArray);
-
-    for (let i = 0; i < actual.length; ++i) {
-      assert.strictEqual(actual[i], initialArray[i]);
-    }
   });
 
   it("getPCMData returns data Object and PCM as array when initial data is passed", async () => {
@@ -126,13 +103,12 @@ describe(`Audio File Handler`, function () {
       connect: () => {},
     };
 
-    const fakeAudioContext = {
+    audio.audioContext = {
       createBufferSource: () => {
         return fakeObj;
       },
     };
 
-    audio.audioContext = fakeAudioContext;
     audio.audioContext.destination = null;
 
     const source = await audio.createSource();

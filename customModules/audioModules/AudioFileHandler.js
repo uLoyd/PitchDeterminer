@@ -1,28 +1,22 @@
+'use strict';
+
 const { AudioHandler, AudioEvents } = require("./index");
+const { convertToArrayBuffer } = require("./index").utils;
 const { readFileSync } = require("fs");
 
 class audioFileHandler extends AudioHandler {
-  constructor(initData, filePath) {
+  constructor(initData, filePath, maxSmallContainerSize = 35000) {
     super(initData);
     this.filePath = filePath;
-  }
-
-  toArrayBuffer(buf) {
-    const ab = new ArrayBuffer(buf.length);
-    let view = new Uint8Array(ab);
-
-    for (let i = 0; i < buf.length; ++i) {
-      view[i] = buf[i];
-    }
-    return ab;
+    this.maxSmallContainerSize = maxSmallContainerSize;
   }
 
   // returns AudioBuffer instance
   async decode(callback) {
     const fileData = readFileSync(this.filePath); // audioContext.decodeAudioData wants the whole file as param
     return await this.audioContext.decodeAudioData(
-      this.toArrayBuffer(fileData),
-      callback
+        convertToArrayBuffer(Uint8Array, fileData, this.maxSmallContainerSize),
+        callback
     );
   }
 
@@ -62,14 +56,13 @@ class audioFileHandler extends AudioHandler {
   async createSource(callback) {
     const source = this.audioContext.createBufferSource();
 
-    const action =
-      callback ??
-      async function (buf) {
-        source.buffer = buf;
-        source.connect(this.audioContext.destination);
-      }.bind(this);
+    const defaultAction = async function (buf) {
+      source.buffer = buf;
+      source.connect(this.audioContext.destination);
+    }.bind(this);
 
-    await this.decode(action);
+    await this.decode(callback ?? defaultAction);
+
     return source;
   }
 }

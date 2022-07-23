@@ -1,13 +1,7 @@
-const defaults = require("./defaultAudioValues").correlation;
+'use strict';
 
 class Correlation {
   constructor(initData) {
-    for (const prop in defaults) {
-      if (!initData.hasOwnProperty(prop)) {
-        initData[prop] = defaults[prop];
-      }
-    }
-
     const {
       sampleRate,
       rmsThreshold,

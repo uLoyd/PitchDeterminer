@@ -1,3 +1,5 @@
+'use strict';
+
 // basically an enum
 class AudioEvents {
   static audioContextStared = "AudioContextStarted";

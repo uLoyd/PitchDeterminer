@@ -1,3 +1,5 @@
+'use strict';
+
 const { AudioEvents, SoundStorage } = require("./index");
 
 class SoundStorageEvent extends SoundStorage {

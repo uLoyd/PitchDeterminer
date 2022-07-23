@@ -1,3 +1,5 @@
+'use strict';
+
 const {
   Correlation,
   AudioSetup,
@@ -8,6 +10,7 @@ const {
   ScriptProcessor,
   AudioEvents,
 } = require("./index");
+const {fillDefaults} = require("./utilities/utilities");
 
 const curveChoose = (x) => {
   switch (x?.toUpperCase()) {
@@ -34,21 +37,20 @@ class AudioHandler extends AudioSetup {
   // be set to "running" before invocation of setupStream method
 
   constructor({
-    general = defaultAudioValues.general,
+    general = {},
     gainNode,
     analyserNode,
     correlationSettings = {},
   } = {}) {
     super(gainNode, analyserNode);
 
+    fillDefaults(general, defaultAudioValues.general);
+
     // Creates instance of class responsible for weighting sound levels
     this.soundCurve = curveChoose(general.curveAlgorithm);
     this.correlationSettings = correlationSettings;
 
-    for (const prop in defaultAudioValues.correlation) {
-      if (!this.correlationSettings.hasOwnProperty(prop))
-        this.correlationSettings[prop] = defaultAudioValues.correlation[prop];
-    }
+    fillDefaults(this.correlationSettings, defaultAudioValues.correlation);
 
     this.buflen = general.buflen;
 
@@ -107,8 +109,7 @@ class AudioHandler extends AudioSetup {
   }
 
   initCorrelation(buflen = this.buflen, sampleRate = this.sampleRate) {
-    const { rmsThreshold, correlationThreshold, correlationDegree } =
-      this.correlationSettings;
+    const { rmsThreshold, correlationThreshold, correlationDegree } = this.correlationSettings;
     this.correlation = new Correlation({
       buflen,
       sampleRate,

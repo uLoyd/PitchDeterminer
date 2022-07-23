@@ -1,3 +1,5 @@
+'use strict';
+
 const EventEmitter = require("events");
 const { Gain, Analyser, AudioEvents } = require("../index");
 

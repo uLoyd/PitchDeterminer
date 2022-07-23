@@ -178,14 +178,14 @@ window.onload = async () => {
     (await fileHandler.createSource()).start(0);
     */
 
-  /*const fileHandler = new AudioFileHandler({}, './ppa.wav');
-    await fileHandler.initCorrelation();*/
-  //(await fileHandler.createSource()).start(0);
+  const fileHandler = new AudioFileHandler({}, './controllers/audioFiles/E4.wav');
+  await fileHandler.initCorrelation();
+  (await fileHandler.createSource()).start(0);
 
-  //fileHandler.on("ProcessedFileChunk", evt =>
-  //   console.log(fileHandler.correlation.perform(evt)));
+  fileHandler.on("ProcessedFileChunk", evt =>
+    console.log(fileHandler.correlation.perform(evt)));
 
-  //fileHandler.processEvent();
+  fileHandler.processEvent();
 
   /*fileHandler.processCallback(data => {
         const cor = fileHandler.correlation.perform(data);

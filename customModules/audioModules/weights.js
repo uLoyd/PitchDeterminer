@@ -1,3 +1,5 @@
+'use strict';
+
 class Weighting {
   constructor(power, of, underRoot) {
     this.dividend = Math.pow(12194, 2);

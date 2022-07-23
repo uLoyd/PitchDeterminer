@@ -1,14 +1,13 @@
+'use strict';
+
+const {utils} = require("../../index");
+
 class IAudioNode {
   settings = null;
   node = null;
 
   constructor(settings, defaults = {}) {
-    for (const prop in defaults) {
-      if (!settings.hasOwnProperty(prop)) {
-        settings[prop] = defaults[prop];
-      }
-    }
-
+    utils.fillDefaults(settings, defaults);
     this.settings = settings;
   }
 
@@ -17,10 +16,7 @@ class IAudioNode {
   }
 
   applySettings(node = this.node) {
-    for (const prop in this.settings) {
-      node[prop] = this.settings[prop];
-    }
-
+    utils.fillDefaults(node, this.settings, true);
     return this;
   }
 

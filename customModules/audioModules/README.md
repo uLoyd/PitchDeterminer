@@ -253,11 +253,17 @@ live audio input but adds methods meant for audio file decoding,
 creating standard BufferSources with primary goal of audio output, or
 obtaining pulse-code modulation data.
 
-#### constructor(initData, filePath: string)
+#### constructor(initData, filePath: string, maxSmallContainerSize: uint = 35000)
 
 Given that this class extends AudioHandler the initData argument is
 the object passed to the base class. Additionally, it accepts filePath argument
-which, as the name suggests, should be the path to a file which will be processed.
+which, as the name suggests, should be the path to a file which will be processed.  
+Because there's a need to decode the files, and their content will have to be converted to
+ArrayBuffer, "maxSmallContainerSize" uint will choose the appropriate method to convert
+the data as different solutions work faster for different container sizes.
+i.e. ``new Uint8Array(data).buffer`` will be faster for smaller containers than a standard for loop
+with value reassignments by ~30% as long as the "data" container has less than 35 000 elements.
+With more elements to process the situation is reversed and standard loop becomes faster for large containers.
 
 Example of logging correlated data and playing the audio from a file:
 
@@ -293,10 +299,6 @@ fileHandler.processCallback((data) => {
 // While using callback processing starts immediately so there's
 // no call like "processEvent()" in this case
 ```
-
-#### toArrayBuffer(Buffer/Array: buf) -> ArrayBuffer
-
-Returns received [Array | Buffer | AudioBuffer] as ArrayBuffer type.
 
 #### async decode(callback: function) -> AudioBuffer
 
