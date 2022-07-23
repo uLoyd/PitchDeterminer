@@ -7,14 +7,12 @@ on:
     branches: [ master, CI_experiments ]
 
 jobs:
-  test:
+  coverage:
     runs-on: windows-latest
+
     strategy:
       matrix:
         node-version: [ 16.x ]
-        include:
-        - name: mocha & nyc
-          npm-i: mocha nyc
 
     steps:
       - name: Fetch
@@ -31,14 +29,11 @@ jobs:
       - name: Get Coverage
         run: npm run coverage_xml
 
-  coverage:
-    needs: test
-    runs-on: windows-latest
-    steps:
       - name: Condecov
         uses: codecov/codecov-action@v3
         with:
-          directory: coverage
+          directory: ./coverage/
+          files: ./cobertura-coverage.xml
           dry_run: true
           flags: unittests
           name: codecov-coverage
