@@ -38,7 +38,8 @@ jobs:
       - name: Condecov
         uses: codecov/codecov-action@v3
         with:
-          files: ./coverage/cobertura-coverage.xml
+          directory: coverage
+          dry_run: true
           flags: unittests
           name: codecov-coverage
           fail_ci_if_error: true
