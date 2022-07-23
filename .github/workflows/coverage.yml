@@ -1,0 +1,21 @@
+name: Coverage
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Fetch
+      - uses: actions/checkout@v2
+      - name: Get_Coverage
+        run: nyc --reporter=Cobertura mocha
+      - name: CodeCov_Coverage
+      - uses: codecov/codecov-action@v3
+        with:
+          files: ./coverage/cobertura-coverage.xml
+          flags: unittests
+          name: codecov-coverage
+          fail_ci_if_error: true
+          verbose: true
