@@ -1,5 +1,8 @@
 # audio-works
 
+![UTs](https://github.com/uLoyd/PitchDeterminer/actions/workflows/mocha-test.yml/badge.svg?event=push)
+![CodeQL](https://github.com/uLoyd/PitchDeterminer/actions/workflows/codeql-analysis.yml/badge.svg?event=push)
+
 ## **WIP**
 
 Library meant for Electron (ver. 11.x - 13.x) to determine note based on the signal received from mic or file.
@@ -578,11 +581,6 @@ frequency as the argument.
 #### static getDistanceFromFrequency(fx: double) -> int
 
 Returns the distance of not from frequency passed as the parameter, relative to the A sound.
-
-#### getDistanceFromNote(note: string, octave: int) -> int
-
-Returns distance of a given sound relative to A4 sound. The parameters by default are set
-to the sound hold by the instance itself.
 
 #### static getDistanceFromNote(note: string, octave: int) -> int
 
