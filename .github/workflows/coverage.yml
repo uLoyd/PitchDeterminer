@@ -8,7 +8,7 @@ on:
 
 jobs:
   coverage:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
 
     strategy:
       matrix:
@@ -28,10 +28,6 @@ jobs:
 
       - name: Get Coverage
         run: npm run coverage_xml
-
-      - name: Display the path
-        run: echo %PATH%
-        shell: cmd
 
       - name: Condecov
         uses: codecov/codecov-action@v3
