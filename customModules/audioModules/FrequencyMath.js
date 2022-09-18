@@ -1,61 +1,61 @@
 "use strict";
 
+const sounds = [
+  "A",
+  "A#",
+  "B",
+  "C",
+  "C#",
+  "D",
+  "D#",
+  "E",
+  "F",
+  "F#",
+  "G",
+  "G#",
+];
+const flats = [
+  null,
+  "Bb",
+  "Cb",
+  null,
+  "Db",
+  null,
+  "Eb",
+  "Fb",
+  null,
+  "Gb",
+  null,
+  "Ab",
+];
+const A4 = 440; // Sound A in 4th octave by ISO standard is 440 Hz
+
 class FrequencyMath {
   static r = Math.pow(2, 1 / 12);
   static logr = Math.log(FrequencyMath.r);
-  static A4 = 440; // Sound A in 4th octave by ISO standard is 440 Hz
-  static sounds = [
-    "A",
-    "A#",
-    "B",
-    "C",
-    "C#",
-    "D",
-    "D#",
-    "E",
-    "F",
-    "F#",
-    "G",
-    "G#",
-  ];
-  static flats = [
-    null,
-    "Bb",
-    "Cb",
-    null,
-    "Db",
-    null,
-    "Eb",
-    "Fb",
-    null,
-    "Gb",
-    null,
-    "Ab",
-  ];
 
   constructor(fx) {
-    const { distance, soundId, octave } = FrequencyMath.info(fx);
-    this.sound = FrequencyMath.sounds[soundId];
+    const { soundId, octave } = FrequencyMath.info(fx);
+    this.sound = sounds[soundId];
     this.octave = octave;
-    this.flatNote = FrequencyMath.flats[soundId] ?? null;
+    this.flatNote = flats[soundId] ?? null;
     this.flatOctave = this.flatNote
       ? this.flatNote === "Cb"
         ? this.octave + 1
         : this.octave
       : null;
     this.initialFrequency = fx;
-    this.distanceFromA4 = distance;
   }
 
   static soundConstructor(sound, octave) {
     const dist = FrequencyMath.getDistanceFromNote(sound, octave);
-    const frequency = FrequencyMath.getFrequencyFromDistance(dist);
-    return new FrequencyMath(frequency);
+    const fx = FrequencyMath.getFrequencyFromDistance(dist);
+    return new FrequencyMath(fx);
   }
 
   // Function returns amount of steps from the A4 note by passing the frequency in the parameter
   static getDistanceFromFrequency(fx) {
-    const result = Math.log(fx / FrequencyMath.A4) / FrequencyMath.logr; // Formula to find "x" reversed from the "fx" finding formula
+    const result = Math.log(fx / A4) / FrequencyMath.logr; // Formula to find "x" reversed from the "fx" finding formula
     // fx = f0 * r ^ x
     // x = ln(fx / f0) / ln(r)
 
@@ -66,9 +66,13 @@ class FrequencyMath {
     return Math.round(result);
   }
 
+  getDistanceFromNote(note = this.sound, octave = this.octave) {
+    return FrequencyMath.getDistanceFromNote(note, octave);
+  }
+
   // Distance relative to A4 (arguments defaults to "this" object)
   static getDistanceFromNote(note, octave) {
-    const basePos = FrequencyMath.sounds.indexOf(note);
+    const basePos = sounds.indexOf(note);
     const multiplyOctave = octave - 4; // minus 4 because we're counting from A4
     let pos = 12 * multiplyOctave + basePos;
     if (basePos > 2) pos -= 12; // offset made because in music the scale starts at C not A
@@ -83,13 +87,13 @@ class FrequencyMath {
     return Math.round(id);
   }
 
-  getFrequencyFromDistance(distance = this.distanceFromA4) {
+  getFrequencyFromDistance(distance = this.getDistanceFromNote()) {
     return FrequencyMath.getFrequencyFromDistance(distance);
   }
 
   // Distance relative to A4
   static getFrequencyFromDistance(distance) {
-    return FrequencyMath.A4 * Math.pow(2, distance / 12); // Returns a perfect frequency of note x steps from A4
+    return A4 * Math.pow(2, distance / 12); // Returns a perfect frequency of note x steps from A4
   }
 
   static info(fx) {
@@ -145,8 +149,8 @@ class FrequencyMath {
     sound1 = FrequencyMath.soundConstructor("A", 4),
     sound2 = this
   ) {
-    const id1 = FrequencyMath.sounds.indexOf(sound1.sound);
-    const id2 = FrequencyMath.sounds.indexOf(sound2.sound);
+    const id1 = sounds.indexOf(sound1.sound);
+    const id2 = sounds.indexOf(sound2.sound);
 
     const res = id1 - id2;
 
@@ -158,7 +162,7 @@ class FrequencyMath {
   }
 
   getFrequencyError(fx = this.initialFrequency) {
-    const targetNoteDist = this.distanceFromA4;
+    const targetNoteDist = this.getDistanceFromNote();
     const targetFrequency = this.getFrequencyFromDistance(); // returns perfect pitch
     const nextNote =
       fx > targetFrequency ? targetNoteDist + 1 : targetNoteDist - 1;
@@ -176,14 +180,14 @@ class FrequencyMath {
   }
 
   getSoundInfo(fx = this.initialFrequency) {
-    const { soundId, distance, octave } = FrequencyMath.info(fx);
+    const info = FrequencyMath.info(fx);
 
     return {
       frequency: fx,
-      note: FrequencyMath.sounds[soundId],
-      step: distance,
-      soundId: soundId,
-      octave: octave,
+      note: sounds[info.soundId],
+      step: info.distance,
+      soundId: info.soundId,
+      octave: info.octave,
     };
   }
 

@@ -18,8 +18,7 @@ testData.forEach((data) => {
     });
 
     it("Distance from note calculation is correct", () => {
-      fq.distanceFromA4 = fq.distanceFromA4 === -0 ? 0 : fq.distanceFromA4;
-      assert.strictEqual(fq.distanceFromA4, data.step);
+      assert.strictEqual(fq.getDistanceFromNote(), data.step);
     });
 
     it("Distance from A4 to given note is equal to 'step' multiplied by -1", () => {

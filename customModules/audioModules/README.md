@@ -3,6 +3,7 @@
 ![UTs](https://github.com/uLoyd/PitchDeterminer/actions/workflows/mocha-test.yml/badge.svg?event=push)
 ![CodeQL](https://github.com/uLoyd/PitchDeterminer/actions/workflows/codeql-analysis.yml/badge.svg?event=push)
 
+
 ## **WIP**
 
 Library meant for Electron (ver. 11.x - 13.x) to determine note based on the signal received from mic or file.
@@ -14,8 +15,7 @@ so at the moment it's accurate enough down to at least 2Hz differences.
 - Still ~~a lot~~ a little of garbage left in methods waiting for removal
 - Added possibility to change input audio device (+ automatically changes when current device gets disconnected)
 - ~~Still a lot a little bit~~ Almost none ~~of~~ garbage left in methods waiting for removal
-- Added possibility to change input audio device 
-  (+ automatically updates list of devices on change / when current device gets disconnected)
+- Added possibility to change input audio device (+ automatically updates list of devices on change / when current device gets disconnected)
 - Separated most micSetup and Renderer methods into modules
 - Changed objects into classes
 - Fixed bug with enabling mic after disabling it
@@ -35,11 +35,6 @@ TODO right now:
 - [x] Output audio (the latency is/will be +- 1 second so not great, but it's Node + Chromium ¯\\_(ツ)_/¯
 - [x] Changes in soundStorage module for storing and determining frequencies (in progress)
 - [ ] Anything else that will pop up later
-
-##### Table of Contents
- - [Setup, sample initialization](#Setup,-sample-initialization)
- - [Classes](#Classes)
-   - [AudioSetup](#AudioSetup)
 
 ## Setup, sample initialization
 
@@ -587,6 +582,11 @@ frequency as the argument.
 #### static getDistanceFromFrequency(fx: double) -> int
 
 Returns the distance of not from frequency passed as the parameter, relative to the A sound.
+
+#### getDistanceFromNote(note: string, octave: int) -> int
+
+Returns distance of a given sound relative to A4 sound. The parameters by default are set
+to the sound hold by the instance itself.
 
 #### static getDistanceFromNote(note: string, octave: int) -> int
 
