@@ -34,9 +34,17 @@ TODO right now:
 - [x] Changes in soundStorage module for storing and determining frequencies (in progress)
 - [ ] Anything else that will pop up later
 
-- [Setup, sample initialization](#Setup,-sample-initialization)
-- [Classes](#Classes)
-  - [AudioSetup](#AudioSetup)
+##### Classes:
+- [AudioSetup](#AudioSetup)
+- [AudioHandler](#AudioHandler)
+- [AudioFileHandler](#AudioFileHandler)
+- [Correlation](#Correlation)
+- [DeviceHandler](#DeviceHandler)
+- [Device](#Device)
+- [SoundStorage](#SoundStorage)
+- [SoundStorageEvent](#SoundStorageEvent)
+- [FrequencyMath](#FrequencyMath)
+- [AudioEvents](#AudioEvents)
 
 ## Setup, sample initialization
 
@@ -106,9 +114,9 @@ mic.changeInput(inputs[2].id);
 await mic.setupStream();
 ```
 
-## Classes
+# Classes
 
-### AudioSetup
+## AudioSetup
 
 Main class responsible for setting up AudioHandler and AudioFileHandler
 holding two main obligatory nodes used by AudioContext which are AnalyserNode and GainNode.
