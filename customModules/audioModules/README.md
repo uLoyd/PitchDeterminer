@@ -34,6 +34,10 @@ TODO right now:
 - [x] Changes in soundStorage module for storing and determining frequencies (in progress)
 - [ ] Anything else that will pop up later
 
+- [Setup, sample initialization](#Setup,-sample-initialization)
+- [Classes](#Classes)
+  - [AudioSetup](#AudioSetup)
+
 ## Setup, sample initialization
 
 Electron's browser window should've contextIsolation set to false as well as
