@@ -3,7 +3,6 @@
 ![UTs](https://github.com/uLoyd/PitchDeterminer/actions/workflows/mocha-test.yml/badge.svg?event=push)
 ![CodeQL](https://github.com/uLoyd/PitchDeterminer/actions/workflows/codeql-analysis.yml/badge.svg?event=push)
 
-
 ## **WIP**
 
 Library meant for Electron (ver. 11.x - 13.x) to determine note based on the signal received from mic or file.
