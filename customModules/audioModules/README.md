@@ -14,7 +14,8 @@ so at the moment it's accurate enough down to at least 2Hz differences.
 - Still ~~a lot~~ a little of garbage left in methods waiting for removal
 - Added possibility to change input audio device (+ automatically changes when current device gets disconnected)
 - ~~Still a lot a little bit~~ Almost none ~~of~~ garbage left in methods waiting for removal
-- Added possibility to change input audio device (+ automatically updates list of devices on change / when current device gets disconnected)
+- Added possibility to change input audio device 
+  (+ automatically updates list of devices on change / when current device gets disconnected)
 - Separated most micSetup and Renderer methods into modules
 - Changed objects into classes
 - Fixed bug with enabling mic after disabling it
@@ -34,6 +35,11 @@ TODO right now:
 - [x] Output audio (the latency is/will be +- 1 second so not great, but it's Node + Chromium ¯\\_(ツ)_/¯
 - [x] Changes in soundStorage module for storing and determining frequencies (in progress)
 - [ ] Anything else that will pop up later
+
+##### Table of Contents
+ - [Setup, sample initialization](#Setup,-sample-initialization)
+ - [Classes](#Classes)
+   - [AudioSetup](#AudioSetup)
 
 ## Setup, sample initialization
 
