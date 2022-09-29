@@ -1,4 +1,4 @@
-const Weight = require("../../customModules/audioModules/weights").all;
+const Weight = require("../../customModules/audioModules/weights").Weights;
 const defaults = require("../../customModules/audioModules/audioHandlerComponents/defaultAudioValues");
 const { analyser, gain } = defaults.audioSetup;
 

@@ -1,10 +1,10 @@
 const assert = require("assert");
-const { weights } = require("../customModules/audioModules/index");
+const { Weights } = require("../customModules/audioModules/index");
 
 testData = [
-  { curve: "A", impl: weights.Aweight },
-  { curve: "B", impl: weights.Bweight },
-  { curve: "C", impl: weights.Cweight },
+  { curve: "A", impl: Weights.Aweight },
+  { curve: "B", impl: Weights.Bweight },
+  { curve: "C", impl: Weights.Cweight },
 ];
 
 testData.forEach((data) => {
@@ -18,7 +18,7 @@ testData.forEach((data) => {
       weight = null;
     });
 
-    it("returns 0 for 1000Hz", () => {
+    it("Returns 0 weight for 1000Hz", () => {
       const actual = weight.dbWeight(1000, 1).dbweighted;
       const isZero = actual === 0 || actual === -0;
       assert.ok(isZero, actual);

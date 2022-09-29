@@ -3,7 +3,7 @@
 const {
   Correlation,
   AudioSetup,
-  weights,
+  Weights,
   defaultAudioValues,
   DeviceHandler,
   MediaStreamSource,
@@ -13,15 +13,16 @@ const {
 const { fillDefaults } = require("./utilities/utilities");
 
 const curveChoose = (x) => {
+  console.log();
   switch (x?.toUpperCase()) {
     case "A":
-      return new weights.Aweight();
+      return new Weights.Aweight();
     case "B":
-      return new weights.Bweight();
+      return new Weights.Bweight();
     case "C":
-      return new weights.Cweight();
+      return new Weights.Cweight();
     case "D":
-      return new weights.Dweight();
+      return new Weights.Dweight();
     default:
       return curveChoose(defaultAudioValues.general.curveAlgorithm);
   }

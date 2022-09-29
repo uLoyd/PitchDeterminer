@@ -10,57 +10,57 @@ const audioTest = require("./audioHandleTest"),
   tuner = require("./tuner"),
   fs = require("fs");
 
-const { Fretboard } = require("./../customModules/fretboard/Fretboard");
-const { Sound, sounds } = require("./../customModules/fretboard/Sound");
+// const { Fretboard } = require("./../customModules/fretboard/Fretboard");
+// const { Sound, sounds } = require("./../customModules/fretboard/Sound");
 const { Device } = require("../customModules/audioModules");
 
 window.onload = async () => {
   let soundDataEvent = new SoundStorageEvent();
-  const fretboardInstance = new Fretboard({
-    container: document.getElementById("fretboard"),
-    frets: 12,
-    tuning: [
-      new Sound("E", 4),
-      new Sound("B", 3),
-      new Sound("G", 3),
-      new Sound("D", 3),
-      new Sound("A", 2),
-      new Sound("E", 2),
-    ],
-    // evt - event...
-    // lane - StringLane instance
-    onTuningChangeEvt: (evt, lane) =>
-      fretboardInstance.addSoundMarksOnString(lane),
-    // evt - event...
-    // lane - StringLane instance
-    onOctaveChangeEvt: (evt, lane) =>
-      fretboardInstance.addSoundMarksOnString(lane),
-    octaveRange: { min: 1, max: 9 },
-    // tuning - Sound instance with value of string
-    // fretSound - Sound instance with value of sound on a specific clicked fret
-    // marked - is the fret currently marked or not (Boolean)
-    // evt - event...
-    fretsClick: (tuning, fretSound, marked, evt) => {
-      const soundIndex = sounds.indexOf(fretSound.sound);
-      if (marked)
-        fretboardInstance
-          .removeCurrentSound(soundIndex)
-          .addSoundMarksOnStrings();
-      else
-        fretboardInstance.addCurrentSound(soundIndex).addSoundMarksOnStrings();
-    },
-    emptyStringClasses: [
-      "col",
-      "d-flex",
-      "justify-content-center",
-      "empty_string",
-    ],
-  }).create([0, 3, 5, 7, 9, 12]);
+  // const fretboardInstance = new Fretboard({
+  //   container: document.getElementById("fretboard"),
+  //   frets: 12,
+  //   tuning: [
+  //     new Sound("E", 4),
+  //     new Sound("B", 3),
+  //     new Sound("G", 3),
+  //     new Sound("D", 3),
+  //     new Sound("A", 2),
+  //     new Sound("E", 2),
+  //   ],
+  //   // evt - event...
+  //   // lane - StringLane instance
+  //   onTuningChangeEvt: (evt, lane) =>
+  //     fretboardInstance.addSoundMarksOnString(lane),
+  //   // evt - event...
+  //   // lane - StringLane instance
+  //   onOctaveChangeEvt: (evt, lane) =>
+  //     fretboardInstance.addSoundMarksOnString(lane),
+  //   octaveRange: { min: 1, max: 9 },
+  //   // tuning - Sound instance with value of string
+  //   // fretSound - Sound instance with value of sound on a specific clicked fret
+  //   // marked - is the fret currently marked or not (Boolean)
+  //   // evt - event...
+  //   fretsClick: (tuning, fretSound, marked, evt) => {
+  //     const soundIndex = sounds.indexOf(fretSound.sound);
+  //     if (marked)
+  //       fretboardInstance
+  //         .removeCurrentSound(soundIndex)
+  //         .addSoundMarksOnStrings();
+  //     else
+  //       fretboardInstance.addCurrentSound(soundIndex).addSoundMarksOnStrings();
+  //   },
+  //   emptyStringClasses: [
+  //     "col",
+  //     "d-flex",
+  //     "justify-content-center",
+  //     "empty_string",
+  //   ],
+  // }).create([0, 3, 5, 7, 9, 12]);
 
   function updatePitch() {
     const snd = new FrequencyMath(soundDataEvent.determine()).getSoundInfo();
     test.updatePitch(snd);
-    fretboardInstance.addCurrentSound(snd.soundId).addSoundMarksOnStrings();
+    // fretboardInstance.addCurrentSound(snd.soundId).addSoundMarksOnStrings();
   }
 
   function updateTuner(ac) {

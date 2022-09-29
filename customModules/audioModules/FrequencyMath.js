@@ -81,7 +81,7 @@ class FrequencyMath {
 
   // Distance relative to A4 - returns only the sound symbol index without the octave
   static getNoteFromDistance(step) {
-    let id = step > 11 || step < -11 ? step % 12 : step;
+    let id = Math.abs(step) > 11 ? step % 12 : step;
     id = id < 0 ? 12 + id : id;
 
     return Math.round(id);
@@ -108,23 +108,15 @@ class FrequencyMath {
 
   // Distance relative to A4
   static getOctaveFromDistance(distance) {
-    let octaves = 4;
+    let octave = 4;
+    const direction = distance < 0 ? -1 : 1;
 
-    while (true) {
-      if (distance < -11) {
-        // Checking if offset is needed as scale starts at C and not A
-        --octaves;
-        distance += 12;
-      } else if (distance > 11) {
-        // Checking if offset is needed as scale starts at C and not A
-        ++octaves;
-        distance -= 12;
-      } else break;
+    while (Math.abs(distance) > 11) {
+      octave += direction;
+      distance += -direction * 12; // minus direction! important
     }
 
-    if (distance < -9) octaves--;
-    if (distance > 2) octaves++;
-    return octaves;
+    return distance < -9 || distance > 2 ? octave + direction : octave;
   }
 
   // arguments are supposed to be instances of Sound class

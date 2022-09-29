@@ -7,13 +7,16 @@ class DeviceHandler {
   currentOutput = null;
   deviceChangeCallback = () => {};
 
-  // callback -> deviceChangeCallback
   constructor(callback) {
     if (callback) this.deviceChangeCallback = callback;
 
     try {
       navigator.mediaDevices.ondevicechange = this.deviceChangeEvent.bind(this);
-    } catch (e) {}
+    } catch (e) {
+      console.error(
+        `Problem with window.navigator.mediaDevices.ondevicechange event:\n${e}`
+      );
+    }
   }
 
   deviceChangeEvent() {

@@ -105,13 +105,15 @@ class DWeighting extends Weighting {
   }
 }
 
+class Weights {
+  static Aweight = AWeighting;
+  static Bweight = BWeighting;
+  static Cweight = CWeighting;
+  static Dweight = DWeighting;
+}
+
 module.exports.Aweight = AWeighting;
 module.exports.Bweight = BWeighting;
 module.exports.Cweight = CWeighting;
 module.exports.Dweight = DWeighting;
-module.exports.all = {
-  Aweight: AWeighting,
-  Bweight: BWeighting,
-  Cweight: CWeighting,
-  Dweight: DWeighting,
-};
+module.exports.Weights = Weights;
