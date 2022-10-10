@@ -716,3 +716,4 @@ Members:
 - Renamed _getVolume_ method of AudioHandler class to _getWeightedVolume_.
 - Added _getVolume_ method to AudioHandler class that counts average of ByteFrequencyData stored 
   in Analyser node and casts it into a double in <0, 1) range
+- getWeightedVolume returns Number instead of string

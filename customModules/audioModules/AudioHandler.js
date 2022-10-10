@@ -128,12 +128,11 @@ class AudioHandler extends AudioSetup {
   getVolume(accuracy) {
     const data = this.BFDUint8();
     const sum = data.reduce((total, x) => total + Math.abs(x - 128), 0);
-    return parseInt((sum / data.length / 128).toFixed(accuracy));
+    return parseFloat((sum / data.length / 128).toFixed(accuracy));
   }
 
   getWeightedVolume(accuracy) {
     const data = this.BFDUint8();
-    //const nyquist = this.nyquistFrequency();                   // Max possible frequency
     const band = parseFloat(this.bandRange.toFixed(accuracy)); // Calculates a frequency band range
 
     let currentFrequency = band / 2; // Takes the middle frequency of a band
@@ -144,7 +143,7 @@ class AudioHandler extends AudioSetup {
       return result + dbw.dblevel; // Sums dbLevels
     }, 0);
 
-    return parseInt((Math.log10(vol) * 10).toFixed(accuracy));
+    return parseFloat((Math.log10(vol) * 10).toFixed(accuracy));
     //console.log(data.reduce((total, current) => { return total + Math.pow(current, 2) / (256 * this.binCount); }, 0) / 64);
   }
 
