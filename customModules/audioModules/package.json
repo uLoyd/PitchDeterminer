@@ -1,11 +1,9 @@
 {
   "name": "audio-works",
-  "version": "0.6.1",
+  "version": "0.6.2",
   "description": "Node.js audio library for Electron using web audio api",
   "main": "index.js",
-  "scripts": {
-    "test": "mocha --exit"
-  },
+  "scripts": {},
   "repository": {
     "type": "git",
     "url": "git+https://github.com/DawidPartyka/PitchDeterminer.git"

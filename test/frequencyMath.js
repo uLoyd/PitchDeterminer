@@ -10,15 +10,22 @@ testData.forEach((data) => {
       fq = new FrequencyMath(data.frequency);
     });
 
-    it("Sound info is correct", () => {
-      const soundInfo = fq.getSoundInfo(data.frequency);
+    it("Sound info without default value is correct", () => {
+      const soundInfo = fq.getSoundInfo(fq.initialFrequency);
+
+      for (const [key, value] of Object.entries(soundInfo))
+        assert.ok(data[key] === value); // for some reason -0 !== 0 in mocha
+    });
+
+    it("Sound info with default value is correct", () => {
+      const soundInfo = fq.getSoundInfo();
 
       for (const [key, value] of Object.entries(soundInfo))
         assert.ok(data[key] === value); // for some reason -0 !== 0 in mocha
     });
 
     it("Distance from note calculation is correct", () => {
-      assert.strictEqual(fq.getDistanceFromNote(), data.step);
+      assert.ok(fq.distance === data.step);
     });
 
     it("Distance from A4 to given note is equal to 'step' multiplied by -1", () => {

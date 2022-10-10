@@ -233,13 +233,26 @@ After that a Correlation instance is created and stored in _this.correlation_ me
 
 Returns AudioContext sample rate divided by two which is... the nyquist frequency.
 
-#### getVolume(accuracy: int) -> double
+#### getVolume(accuracy: int) -> double (in range <0, 1))
+
+An average of values stored in analysers ByteFrequencyData.
+The _accuracy_ passed to the method represents decimal points of returned value.
+
+#### getWeightedVolume(accuracy: int) -> double
 
 Purely empirical and subjective method that aggregates all the bands from the
 byte frequency data cast into a weighting curve then passed through logarithm of base 10
 and finally multiplied by ten...\
-The accuracy passed to the method represents decimal points of returned value.
-
+The _accuracy_ passed to the method represents decimal points of returned value.
+Seems to work better (from human ear perspective) then _getVolume_ method especially with
+addition of few operations to limit the output value ie.
+``` javascript
+const vol = mic.getWeightedVolume(2); 
+let volume = (vol / 200) * (vol / 2); // Let's take everything over 200dB as maximally "loud"
+                                      // (alternatively can be written as vol^2 / 400)
+volume = volume < 100 ? volume : 100; 
+```
+but then again, it's not a concrete measure as it's a subjective value.
 #### correlate() -> double
 
 Returns output of correlation (frequency in Hz) performed on float time domain data of the currently
@@ -577,6 +590,10 @@ Frequency used to initialize class instance. In case of static constructor usage
 the frequency hold by this member is the perfect pitch of the sound passed to the
 constructor.
 
+#### distance: [int]
+
+Distance of given sound from A4.
+
 #### constructor(fx: double)
 
 To initialize an instance only value needed is the frequency. Based on the frequency
@@ -594,15 +611,9 @@ frequency as the argument.
 
 Returns the distance of not from frequency passed as the parameter, relative to the A sound.
 
-#### getDistanceFromNote(note: string, octave: int) -> int
-
-Returns distance of a given sound relative to A4 sound. The parameters by default are set
-to the sound hold by the instance itself.
-
 #### static getDistanceFromNote(note: string, octave: int) -> int
 
-Performs the same operations as non-static version with only difference being the lack
-of the default values for the arguments.
+Returns distance of a given sound relative to A4 sound.
 
 #### getNoteFromDistance(distance: int) -> int
 
@@ -694,3 +705,14 @@ Members:
 - streamResume
 - sampleLimit
 - sampleTarget
+
+
+# ChangeLog
+### v0.6.2
+
+- Added _distance_ class member to FrequencyMath to limit recalculation of this value
+  in other class methods 
+- Removed non static _getDistanceFromNote_ method as "distance" is now a class member
+- Renamed _getVolume_ method of AudioHandler class to _getWeightedVolume_.
+- Added _getVolume_ method to AudioHandler class that counts average of ByteFrequencyData stored 
+  in Analyser node and casts it into a double in <0, 1) range

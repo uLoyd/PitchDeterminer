@@ -128,7 +128,7 @@ window.onload = async () => {
   mic.on(AudioEvents.deviceChange, test.updateDeviceList.bind(test));
 
   mic.on(AudioEvents.audioProcessUpdate, (evt) => {
-    const volume = evt.getVolume(2);
+    const volume = evt.getWeightedVolume(2);
     //evt.volume(evt.BFDUint8());
     test.updateVolume(volume);
 
