@@ -1,6 +1,6 @@
 {
   "name": "audio-works",
-  "version": "0.6.2",
+  "version": "0.6.3",
   "description": "Node.js audio library for Electron using web audio api",
   "main": "index.js",
   "scripts": {},

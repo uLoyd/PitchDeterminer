@@ -35,7 +35,7 @@ TODO right now:
 - [x] Changes in soundStorage module for storing and determining frequencies (in progress)
 - [ ] Anything else that will pop up later
 
-### [ChangeLog](#Changelog)
+### [ChangeLog](#ChangeLog)
 
 ## Classes:
 - [AudioSetup](#AudioSetup)
