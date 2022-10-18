@@ -6,7 +6,7 @@
   "scripts": {},
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/DawidPartyka/PitchDeterminer.git"
+    "url": "git+https://github.com/uLoyd/PitchDeterminer.git"
   },
   "keywords": [
     "electron",
