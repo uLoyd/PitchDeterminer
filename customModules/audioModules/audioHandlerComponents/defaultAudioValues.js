@@ -1,3 +1,5 @@
+const { Aweight } = require("../index");
+
 const defaultAudioValues = {
   correlation: {
     rmsThreshold: 0.01,
@@ -16,7 +18,7 @@ const defaultAudioValues = {
     },
   },
   general: {
-    curveAlgorithm: "A",
+    curveAlgorithm: Aweight,
     buflen: 8192, // Going lower than 2048 results in really low accuracy in determining frequencies
   },
 };

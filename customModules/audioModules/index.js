@@ -1,10 +1,10 @@
 module.exports.utils = require("./utilities/utilities");
 module.exports.AudioEvents = require("./audioHandlerComponents/AudioEvents");
-module.exports.Weights = require("./weights").Weights;
-module.exports.Aweight = require("./weights").Aweight;
-module.exports.Bweight = require("./weights").Bweight;
-module.exports.Cweight = require("./weights").Cweight;
-module.exports.Dweight = require("./weights").Dweight;
+module.exports.Weights = require("./Weights").Weights;
+module.exports.Aweight = require("./Weights").Aweight;
+module.exports.Bweight = require("./Weights").Bweight;
+module.exports.Cweight = require("./Weights").Cweight;
+module.exports.Dweight = require("./Weights").Dweight;
 module.exports.defaultAudioValues =
   require("./audioHandlerComponents/defaultAudioValues").all;
 module.exports.IAudioNode = require("./audioHandlerComponents/audioSetupComponents/IAudioNode");

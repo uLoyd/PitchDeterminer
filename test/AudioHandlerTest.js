@@ -8,7 +8,7 @@ const {
 } = require("../customModules/audioModules");
 const assert = require("assert");
 const testData = require("./data/AudioHandlerInitData");
-const { Dweight } = require("../customModules/audioModules/weights");
+const { Dweight } = require("../customModules/audioModules/Weights");
 
 describe("Audio Handler", () => {
   let audio;

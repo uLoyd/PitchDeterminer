@@ -3,7 +3,6 @@
 const {
   Correlation,
   AudioSetup,
-  Weights,
   defaultAudioValues,
   DeviceHandler,
   MediaStreamSource,
@@ -11,22 +10,6 @@ const {
   AudioEvents,
 } = require("./index");
 const { fillDefaults } = require("./utilities/utilities");
-
-const curveChoose = (x) => {
-  console.log();
-  switch (x?.toUpperCase()) {
-    case "A":
-      return new Weights.Aweight();
-    case "B":
-      return new Weights.Bweight();
-    case "C":
-      return new Weights.Cweight();
-    case "D":
-      return new Weights.Dweight();
-    default:
-      return curveChoose(defaultAudioValues.general.curveAlgorithm);
-  }
-};
 
 class AudioHandler extends AudioSetup {
   correlation = null; // Placeholder for Correlation class instance
@@ -48,7 +31,7 @@ class AudioHandler extends AudioSetup {
     fillDefaults(general, defaultAudioValues.general);
 
     // Creates instance of class responsible for weighting sound levels
-    this.soundCurve = curveChoose(general.curveAlgorithm);
+    this.soundCurve = new general.curveAlgorithm();
     this.correlationSettings = correlationSettings;
 
     fillDefaults(this.correlationSettings, defaultAudioValues.correlation);
@@ -127,7 +110,11 @@ class AudioHandler extends AudioSetup {
 
   getVolume(accuracy) {
     const data = this.BFDUint8();
-    const sum = data.reduce((total, x) => total + Math.abs(x - 128), 0);
+    let sum = 0;
+    for (let i = 0; i < data.length; i++) {
+      sum += Math.abs(data[i] - 128);
+    }
+
     return parseFloat((sum / data.length / 128).toFixed(accuracy));
   }
 
@@ -135,20 +122,20 @@ class AudioHandler extends AudioSetup {
     const data = this.BFDUint8();
     const band = parseFloat(this.bandRange.toFixed(accuracy)); // Calculates a frequency band range
 
-    let currentFrequency = band / 2; // Takes the middle frequency of a band
+    let currentFrequency = this.bandRange / 2; // Takes the middle frequency of a band
+    let vol = 0;
 
-    const vol = data.reduce((result, level) => {
-      const dbw = this.soundCurve.dbLevel(currentFrequency, accuracy, level);
+    for (let i = 0; i < data.length; ++i) {
+      const dbw = this.soundCurve.dbLevel(currentFrequency, accuracy, data[i]);
       currentFrequency += band; // Move to next frequency band
-      return result + dbw.dblevel; // Sums dbLevels
-    }, 0);
+      vol += dbw.dblevel; // Sums dbLevels
+    }
 
-    return parseFloat((Math.log10(vol) * 10).toFixed(accuracy));
-    //console.log(data.reduce((total, current) => { return total + Math.pow(current, 2) / (256 * this.binCount); }, 0) / 64);
+    return (Math.log10(vol) * 10).toFixed(accuracy);
   }
 
   correlate() {
-    const buf = this.FTDFloat32(this.buflen);
+    const buf = this.FTDFloat32();
 
     return this.correlation.perform(buf);
   }

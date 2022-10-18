@@ -9,6 +9,7 @@ describe(`Utilities`, function () {
       assert.strictEqual(actual[i], expected[i]);
     }
   }
+
   it("convertToArrayBuffer for small data set returns ArrayBuffer", () => {
     const initialArray = [0, 1, 2, 3, 4];
     const actual = utils.convertToArrayBuffer(Uint8Array, initialArray, 10);

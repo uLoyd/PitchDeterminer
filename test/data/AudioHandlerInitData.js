@@ -1,4 +1,4 @@
-const Weight = require("../../customModules/audioModules/weights").Weights;
+const Weight = require("../../customModules/audioModules/Weights").Weights;
 const defaults = require("../../customModules/audioModules/audioHandlerComponents/defaultAudioValues");
 const { analyser, gain } = defaults.audioSetup;
 
@@ -26,7 +26,7 @@ module.exports = [
     params: {
       general: {
         buflen: 512,
-        curveAlgorithm: "B",
+        curveAlgorithm: Weight.Bweight,
       },
       gainSettings: {
         value: 1,
@@ -53,7 +53,7 @@ module.exports = [
     params: {
       general: {
         buflen: 2048,
-        curveAlgorithm: "C",
+        curveAlgorithm: Weight.Cweight,
       },
       gainSettings: {
         value: 0.3,
@@ -80,7 +80,7 @@ module.exports = [
     params: {
       general: {
         buflen: 2048,
-        curveAlgorithm: "D",
+        curveAlgorithm: Weight.Dweight,
       },
       gainSettings: {
         value: 0.3,
@@ -107,7 +107,7 @@ module.exports = [
     params: {
       general: {
         buflen: 2048,
-        curveAlgorithm: "E",
+        curveAlgorithm: Weight.Aweight,
       },
       gainSettings: {
         value: 0.3,

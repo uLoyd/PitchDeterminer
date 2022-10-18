@@ -40,7 +40,7 @@ describe(`Audio File Handler`, function () {
     );
 
     audio.decode = fakeDecode;
-    audio.buflen = 1;
+    audio.buflen = 4096;
   });
 
   it("getPCMData returns data Object and PCM as array when initial data is passed", async () => {
@@ -60,8 +60,8 @@ describe(`Audio File Handler`, function () {
     const output = [];
 
     const callback = (chunk) => {
-      assert.strictEqual(chunk.length, 1);
-      output.push(chunk[0]);
+      assert.strictEqual(chunk.length, 5);
+      output.push(...chunk);
     };
 
     audio.process([...expectedOutput], callback);
@@ -69,13 +69,13 @@ describe(`Audio File Handler`, function () {
     assertProcessOutput(expectedOutput, output);
   });
 
-  it("processCallback will call action 5 times for array of 5 elements and buffer of 1", async () => {
+  it("processCallback will call action once for array of 5 elements and buffer of 4096", async () => {
     const expectedOutput = [0, 1, 2, 3, 4];
     const output = [];
 
     const callback = (chunk) => {
-      assert.strictEqual(chunk.length, 1);
-      output.push(chunk[0]);
+      assert.strictEqual(chunk.length, 5);
+      output.push(...chunk);
     };
 
     await audio.processCallback(callback);
@@ -83,13 +83,13 @@ describe(`Audio File Handler`, function () {
     assertProcessOutput(expectedOutput, output);
   });
 
-  it("processEvent will call action 5 times for array of 5 elements and buffer of 1", async () => {
+  it("processEvent will call action once for array of 5 elements and buffer of 4096", async () => {
     const expectedOutput = [0, 1, 2, 3, 4];
     const output = [];
 
     audio.on(AudioEvents.processedFileChunk, (chunk) => {
-      assert.strictEqual(chunk.length, 1);
-      output.push(chunk[0]);
+      assert.strictEqual(chunk.length, 5);
+      output.push(...chunk);
     });
 
     await audio.processEvent();

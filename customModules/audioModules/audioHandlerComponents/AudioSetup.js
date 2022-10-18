@@ -81,7 +81,7 @@ class AudioSetup extends EventEmitter {
     this.analyser.node.getFloatTimeDomainData(buf);
   }
 
-  FTDFloat32(buflen) {
+  FTDFloat32(buflen = this.buflen) {
     const buf = new Float32Array(buflen);
     this.FTD(buf);
 

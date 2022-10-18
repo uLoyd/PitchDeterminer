@@ -35,6 +35,8 @@ TODO right now:
 - [x] Changes in soundStorage module for storing and determining frequencies (in progress)
 - [ ] Anything else that will pop up later
 
+### [ChangeLog](#Changelog)
+
 ## Classes:
 - [AudioSetup](#AudioSetup)
 - [AudioHandler](#AudioHandler)
@@ -160,9 +162,21 @@ Basically just a shorthand for _await this.audioContext.resume()_
 
 Shorthand for _this.analyser.node.getByteFrequencyData(dataContainer)_
 
+#### BFDUint8(binCount: uint = this.binCount) -> Uint8Array
+
+Shorthand call to _this.BFD(...)_ that automatically creates Uint8Array of size passed to the method
+as _binCount_ argument that defaults to _this.binCount_, that will be filled with data by 
+_getByteFrequencyData_ and returns it afterwards.
+
 #### FTD(buffer: Float32Array) -> void
 
 Shorthand for _this.analyser.node.getFloatTimeDomainData(Buffer)_
+
+#### FTDFloat32(buflen: uint = this.buflen) -> Float32Array
+
+Shorthand call to _this.FTD(...)_ that automatically creates Float32Array of size passed to the method
+as _buflen_ argument that defaults to _this.buflen_, that will be filled with data by
+_getFloatTimeDomainData_ and returns it afterwards.
 
 #### checkAudioContext() -> string
 
@@ -386,15 +400,33 @@ the signal in monophonic context.
 Creates a Correlation instance setting up rms and correlation thresholds. Sample rate is require
 for the last step of the autocorrelation as based on this value the frequency will be calculated.
 It is possible and encouraged to pass only the buflen and sampleRate values as the remaining
-values can be automatically set to default.
+values can be automatically set to default.  
+**Based on buffer length (buflen) value of the _defaultCorrelationSampleStep_ property is determined:**  
+For buffer length below 8192 by default the value is set to 1 otherwise to 2. The purpose of it is that
+with large buffers the accuracy is good enough while looping over every **second** element/pair during
+the autocorrelation. This behaviour can be changed to standard looping over every element/pair bt simply
+passing value _1_ to the _perform_ method. It should be noted that with larger buffers not skipping
+any element results in higher latency where skipping every second pair boosts execution time by ~60-70%
+in case of buffers over 8192 samples compared to standard loop over every element/pair and in both scenarios
+the difference in results is around 4th decimal place therefore by default in case of larger buffers the
+algorithm sets _defaultCorrelationSampleStep_ to _2_.
 
-#### perform(buf: Float32Array) -> double
+#### perform(buf: Float32Array, defaultCorrelationSampleStep: uint = (1 or 2 depending on buffer size)) -> double
 
 This method receives buffer with data that will be processed up to the length
 specified in the _this.buflen_ member. If RMS will be too low, meaning the signal is too weakk,
 -1 will be returned. In case autocorrelation algorithm result will be higher than
 _this.correlationThreshold_ the output will be the fundamental frequency of the passed buffer,
-otherwise it will return -1.
+otherwise it will return -1.  
+As mentioned before, _defaultCorrelationSampleStep_ determines the incrementation of data for
+loops going through the buffer. The higher the value the more values/pairs will be skipped.
+It shouldn't be set to value higher than 2. For smaller buffers (< 8192) it's set to 1, for larger
+ones it's set to 2 to minimize latency.
+
+#### _checkRms(buf: Float32Array, defaultCorrelationSampleStep: uint = (1 or 2 depending on buffer size)) -> bool
+
+Calculate sum of squares of all the values in the buffer and returns true if the square sum divided 
+by amount of elements is higher than value specified in the constructor: _this.rmsThreshold_.
 
 ## DeviceHandler
 
@@ -708,6 +740,17 @@ Members:
 
 
 # ChangeLog
+### v0.6.3
+
+- Shorter execution time of _perform_ method of _Correlation_ class
+- Shorter execution time of _getVolume_ method of _AudioHandler_ class
+- Slightly shorter execution time of _getWeightedVolume_ method of _AudioHandler_ class
+- _FTDFloat32(buflen: uint)_ method of _AudioSetup_ class now takes _this.buflen_ by default
+- _perform_ method of _Correlation_ class now takes additional argument defaultCorrelationSampleStep
+  that defaults to 1 (for smaller buffers < 8192) or 2 (for larger buffers >= 8192) to minimize latency.
+  Larger buffers can still work the same way as smaller ones by **explicitly** passing value _1_ 
+  as second argument to the method.
+
 ### v0.6.2
 
 - Added _distance_ class member to FrequencyMath to limit recalculation of this value

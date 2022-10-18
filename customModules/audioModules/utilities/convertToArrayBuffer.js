@@ -4,9 +4,8 @@ function convertLargeContainer(Type, data, dataLength) {
   const ab = new ArrayBuffer(dataLength);
   let view = new Type(ab);
 
-  for (let i = 0; i < dataLength; ++i) {
-    view[i] = data[i];
-  }
+  for (let i = 0; i < dataLength; ++i) view[i] = data[i];
+
   return ab;
 }
 

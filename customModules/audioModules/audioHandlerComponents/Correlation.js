@@ -12,38 +12,42 @@ class Correlation {
 
     this.buflen = buflen;
     this.maxSamples = Math.floor(buflen / 2);
-
     this.sampleRate = sampleRate;
     this.rmsThreshold = rmsThreshold;
     this.correlationThreshold = correlationThreshold;
     this.correlationDegree = correlationDegree;
+    this.defaultCorrelationSampleStep = buflen < 8192 ? 1 : 2;
+    this._correlations = new Array(this.maxSamples - 1);
   }
 
-  perform(buf) {
-    let rms = Math.sqrt(
-      buf.reduce((total, curVal) => {
-        return total + Math.pow(curVal, 2);
-      }, 0) / this.buflen
-    );
+  _checkRms(buf, correlationSampleStep) {
+    let rms = 0;
+    for (let i = 0; i < this.buflen; i += correlationSampleStep)
+      rms += Math.pow(buf[i], 2);
+    return rms !== 0 && Math.sqrt(rms / this.buflen) >= this.rmsThreshold;
+  }
 
-    if (isNaN(rms) || rms < this.rmsThreshold)
+  perform(buf, correlationSampleStep = this.defaultCorrelationSampleStep) {
+    if (!this._checkRms(buf, correlationSampleStep))
       // not enough signal power
       return -1;
 
     let best_offset = -1,
       best_correlation = 0,
-      correlations = new Array(this.maxSamples),
       lastCorrelation = 1;
 
-    for (let offset = 0; offset < this.maxSamples; offset++) {
+    for (let offset = 1; offset < this.maxSamples; ++offset) {
       let correlation = 0;
 
-      for (let i = 0; i < this.maxSamples; i++)
-        correlation += Math.abs(buf[i] - buf[i + offset]);
+      for (
+        let begin = 0;
+        begin < this.maxSamples;
+        begin += correlationSampleStep
+      )
+        correlation += Math.abs(buf[begin] - buf[begin + offset]);
 
       correlation = 1 - correlation / this.maxSamples;
-
-      correlations[offset] = correlation;
+      this._correlations[offset] = correlation;
 
       if (
         correlation > this.correlationDegree &&
@@ -54,8 +58,8 @@ class Correlation {
           best_offset = offset;
         } else {
           const shift =
-            (correlations[best_offset + 1] - correlations[best_offset - 1]) /
-            correlations[best_offset];
+            (this._correlations[best_offset + 1] - this._correlations[best_offset - 1]) /
+            this._correlations[best_offset];
           return this.sampleRate / (best_offset + 8 * shift);
         }
       }

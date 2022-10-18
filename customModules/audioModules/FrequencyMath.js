@@ -67,7 +67,7 @@ class FrequencyMath {
     //return (fx < 90 ? Math.floor(result) : Math.round(result)); // Rounds down the results if the frequency is low compensating lack of
     // accuracy determining the low frequencies as the "distance" between
     // notes gets smaller the lower the frequency. Accurate only from E2 up.
-    // Useful ONLY with buffer size ("buflen" variable) in AudioHandler.js under 2048
+    // Useful ONLY with buffer size ("buflen" variable) in AudioHandlerTest.js under 2048
     return Math.round(result);
   }
 

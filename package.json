@@ -20,11 +20,12 @@
     "check": "npx prettier --check .",
     "validate": "npm run check && npm run test",
     "format": "npx prettier --write .",
-    "start": "electron ."
+    "start": "electron .",
+    "bench": "node ./test/bench/main.js"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/DawidPartyka/PitchDeterminer.git"
+    "url": "git+https://github.com/uLoyd/PitchDeterminer.git"
   },
   "keywords": [
     "electron",
@@ -35,7 +36,7 @@
   "author": "Dawid Partyka",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/DawidPartyka/PitchDeterminer/issues"
+    "url": "https://github.com/uLoyd/PitchDeterminer/issues"
   },
-  "homepage": "https://github.com/DawidPartyka/PitchDeterminer#readme"
+  "homepage": "https://github.com/uLoyd/PitchDeterminer#readme"
 }
