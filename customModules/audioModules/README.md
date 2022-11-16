@@ -27,12 +27,6 @@ so at the moment it's accurate enough down to at least 2Hz differences.
 - Added methods returning nyquist frequency and band range of current audioHandler setup
 - Added possibility to change output device
 
-| Name | Arguments | Return value | Description |
-|------|-----------|--------------|-------------|
-|      |           |              |             |
-|      |           |              |             |
-|      |           |              |             |
-
 TODO right now:
 
 - [x] Add methods to frequencyMath
