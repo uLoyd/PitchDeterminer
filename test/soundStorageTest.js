@@ -1,4 +1,5 @@
 const assert = require("assert");
+const assertion = require("./utilities/Assertion");
 const testA2 = require("./data/A2");
 const testE2 = require("./data/E2");
 const testB3 = require("./data/B3");
@@ -71,9 +72,9 @@ testData.forEach(async (data) => {
       const outliers = storage.getOutliers();
       const expectedOutliers = [1, 100];
 
-      outliers.forEach((outlier) => {
-        assert.ok(expectedOutliers.includes(outlier), outlier);
-      });
+      assertion.every(outliers, (outlier) =>
+        expectedOutliers.includes(outlier)
+      );
     });
 
     it("Method getting outliers positions works", () => {
@@ -84,12 +85,9 @@ testData.forEach(async (data) => {
       const outlierPositions = storage.outlierPosition();
       const expectedOutlierPositions = [0, values.length - 1];
 
-      outlierPositions.forEach((outlierPosition) => {
-        assert.ok(
-          expectedOutlierPositions.includes(outlierPosition),
-          outlierPosition
-        );
-      });
+      assertion.every(outlierPositions, (outlierPosition) =>
+        expectedOutlierPositions.includes(outlierPosition)
+      );
     });
 
     it("Base method average works", () => {
@@ -111,14 +109,13 @@ testData.forEach(async (data) => {
 
       values.forEach((value) => baseStorage.add(value));
 
-      baseStorage.freqArr.forEach((element) =>
-        assert.ok(expectedValues.includes(element))
+      assertion.every(baseStorage.freqArr, (freq) =>
+        expectedValues.includes(freq)
       );
     });
 
     it("Base method determine returns null if there are no samples", () => {
       const baseStorage = new SoundStorage();
-
       const determined = baseStorage.determine();
 
       assert.strictEqual(determined, null);

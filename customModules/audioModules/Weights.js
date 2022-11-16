@@ -10,8 +10,8 @@ class Weighting {
 
     this.dividendFrequencyPower = power;
 
-    const offsetWeight = this.dbWeight(1000);
-    this.offset = 20 * Math.log10(offsetWeight.weighted);
+    const offsetWeight = this.rawWeight(1000);
+    this.offset = 20 * Math.log10(offsetWeight);
   }
 
   getDividend(frequency) {
@@ -36,28 +36,23 @@ class Weighting {
     return result;
   }
 
+  rawWeight(frequency, accuracy = 0) {
+    return parseFloat(
+      (this.getDividend(frequency) / this.getDivider(frequency)).toFixed(
+        accuracy
+      )
+    );
+  }
+
   dbWeight(frequency, accuracy) {
-    let weighted = this.getDividend(frequency) / this.getDivider(frequency);
-    let dbw = 20 * Math.log10(weighted) + this.offset;
-
-    if (accuracy) {
-      weighted = parseFloat(weighted.toFixed(accuracy));
-      dbw = parseFloat(dbw.toFixed(accuracy));
-    }
-
-    return { weighted: weighted, dbweighted: dbw };
+    let dbw =
+      20 * Math.log10(this.rawWeight(frequency, accuracy)) + this.offset;
+    return parseFloat(dbw.toFixed(accuracy));
   }
 
   dbLevel(frequency, accuracy, level) {
-    let dbw =
-      typeof frequency === "object" && frequency !== null
-        ? frequency
-        : this.dbWeight(frequency, accuracy);
-    dbw.dblevel = parseFloat(
-      Math.pow(10, (dbw.dbweighted + level) / 10).toFixed(accuracy)
-    );
-
-    return dbw;
+    let dbw = this.dbWeight(frequency, accuracy);
+    return parseFloat(Math.pow(10, (dbw + level) / 10).toFixed(accuracy));
   }
 }
 
@@ -79,41 +74,13 @@ class CWeighting extends Weighting {
   }
 }
 
-class DWeighting extends Weighting {
-  // https://en.wikipedia.org/wiki/A-weighting#D_2
-  dbWeight(frequency, accuracy) {
-    const f2 = Math.pow(frequency, 2);
-    let w =
-      (Math.pow(1037918.48 - f2, 2) + 1080768 * f2) /
-      (Math.pow(9837328 - f2, 2) + 11723776 * f2);
-
-    let dbw =
-      (frequency / 689668884.96476) *
-      Math.sqrt(w / ((f2 + 79919.29) * (f2 + 1345600)));
-    dbw = 20 * Math.log10(dbw);
-
-    w = accuracy ? parseFloat(w.toFixed(accuracy)) : w;
-    dbw = accuracy ? parseFloat(dbw.toFixed(accuracy)) : dbw;
-
-    return { weighted: w, dbweighted: dbw };
-  }
-
-  dbLevel(frequency, accuracy, level) {
-    const db = this.dbWeight(frequency, accuracy);
-
-    return Weighting.prototype.dbLevel.call(this, db, accuracy, level);
-  }
-}
-
 class Weights {
   static Aweight = AWeighting;
   static Bweight = BWeighting;
   static Cweight = CWeighting;
-  static Dweight = DWeighting;
 }
 
 module.exports.Aweight = AWeighting;
 module.exports.Bweight = BWeighting;
 module.exports.Cweight = CWeighting;
-module.exports.Dweight = DWeighting;
 module.exports.Weights = Weights;

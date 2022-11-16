@@ -58,7 +58,8 @@ class Correlation {
           best_offset = offset;
         } else {
           const shift =
-            (this._correlations[best_offset + 1] - this._correlations[best_offset - 1]) /
+            (this._correlations[best_offset + 1] -
+              this._correlations[best_offset - 1]) /
             this._correlations[best_offset];
           return this.sampleRate / (best_offset + 8 * shift);
         }

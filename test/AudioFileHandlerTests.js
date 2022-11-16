@@ -1,4 +1,5 @@
 const assert = require("assert");
+const assertion = require("./utilities/Assertion");
 const {
   Analyser,
   Gain,
@@ -23,13 +24,10 @@ describe(`Audio File Handler`, function () {
 
   const assertProcessOutput = function (expected, actual) {
     assert.strictEqual(expected.length, actual.length);
-
-    expected.forEach((elem, index) => {
-      assert.strictEqual(elem, actual[index]);
-    });
+    assertion.iterableStrictEqual(actual, expected);
   };
 
-  before(() => {
+  beforeEach(() => {
     audio = new AudioFileHandler(
       {
         general: testData.params.general,

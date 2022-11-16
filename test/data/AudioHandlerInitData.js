@@ -80,7 +80,7 @@ module.exports = [
     params: {
       general: {
         buflen: 2048,
-        curveAlgorithm: Weight.Dweight,
+        curveAlgorithm: Weight.Aweight,
       },
       gainSettings: {
         value: 0.3,
@@ -99,7 +99,7 @@ module.exports = [
       minDecibels: -45,
       maxDecibels: -20,
       buflen: 2048,
-      soundCurve: Weight.Dweight,
+      soundCurve: Weight.Aweight,
     },
   },
   {

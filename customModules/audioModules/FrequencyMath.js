@@ -52,10 +52,34 @@ class FrequencyMath {
     this.initialFrequency = fx;
   }
 
-  static soundConstructor(sound, octave) {
-    const distance = FrequencyMath.getDistanceFromNote(sound, octave);
+  static soundConstructor(note, octave) {
+    const distance = FrequencyMath.getDistanceFromNote(note, octave);
     const fx = FrequencyMath.getFrequencyFromDistance(distance);
     return new FrequencyMath(fx);
+  }
+
+  static symbolConstructor(sound) {
+    const note = sound.trim().split(/[0-9]/)[0];
+    const isInSounds = sounds.includes(note);
+    const isInFlats = flats.includes(note);
+
+    if (!isInSounds && !isInFlats)
+      throw new Error(
+        `${note} is not a recognized sound symbol\nTry on of:\n${sounds}\nor\n${flats}`
+      );
+
+    const octave = parseInt(sound.replace(note, ""));
+
+    if (isNaN(octave))
+      throw new Error(
+        `${sound.replace(
+          note,
+          ""
+        )} parsed to int: ${octave} is not recognized as an octave. ` +
+          `Octave must be an integer`
+      );
+
+    return FrequencyMath.soundConstructor(note, octave);
   }
 
   // Function returns amount of steps from the A4 note by passing the frequency in the parameter

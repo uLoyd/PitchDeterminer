@@ -7,8 +7,8 @@ const {
   Correlation,
 } = require("../customModules/audioModules");
 const assert = require("assert");
+const assertion = require("./utilities/Assertion");
 const testData = require("./data/AudioHandlerInitData");
-const { Dweight } = require("../customModules/audioModules/Weights");
 
 describe("Audio Handler", () => {
   let audio;
@@ -27,15 +27,6 @@ describe("Audio Handler", () => {
     ];
   };
 
-  const willThrow = async function (callback, params) {
-    try {
-      await callback(...params);
-      assert.ok(false);
-    } catch (e) {
-      assert.ok(true);
-    }
-  };
-
   const testDeviceLists = async function (direction) {
     const actualList = await audio.getDeviceList(direction);
     const expectedList = await fakeDeviceHandler
@@ -43,11 +34,7 @@ describe("Audio Handler", () => {
       .filter((device) => device.dir === (direction ?? device.dir));
     assert.strictEqual(actualList.length, expectedList.length);
 
-    for (let i = 0; i < actualList.length; ++i) {
-      assert.strictEqual(actualList[i].id, expectedList[i].id);
-      assert.strictEqual(actualList[i].label, expectedList[i].label);
-      assert.strictEqual(actualList[i].dir, expectedList[i].dir);
-    }
+    assertion.iterableOfObjectsPropsEqual(actualList, expectedList);
   };
 
   const getVolumeData = function (fillValue) {
@@ -57,7 +44,7 @@ describe("Audio Handler", () => {
     return audio.getVolume(0);
   };
 
-  before(() => {
+  beforeEach(() => {
     audio = new AudioHandler({
       general: testData[0].params.general,
       gainNode: new Gain(testData[0].params.gainSettings),
@@ -77,7 +64,7 @@ describe("Audio Handler", () => {
   it("Audio handler creates Correlation instance", () => {
     assert.strictEqual(audio.correlation, null);
     audio.initCorrelation();
-    assert.strictEqual(audio.correlation instanceof Correlation, true);
+    assert.ok(audio.correlation instanceof Correlation);
   });
 
   it("Audio handler returns the same device list as DeviceHandler", async () => {
@@ -104,17 +91,17 @@ describe("Audio Handler", () => {
 
   it("Audio handler will try to pause if state is set to running", async () => {
     audio.running = true;
-    await willThrow(audio.pause, []);
+    await assertion.willThrow(audio.pause, []);
   });
 
   it("Audio handler will try to end stream if state is set to running", async () => {
     audio.running = true;
-    await willThrow(audio.end, []);
+    await assertion.willThrow(audio.end, []);
   });
 
   it("Audio handler will try to resume stream if state is not set to running", async () => {
     audio.running = false;
-    await willThrow(audio.resume, []);
+    await assertion.willThrow(audio.resume, []);
   });
 
   it("Audio handler will not try to resume stream if state is set to running", async () => {
@@ -127,7 +114,7 @@ describe("Audio Handler", () => {
     fakeDeviceHandler.getDeviceList = function () {
       return [];
     };
-    await willThrow(audio.setupStream, []);
+    await assertion.willThrow(audio.setupStream, []);
   });
 
   it("Audio handler getVolume will return 1 for data with all values set to 0", () => {
@@ -152,12 +139,7 @@ describe("Audio Handler", () => {
       audio.bandRange = 2048 / 256;
       const vol = audio.getWeightedVolume(2);
 
-      if (audio.soundCurve instanceof Dweight) {
-        assert.ok(true);
-        return;
-      }
-
-      assert.ok(vol > 260 && vol < 264);
+      assertion.isInRange(vol, 261, 263);
     }
   );
 });

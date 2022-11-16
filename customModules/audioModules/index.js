@@ -4,7 +4,6 @@ module.exports.Weights = require("./Weights").Weights;
 module.exports.Aweight = require("./Weights").Aweight;
 module.exports.Bweight = require("./Weights").Bweight;
 module.exports.Cweight = require("./Weights").Cweight;
-module.exports.Dweight = require("./Weights").Dweight;
 module.exports.defaultAudioValues =
   require("./audioHandlerComponents/defaultAudioValues").all;
 module.exports.IAudioNode = require("./audioHandlerComponents/audioSetupComponents/IAudioNode");

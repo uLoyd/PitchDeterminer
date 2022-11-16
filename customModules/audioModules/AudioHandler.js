@@ -51,20 +51,19 @@ class AudioHandler extends AudioSetup {
     //this.setupStream();
   }
 
-  async getMediaStream(constrain) {
+  async getMediaStream() {
     // Constrain specifying audio device
     // if value here will be "undefined" then something's not right
     // but the stream will start up with default available device (await is a must)
     const defaultAudioConstrain = await this.deviceHandler.navigatorInput();
-    constrain = constrain ?? {
+    const constraint = {
       audio: {
         deviceId: defaultAudioConstrain,
       },
       video: false,
     };
-
     //console.log(`Stream setting up using input device:`, constrain.audio);
-    return await navigator.mediaDevices.getUserMedia(constrain);
+    return await navigator.mediaDevices.getUserMedia(constraint);
   }
 
   async setupStream() {
@@ -111,9 +110,8 @@ class AudioHandler extends AudioSetup {
   getVolume(accuracy) {
     const data = this.BFDUint8();
     let sum = 0;
-    for (let i = 0; i < data.length; i++) {
-      sum += Math.abs(data[i] - 128);
-    }
+
+    for (let i = 0; i < data.length; i++) sum += Math.abs(data[i] - 128);
 
     return parseFloat((sum / data.length / 128).toFixed(accuracy));
   }
@@ -126,12 +124,16 @@ class AudioHandler extends AudioSetup {
     let vol = 0;
 
     for (let i = 0; i < data.length; ++i) {
-      const dbw = this.soundCurve.dbLevel(currentFrequency, accuracy, data[i]);
+      const dbLevel = this.soundCurve.dbLevel(
+        currentFrequency,
+        accuracy,
+        data[i]
+      );
       currentFrequency += band; // Move to next frequency band
-      vol += dbw.dblevel; // Sums dbLevels
+      vol += dbLevel; // Sums dbLevels
     }
 
-    return (Math.log10(vol) * 10).toFixed(accuracy);
+    return parseFloat((Math.log10(vol) * 10).toFixed(accuracy));
   }
 
   correlate() {

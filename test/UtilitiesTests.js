@@ -1,13 +1,11 @@
 const assert = require("assert");
+const assertion = require("./utilities/Assertion");
 const { utils } = require("../customModules/audioModules");
 
 describe(`Utilities`, function () {
   function assertContainers(actual, expected, ExpectedType) {
     assert.ok(actual instanceof ExpectedType);
-
-    for (let i = 0; i < actual.length; ++i) {
-      assert.strictEqual(actual[i], expected[i]);
-    }
+    assertion.iterableStrictEqual(actual, expected);
   }
 
   it("convertToArrayBuffer for small data set returns ArrayBuffer", () => {

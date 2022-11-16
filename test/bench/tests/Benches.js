@@ -18,7 +18,7 @@ const audio = new AudioHandler({
 });
 
 let start = -128;
-const dummyBuffer = new Array(2048).fill(0).map(_ => {
+const dummyBuffer = new Array(2048).fill(0).map((_) => {
   if (start === 256) start = -129;
   return ++start;
 });
@@ -49,8 +49,12 @@ function runNotWeighted() {
   audio.getVolume(2);
 }
 
-function runCorrelation() {
+function runSmallCorrelation() {
   return audio.correlation.perform(audioBufForCorrelation);
+}
+
+function runBigCorrelation() {
+  return audio.correlation.perform(audioBufForCorrelation, 1);
 }
 
 function runFq() {
@@ -64,9 +68,14 @@ module.exports = [
     run: runWeighted,
   },
   {
-    name: "AudioHandler::correlate",
+    name: "AudioHandler::correlate, default step for buffer size",
     runAmount: 100,
-    run: runCorrelation,
+    run: runSmallCorrelation,
+  },
+  {
+    name: "AudioHandler::correlate, force full buffer check",
+    runAmount: 50,
+    run: runBigCorrelation,
   },
   {
     name: "AudioHandler::getVolume",

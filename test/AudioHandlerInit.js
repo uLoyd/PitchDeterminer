@@ -24,7 +24,7 @@ testData.forEach(async (data) => {
   describe(`Audio Handler Initialization with params: ${data.title}`, function () {
     let audio;
 
-    before(() => {
+    beforeEach(() => {
       audio = new AudioHandler({
         general: data.params.general,
         gainNode: new Gain(data.params.gainSettings),
@@ -46,7 +46,7 @@ testData.forEach(async (data) => {
     describe("Audio Handler Analyser  Initialization", () => {
       const values = {};
 
-      before(() => {
+      beforeEach(() => {
         const expected = data.compare;
         audio.analyser.node = {
           smoothingTimeConstant: 1,
@@ -88,7 +88,7 @@ testData.forEach(async (data) => {
 
     describe("Audio Handler Gain  Initialization", () => {
       const values = {};
-      before(() => {
+      beforeEach(() => {
         const actual = data.compare;
         audio.gain.node.gain.value = 0;
         audio.gain.applySettings();

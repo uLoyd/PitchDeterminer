@@ -1,4 +1,5 @@
 const assert = require("assert");
+const assertion = require("./utilities/Assertion");
 const { FrequencyMath } = require("../customModules/audioModules");
 const testData = require("./data/frequencyData");
 
@@ -6,22 +7,18 @@ testData.forEach((data) => {
   describe(`Frequency Math for ${data.note}${data.octave}`, () => {
     let fq;
 
-    before(() => {
+    beforeEach(() => {
       fq = new FrequencyMath(data.frequency);
     });
 
     it("Sound info without default value is correct", () => {
       const soundInfo = fq.getSoundInfo(fq.initialFrequency);
-
-      for (const [key, value] of Object.entries(soundInfo))
-        assert.ok(data[key] === value); // for some reason -0 !== 0 in mocha
+      assertion.iterableOfObjectsPropsIncludes([soundInfo], [data]);
     });
 
     it("Sound info with default value is correct", () => {
       const soundInfo = fq.getSoundInfo();
-
-      for (const [key, value] of Object.entries(soundInfo))
-        assert.ok(data[key] === value); // for some reason -0 !== 0 in mocha
+      assertion.iterableOfObjectsPropsIncludes([soundInfo], [data]);
     });
 
     it("Distance from note calculation is correct", () => {
@@ -72,5 +69,36 @@ testData.forEach((data) => {
 
       assert.strictEqual(actual, expected, JSON.stringify(fq));
     });
+  });
+});
+
+describe(`Static constructor for soundSymbol of FrequencyMath`, () => {
+  it("Should create correct sound for string 'A4'", () => {
+    const a4FromSoundSymbol =
+      FrequencyMath.symbolConstructor("A4").getSoundInfo();
+    const a4FromFrequency = new FrequencyMath(440).getSoundInfo();
+    assertion.iterableOfObjectsPropsIncludes(
+      [a4FromSoundSymbol],
+      [a4FromFrequency]
+    );
+  });
+
+  it("Should throw while creating sound for string 'Q4'", async () => {
+    const expectedErrMsg = "Q is not a recognized sound symbol";
+    await assertion.willThrowWithMessage(
+      FrequencyMath.symbolConstructor,
+      "Q4",
+      expectedErrMsg
+    );
+  });
+
+  it("Should throw while creating sound for string 'AA'", async () => {
+    const expectedErrMsg =
+      " is not recognized as an octave. Octave must be an integer";
+    await assertion.willThrowWithMessage(
+      FrequencyMath.symbolConstructor,
+      "AA",
+      expectedErrMsg
+    );
   });
 });

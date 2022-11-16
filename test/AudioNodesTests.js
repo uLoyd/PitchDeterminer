@@ -53,7 +53,7 @@ describe(`IAudioNode`, () => {
   let node;
   const { settings, defaults, subDefaults } = getTestData();
 
-  before(() => {
+  beforeEach(() => {
     node = new IAudioNode(settings, defaults);
     node.node = { connect: () => {} };
   });
@@ -88,7 +88,7 @@ describe(`GainNode`, () => {
     },
   };
 
-  before(() => {
+  beforeEach(() => {
     node = new Gain(settings);
     node.node = { gain: 5 };
   });
@@ -123,7 +123,7 @@ describe(`AnalyserNode`, () => {
     },
   };
 
-  before(() => {
+  beforeEach(() => {
     node = new Analyser(settings);
     node.node = {};
   });
@@ -158,7 +158,7 @@ describe(`MediaStreamSource`, () => {
     },
   };
 
-  before(() => {
+  beforeEach(() => {
     node = new MediaStreamSource(settings, defaults);
     node.node = {};
   });
@@ -183,7 +183,7 @@ describe(`ScriptProcessor`, () => {
     },
   };
 
-  before(() => {
+  beforeEach(() => {
     node = new ScriptProcessor(settings, defaults);
     node.node = {};
   });

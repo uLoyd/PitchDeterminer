@@ -7,7 +7,7 @@ const testBuffer = require("./data/buffer");
 describe(`Default Correlation`, function () {
   let correlation;
 
-  before(() => {
+  beforeEach(() => {
     correlation = new CorrelationTests({
       sampleRate: 48000,
       rmsThreshold: 0.01,

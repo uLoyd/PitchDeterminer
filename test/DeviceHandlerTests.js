@@ -1,4 +1,5 @@
 const assert = require("assert");
+const assertion = require("./utilities/Assertion");
 const {
   Device,
   DeviceHandler,
@@ -6,23 +7,18 @@ const {
 const DeviceTestData = require("./data/DeviceData");
 
 DeviceTestData.forEach((deviceData) => {
-  const assertDevice = (actual, expected) => {
-    assert.strictEqual(actual.id, expected.deviceId);
-    assert.strictEqual(actual.label, expected.label);
-    assert.strictEqual(actual.dir, expected.dir);
-    assert.strictEqual(actual.isInput, expected.isInput);
-    assert.strictEqual(actual.isOutput, expected.isOutput);
-  };
-
   describe(`${deviceData.name} is correctly created`, () => {
     const deviceParams = deviceData.data;
 
     it("Device is correctly created from object", () => {
-      assertDevice(new Device(deviceParams, deviceParams.dir), deviceParams);
+      assertion.iterableOfObjectsPropsEqual(
+        new Device(deviceParams, deviceParams.dir),
+        deviceParams
+      );
     });
 
     it("Device is correctly created from arguments", () => {
-      assertDevice(
+      assertion.iterableOfObjectsPropsEqual(
         new Device(deviceParams.deviceId, deviceParams.label, deviceParams.dir),
         deviceParams
       );
@@ -31,14 +27,6 @@ DeviceTestData.forEach((deviceData) => {
 });
 
 describe(`DeviceHandler:`, () => {
-  const assertDevice = (actual, expected) => {
-    assert.strictEqual(actual.id, expected.id);
-    assert.strictEqual(actual.label, expected.label);
-    assert.strictEqual(actual.dir, expected.dir);
-    assert.strictEqual(actual.isInput, expected.isInput);
-    assert.strictEqual(actual.isOutput, expected.isOutput);
-  };
-
   let controlVariable = false;
   let handlerCallback = function () {
     controlVariable = true;
@@ -91,16 +79,16 @@ describe(`DeviceHandler:`, () => {
 
   it("getCurrentOrFirst returns first device if none is set", async () => {
     const current = await deviceHandler.getCurrentOrFirst();
-    assertDevice(current.in, fakeDeviceList[0]);
-    assertDevice(current.out, fakeDeviceList[4]);
+    assertion.iterableOfObjectsPropsEqual(current.in, fakeDeviceList[0]);
+    assertion.iterableOfObjectsPropsEqual(current.out, fakeDeviceList[4]);
   });
 
   it("getCurrentOrFirst returns current devices if those are set", async () => {
     deviceHandler.currentInput = fakeDeviceList[3];
     deviceHandler.currentOutput = fakeDeviceList[7];
     const current = await deviceHandler.getCurrentOrFirst();
-    assertDevice(current.in, fakeDeviceList[3]);
-    assertDevice(current.out, fakeDeviceList[7]);
+    assertion.iterableOfObjectsPropsEqual(current.in, fakeDeviceList[3]);
+    assertion.iterableOfObjectsPropsEqual(current.out, fakeDeviceList[7]);
   });
 
   it("changeDevice dispatches callback and sets correct device", async () => {
@@ -110,8 +98,8 @@ describe(`DeviceHandler:`, () => {
     await deviceHandler.changeInput(fakeInput.id);
     const current1 = await deviceHandler.getCurrentOrFirst();
 
-    assertDevice(current1.in, fakeInput);
-    assertDevice(current1.out, fakeDeviceList[4]);
+    assertion.iterableOfObjectsPropsEqual(current1.in, fakeInput);
+    assertion.iterableOfObjectsPropsEqual(current1.out, fakeDeviceList[4]);
     assert.strictEqual(controlVariable, true);
 
     controlVariable = false;
@@ -121,8 +109,8 @@ describe(`DeviceHandler:`, () => {
     await deviceHandler.changeOutput(fakeOutput.id);
     const current2 = await deviceHandler.getCurrentOrFirst();
 
-    assertDevice(current2.in, fakeInput);
-    assertDevice(current2.out, fakeOutput);
+    assertion.iterableOfObjectsPropsEqual(current2.in, fakeInput);
+    assertion.iterableOfObjectsPropsEqual(current2.out, fakeOutput);
     assert.strictEqual(controlVariable, true);
   });
 
@@ -150,12 +138,9 @@ describe(`DeviceHandler:`, () => {
 
   it("Not mocked getFullDeviceList will throw due to lack of navigator", async () => {
     const originalHandler = new DeviceHandler(handlerCallback);
-
-    try {
-      await originalHandler.getFullDeviceList();
-      assert.strictEqual(true, false);
-    } catch (e) {
-      assert.strictEqual(true, true);
-    }
+    await assertion.willThrow(
+      originalHandler.getFullDeviceList,
+      handlerCallback
+    );
   });
 });
