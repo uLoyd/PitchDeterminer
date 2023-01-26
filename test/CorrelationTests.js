@@ -1,7 +1,9 @@
 const assert = require("assert");
+const assertion = require("./utilities/Assertion");
 const {
   Correlation: CorrelationTests,
-} = require("../customModules/audioModules/index");
+} = require("../customModules/audioModules/index")
+
 const testBuffer = require("./data/buffer");
 
 describe(`Default Correlation`, function () {
@@ -19,14 +21,30 @@ describe(`Default Correlation`, function () {
 
   it("Correlation instance exists", () => assert.ok(correlation));
 
-  it("Autocorrelation with default correlationSampleStep, for given buffer returns aprox. 54.98 Hz", () => {
+  it("Autocorrelation with default correlationSampleStep, for given buffer returns approx. 54.98 Hz", () => {
     const actual = correlation.perform(testBuffer).toFixed(2);
     assert.strictEqual(actual, "54.98");
   });
 
-  it("Autocorrelation with default correlationSampleStep set to 1, for given buffer returns aprox. 54.98 Hz", () => {
+  it("Autocorrelation with default correlationSampleStep, for given buffer returns approx. 54.98 Hz +- 0.5Hz returning on threshold", () => {
+    correlation.returnOnThreshold = true;
+    const actual = correlation.perform(testBuffer);
+    const expected = 54.98;
+    const margin = 0.5;
+    assertion.isInRange(actual, expected - margin, expected + margin)
+  });
+
+  it("Autocorrelation with default correlationSampleStep set to 1, for given buffer returns approx. 54.98 Hz", () => {
     const actual = correlation.perform(testBuffer, 1).toFixed(2);
     assert.strictEqual(actual, "54.98");
+  });
+
+  it("Autocorrelation with default correlationSampleStep set to 1, for given buffer returns approx. 54.98 Hz +- 0.5Hz returning on threshold", () => {
+    correlation.returnOnThreshold = true;
+    const actual = correlation.perform(testBuffer, 1);
+    const expected = 54.98;
+    const margin = 0.5;
+    assertion.isInRange(actual, expected - margin, expected + margin)
   });
 
   it("Autocorrelation with buffer filled with zeros will return -1", () => {

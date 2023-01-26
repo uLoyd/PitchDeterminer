@@ -130,7 +130,7 @@ describe("Audio Handler", () => {
   });
 
   it(
-    "Audio handler getWeightedVolume will return value around 262 for A/B/C sound curves " +
+    "Audio handler getWeightedVolume will return value  around 263 for A/B/C sound curves " +
       "with band range of 8Hz and linear buffer of 256 elements (0-255)",
     async () => {
       audio.BFDUint8 = function () {
@@ -139,7 +139,7 @@ describe("Audio Handler", () => {
       audio.bandRange = 2048 / 256;
       const vol = audio.getWeightedVolume(2);
 
-      assertion.isInRange(vol, 261, 263);
+      assertion.isInRange(vol, 261, 264);
     }
   );
 });

@@ -29,8 +29,8 @@ class NumberAssert {
     errMsg = `${this.value} is not in range ${lowerBound} - ${upperBound}`
   ) {
     const inRange =
-      this.value >= new NumberAssert(lowerBound).value &&
-      this.value >= new NumberAssert(upperBound).value;
+      (this.value >= new NumberAssert(lowerBound).value) &&
+      (this.value <= new NumberAssert(upperBound).value);
     assert.ok(inRange, errMsg);
   }
 }
