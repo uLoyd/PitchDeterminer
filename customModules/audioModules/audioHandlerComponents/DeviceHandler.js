@@ -11,7 +11,9 @@ class DeviceHandler {
     if (callback) this.deviceChangeCallback = callback;
 
     try {
-      navigator.mediaDevices.ondevicechange = this.deviceChangeEvent.bind(this);
+      this.navigator = navigator;
+      this.navigator.mediaDevices.ondevicechange =
+        this.deviceChangeEvent.bind(this);
     } catch (e) {
       console.error(
         `Problem with window.navigator.mediaDevices.ondevicechange event:\n${e}`
@@ -26,18 +28,18 @@ class DeviceHandler {
   }
 
   async getFullDeviceList() {
-    const idArr = [];
+    const devArr = [];
 
-    const devices = await navigator.mediaDevices.enumerateDevices();
+    const devices = await this.navigator.mediaDevices.enumerateDevices();
     devices.forEach((device) => {
       const [kind, type, direction] = device.kind.match(/(\w+)(input|output)/i);
 
       if (type === "audio")
         // Checks only audio input. No use for video
-        idArr.push(new Device(device, direction));
+        devArr.push(new Device(device, direction));
     });
 
-    return idArr;
+    return devArr;
   }
 
   async getDeviceList(requestedDirection) {
@@ -80,6 +82,7 @@ class DeviceHandler {
   // Returns bool. True - there's at least 1 input device available
   async checkForInput() {
     const devList = await this.getDeviceList(Device.direction.input);
+    console.log(await this.getFullDeviceList());
 
     return !!devList.length;
   }

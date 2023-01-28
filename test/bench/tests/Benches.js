@@ -96,7 +96,7 @@ module.exports = [
   },
   {
     name: "AudioHandler::correlate, force full buffer check, return on threshold",
-    runAmount: 50,
+    runAmount: 100,
     run: runBigCorrelationWithThreshold,
   },
   {

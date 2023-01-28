@@ -8,30 +8,19 @@ const {
 } = require("../customModules/audioModules");
 const assert = require("assert");
 const assertion = require("./utilities/Assertion");
+const NavigatorMock = require("./utilities/NavigatorMock");
+const fakeDeviceList = require("./utilities/FakeDeviceList");
 const testData = require("./data/AudioHandlerInitData");
+const { AudioEvents } = require("../customModules/audioModules/index");
 
 describe("Audio Handler", () => {
   let audio;
 
-  const fakeDeviceHandler = new DeviceHandler(() => {});
-  fakeDeviceHandler.getFullDeviceList = function () {
-    return [
-      new Device(1, "test1", Device.direction.input),
-      new Device(2, "test2", Device.direction.input),
-      new Device(3, "test3", Device.direction.input),
-      new Device(4, "test4", Device.direction.input),
-      new Device(5, "test5", Device.direction.output),
-      new Device(6, "test6", Device.direction.output),
-      new Device(7, "test7", Device.direction.output),
-      new Device(8, "test8", Device.direction.output),
-    ];
-  };
-
   const testDeviceLists = async function (direction) {
     const actualList = await audio.getDeviceList(direction);
-    const expectedList = await fakeDeviceHandler
-      .getFullDeviceList()
-      .filter((device) => device.dir === (direction ?? device.dir));
+    const expectedList = (await audio.deviceHandler.getFullDeviceList()).filter(
+      (device) => device.dir === (direction ?? device.dir)
+    );
     assert.strictEqual(actualList.length, expectedList.length);
 
     assertion.iterableOfObjectsPropsEqual(actualList, expectedList);
@@ -44,6 +33,8 @@ describe("Audio Handler", () => {
     return audio.getVolume(0);
   };
 
+  const navigatorMock = NavigatorMock.setMockDevices(fakeDeviceList);
+
   beforeEach(() => {
     audio = new AudioHandler({
       general: testData[0].params.general,
@@ -51,7 +42,8 @@ describe("Audio Handler", () => {
       analyserNode: new Analyser(testData[0].params.analyserSettings),
     });
 
-    audio.deviceHandler = fakeDeviceHandler;
+    audio.navigator = navigatorMock;
+    audio.deviceHandler.navigator = navigatorMock;
   });
 
   it("Audio handler exists", () => assert.ok(audio));
@@ -111,9 +103,7 @@ describe("Audio Handler", () => {
   });
 
   it("Audio handler will throw during stream setup if there's no available input device", async () => {
-    fakeDeviceHandler.getDeviceList = function () {
-      return [];
-    };
+    audio.deviceHandler.navigator = NavigatorMock.setMockDevices([]);
     await assertion.willThrow(audio.setupStream, []);
   });
 
@@ -142,4 +132,101 @@ describe("Audio Handler", () => {
       assertion.isInRange(vol, 261, 264);
     }
   );
+
+  it("Audio handler should call navigator.mediaDevices.getUserMedia with constraint from Device handler if input device is present", async () => {
+    const fakeDeviceList = [new Device(1, "test1", Device.direction.input)];
+
+    audio.navigator = NavigatorMock.setMockDevices(fakeDeviceList);
+    audio.deviceHandler = new DeviceHandler();
+    audio.deviceHandler.navigator =
+      NavigatorMock.setMockDevices(fakeDeviceList);
+    let constraint = await audio.getMediaStream();
+    assert.strictEqual(constraint.audio.deviceId.exact, fakeDeviceList[0].id);
+    assert.strictEqual(constraint.video, false);
+  });
+
+  it("Audio handler should call navigator.mediaDevices.getUserMedia with undefined from Device handler if input device is not present", async () => {
+    audio.navigator = NavigatorMock.setMockDevices([]);
+    audio.deviceHandler = new DeviceHandler();
+    audio.deviceHandler.navigator = NavigatorMock.setMockDevices([]);
+    console.log(audio.deviceHandler.navigator.mediaDevices.enumerateDevices());
+    let constraint = await audio.getMediaStream();
+    assert.strictEqual(constraint.audio.deviceId, undefined);
+    assert.strictEqual(constraint.video, false);
+  });
+
+  it("Audio handler will emit SetupDone event after setupStream call", async () => {
+    const fakeDeviceList = [new Device(1, "test1", Device.direction.input)];
+    audio.navigator = NavigatorMock.setMockDevices(fakeDeviceList);
+    audio.deviceHandler = new DeviceHandler();
+    audio.deviceHandler.navigator =
+      NavigatorMock.setMockDevices(fakeDeviceList);
+    audio.audioContext.createMediaStreamSource = () => {};
+    audio.audioContext.createScriptProcessor = () => {};
+    audio.streamSetup = () => {};
+
+    await assertion.willTriggerEvent(
+      audio,
+      AudioEvents.setupDone,
+      audio.setupStream.bind(audio)
+    );
+  });
+
+  it("Audio Handler will unset stream, running to false and streamReady to false on end call if it's running", async () => {
+    audio.running = true;
+    audio.streamClose = () => {};
+    await audio.end();
+
+    assert.ok(!audio.stream);
+    assert.ok(!audio.running);
+    assert.ok(!audio.streamReady);
+  });
+
+  it("Audio Handler will call streamEnd event after end call if it's currently running", async () => {
+    audio.running = true;
+    audio.streamClose = () => {};
+
+    await assertion.willTriggerEvent(
+      audio,
+      AudioEvents.streamEnd,
+      audio.end.bind(audio)
+    );
+    assert.ok(!audio.running);
+  });
+
+  it("Audio Handler will call streamPause event after pause call if it's currently running", async () => {
+    audio.running = true;
+    audio.streamPause = () => {};
+
+    await assertion.willTriggerEvent(
+      audio,
+      AudioEvents.streamPause,
+      audio.pause.bind(audio)
+    );
+    assert.ok(!audio.running);
+  });
+
+  it("Audio Handler will call streamResume event after resume call if it's currently not running", async () => {
+    audio.running = false;
+    audio.streamResume = () => {};
+
+    await assertion.willTriggerEvent(
+      audio,
+      AudioEvents.streamResume,
+      audio.resume.bind(audio)
+    );
+    assert.ok(audio.running);
+  });
+
+  it("AUdio Handler will call Correlation.perform on correlate call", () => {
+    let callFlag = false;
+    audio.FTDFloat32 = () => {};
+    audio.correlation = {
+      perform: function () {
+        callFlag = true;
+      },
+    };
+    audio.correlate();
+    assert.ok(callFlag);
+  });
 });

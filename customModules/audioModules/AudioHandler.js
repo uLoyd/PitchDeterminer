@@ -47,6 +47,12 @@ class AudioHandler extends AudioSetup {
 
     this.changeOutput = (e) => this.deviceHandler.changeOutput(e);
 
+    try {
+      this.navigator = navigator;
+    } catch (e) {
+      console.warn("Audio Handler could not acquire navigator object");
+      console.warn(e);
+    }
     // starting up audio stream immediately after initialization
     //this.setupStream();
   }
@@ -63,7 +69,7 @@ class AudioHandler extends AudioSetup {
       video: false,
     };
     //console.log(`Stream setting up using input device:`, constrain.audio);
-    return await navigator.mediaDevices.getUserMedia(constraint);
+    return await this.navigator.mediaDevices.getUserMedia(constraint);
   }
 
   async setupStream() {

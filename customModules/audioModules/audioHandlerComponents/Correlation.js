@@ -8,7 +8,7 @@ class Correlation {
       correlationThreshold,
       correlationDegree,
       buflen,
-      returnOnThreshold
+      returnOnThreshold,
     } = initData;
 
     this.buflen = buflen;
@@ -59,7 +59,10 @@ class Correlation {
           best_correlation = correlation;
           best_offset = offset;
 
-          if (this.returnOnThreshold && (best_correlation > this.correlationThreshold))
+          if (
+            this.returnOnThreshold &&
+            best_correlation > this.correlationThreshold
+          )
             return this.sampleRate / best_offset;
         } else {
           const shift =

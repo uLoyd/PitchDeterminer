@@ -29,8 +29,8 @@ class NumberAssert {
     errMsg = `${this.value} is not in range ${lowerBound} - ${upperBound}`
   ) {
     const inRange =
-      (this.value >= new NumberAssert(lowerBound).value) &&
-      (this.value <= new NumberAssert(upperBound).value);
+      this.value >= new NumberAssert(lowerBound).value &&
+      this.value <= new NumberAssert(upperBound).value;
     assert.ok(inRange, errMsg);
   }
 }
@@ -184,6 +184,29 @@ const assertion = {
           errMsg(arr1[i][key], arr2[i][key])
         );
     }
+  },
+
+  willTriggerEvent: async function (
+    obj,
+    event,
+    callback,
+    params = [],
+    errMsg = `${event} not triggered`
+  ) {
+    let eventFlag = false;
+
+    obj.on(event, function () {
+      eventFlag = true;
+    });
+
+    try {
+      await callback(...params);
+      assert.ok(true);
+    } catch (e) {
+      assert.ok(false, e);
+    }
+
+    assert.ok(eventFlag, errMsg);
   },
 
   willThrow: async function (
