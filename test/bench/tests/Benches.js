@@ -39,6 +39,7 @@ audio.correlation = new Correlation({
     correlationThreshold: 0.5,
     correlationDegree: 0.98,
     buflen: 8192,
+    returnOnThreshold: true,
 });
 
 function runWeighted() {
@@ -58,15 +59,15 @@ function runBigCorrelation() {
 }
 
 function runSmallCorrelationWithThreshold() {
-    audio.correlation.returnOnThreshold = true;
-    return audio.correlation.perform(audioBufForCorrelation);
     audio.correlation.returnOnThreshold = false;
+    return audio.correlation.perform(audioBufForCorrelation);
+    audio.correlation.returnOnThreshold = true;
 }
 
 function runBigCorrelationWithThreshold() {
-    audio.correlation.returnOnThreshold = true;
-    return audio.correlation.perform(audioBufForCorrelation, 1);
     audio.correlation.returnOnThreshold = false;
+    return audio.correlation.perform(audioBufForCorrelation, 1);
+    audio.correlation.returnOnThreshold = true;
 }
 
 function runFq() {
@@ -80,22 +81,22 @@ module.exports = [
         run: runWeighted,
     },
     {
-        name: "AudioHandler::correlate, default step for buffer size",
+        name: "AudioHandler::correlate, default step for buffer size, return on threshold",
         runAmount: 100,
         run: runSmallCorrelation,
     },
     {
-        name: "AudioHandler::correlate, force full buffer check",
+        name: "AudioHandler::correlate, force full buffer check, return on threshold",
         runAmount: 50,
         run: runBigCorrelation,
     },
     {
-        name: "AudioHandler::correlate, default step for buffer size, return on threshold",
+        name: "AudioHandler::correlate, default step for buffer size, no return on threshold",
         runAmount: 100,
         run: runSmallCorrelationWithThreshold,
     },
     {
-        name: "AudioHandler::correlate, force full buffer check, return on threshold",
+        name: "AudioHandler::correlate, force full buffer check, no return on threshold",
         runAmount: 100,
         run: runBigCorrelationWithThreshold,
     },

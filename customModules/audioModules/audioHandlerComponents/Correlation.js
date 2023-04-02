@@ -29,6 +29,13 @@ class Correlation {
         return rms !== 0 && Math.sqrt(rms / this.buflen) >= this.rmsThreshold;
     }
 
+    _getShift(offset) {
+        return (
+            (this._correlations[offset + 1] - this._correlations[offset - 1]) /
+            this._correlations[offset]
+        );
+    }
+
     perform(buf, correlationSampleStep = this.defaultCorrelationSampleStep) {
         if (!this._checkRms(buf, correlationSampleStep))
             // not enough signal power
@@ -65,11 +72,10 @@ class Correlation {
                     )
                         return this.sampleRate / best_offset;
                 } else {
-                    const shift =
-                        (this._correlations[best_offset + 1] -
-                            this._correlations[best_offset - 1]) /
-                        this._correlations[best_offset];
-                    return this.sampleRate / (best_offset + 8 * shift);
+                    return (
+                        this.sampleRate /
+                        (best_offset + 8 * this._getShift(best_offset))
+                    );
                 }
             }
 

@@ -38,6 +38,7 @@ TODO right now:
 - [ ] Anything else that will pop up later
 
 ## ChangeLog:
+- [v0.6.7](#v067)
 - [v0.6.6](#v066)
 - [v0.6.5](#v065)
 - [v0.6.4](#v064) 
@@ -109,15 +110,18 @@ await mic.setupStream(); // setupStream() is asynchronus but all the following
 
 To change the device it's enough to pass an id of said device to the
 _changeInput_ methods of the AudioHandler. List of devices can be accessed
-through DeviceHandler hold by the AudioHandler as _deviceHandler_ property.
+through [DeviceHandler](#DeviceHandler) hold by the [AudioHandler](#AudioHandler) as _deviceHandler_ property.
 
 ```javascript
 const { AudioHandler, Device } = require("audio-works");
 
 let mic = new AudioHandler();
 
+// if for some reason the device list is empty, which shouldn't really happen,
+// then it can be easily fixed by calling `await mic.deviceHandler.updateDeviceList();`
+
 // Retrieves a list of available devices
-let inputs = await mic.getDeviceList(Device.direction.input);
+let inputs = mic.getDeviceList(Device.direction.input);
 // Change default ('first available') input to the third one
 mic.changeInput(inputs[2].id);
 
@@ -128,7 +132,8 @@ await mic.setupStream();
 
 ### AudioSetup
 
-Main class responsible for setting up AudioHandler and AudioFileHandler
+[File in GitHub](https://github.com/uLoyd/PitchDeterminer/blob/master/customModules/audioModules/audioHandlerComponents/AudioSetup.js)  
+Main class responsible for setting up [AudioHandler](#AudioHandler) and [AudioFileHandler](#AudioFileHandler)
 holding two main obligatory nodes used by AudioContext which are AnalyserNode and GainNode.
 This class extends EventEmitter as after various steps instance dispatches related to them events.
 
@@ -148,7 +153,8 @@ This class extends EventEmitter as after various steps instance dispatches relat
 
 ## AudioHandler
 
-Extends AudioSetup as AudioContext is crucial for all the functionalities provided by this class. 
+[File in GitHub](https://github.com/uLoyd/PitchDeterminer/blob/master/customModules/audioModules/AudioHandler.js)  
+Extends [AudioSetup](#AudioSetup) as AudioContext is crucial for all the functionalities provided by this class. 
 Handles live audio inputs like microphones or instruments connected to
 audio interfaces as well as output to any available devices.
 
@@ -200,7 +206,8 @@ volume = volume < 100 ? volume : 100;
 
 ## AudioFileHandler
 
-Extends AudioHandler class therefore retains possibility to handle
+[File in GitHub](https://github.com/uLoyd/PitchDeterminer/blob/master/customModules/audioModules/AudioFileHandler.js)  
+Extends [AudioHandler](#AudioHandler) class therefore retains possibility to handle
 live audio input but adds methods meant for audio file decoding,
 creating standard BufferSources with primary goal of audio output, or
 obtaining pulse-code modulation data.
@@ -252,48 +259,60 @@ fileHandler.processCallback((data) => {
 
 ## Correlation
 
+[File in GitHub](https://github.com/uLoyd/PitchDeterminer/blob/master/customModules/audioModules/audioHandlerComponents/Correlation.js)  
 Sole purpose of this class is performing autocorrelation on audio buffer,
 allowing a set-up of custom thresholds. The output of perform method is supposed to be
 a frequency of the sound (the fundamental frequency). This means it processes
 the signal in monophonic context.
 
-| Method      | Arguments                                                                                                                      | Return value | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-|-------------|--------------------------------------------------------------------------------------------------------------------------------|--------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| constructor | Object{<br/>&ensp;sampleRate: uint,<br/> &ensp;rmsThreshold: double <0,1),<br/> &ensp;correlationThreshold: double <0,1)<br/>} | Correlation  | Creates a Correlation instance setting up rms and correlation thresholds. Sample rate is require for the last step of the autocorrelation as based on this value the frequency will be calculated. It is possible and encouraged to pass only the buflen and sampleRate values as the remaining values can be automatically set to default. **Based on buffer length (buflen) value of the _defaultCorrelationSampleStep_ property is determined:** For buffer length below 8192 by default the value is set to 1 otherwise to 2. The purpose of it is that with large buffers the accuracy is good enough while looping over every **second** element/pair during the autocorrelation. This behaviour can be changed to standard looping over every element/pair bt simply passing value _1_ to the _perform_ method. It should be noted that with larger buffers not skipping any element results in higher latency where skipping every second pair boosts execution time by ~60-70% in case of buffers over 8192 samples compared to standard loop over every element/pair and in both scenarios the difference in results is around 4th decimal place therefore by default in case of larger buffers the algorithm sets _defaultCorrelationSampleStep_ to _2_. |
-| perform     | buf: Float32Array,<br/>defaultCorrelationSampleStep: uint = <1 or 2 depending on buffer size>                                  | double       | This method receives buffer with data that will be processed up to the length specified in the _this.buflen_ member. If RMS will be too low, meaning the signal is too weakk, -1 will be returned. In case autocorrelation algorithm result will be higher than _this.correlationThreshold_ the output will be the fundamental frequency of the passed buffer, otherwise it will return -1. As mentioned before, _defaultCorrelationSampleStep_ determines the incrementation of data for loops going through the buffer. The higher the value the more values/pairs will be skipped. It shouldn't be set to value higher than 2. For smaller buffers (< 8192) it's set to 1, for larger ones it's set to 2 to minimize latency.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| _checkRms   | buf: Float32Array,<br/>defaultCorrelationSampleStep: uint = <1 or 2 depending on buffer size>                                  | bool         | Calculate sum of squares of all the values in the buffer and returns true if the square sum divided by amount of elements is higher than value specified in the constructor: _this.rmsThreshold_.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| Method      | Arguments                                                                                                                                                                                                     | Return value | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+|-------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| constructor | Object{<br/>&ensp;sampleRate: uint,<br/> &ensp;rmsThreshold: double <0,1),<br/> &ensp;correlationThreshold: double <0,1),<br/>correlationDegree: double <0,1),<br/>buflen: uint,<br/>returnOnThreshold: bool} | Correlation  | Creates a Correlation instance setting up rms and correlation thresholds. Sample rate is require for the last step of the autocorrelation as based on this value the frequency will be calculated. It is possible and encouraged to pass only the buflen and sampleRate values as the remaining values can be automatically set to default. **Based on buffer length (buflen) value of the _defaultCorrelationSampleStep_ property is determined:** For buffer length below 8192 by default the value is set to 1 otherwise to 2. The purpose of it is that with large buffers the accuracy is good enough while looping over every **second** element/pair during the autocorrelation. This behaviour can be changed to standard looping over every element/pair bt simply passing value _1_ to the _perform_ method. It should be noted that with larger buffers not skipping any element results in higher latency where skipping every second pair boosts execution time by ~60-70% in case of buffers over 8192 samples compared to standard loop over every element/pair and in both scenarios the difference in results is around 4th decimal place therefore by default in case of larger buffers the algorithm sets _defaultCorrelationSampleStep_ to _2_. |
+| perform     | buf: Float32Array,<br/>defaultCorrelationSampleStep: uint = <1 or 2 depending on buffer size>                                                                                                                 | double       | This method receives buffer with data that will be processed up to the length specified in the _this.buflen_ member. If RMS will be too low, meaning the signal is too weakk, -1 will be returned. In case autocorrelation algorithm result will be higher than _this.correlationThreshold_ the output will be the fundamental frequency of the passed buffer, otherwise it will return -1. As mentioned before, _defaultCorrelationSampleStep_ determines the incrementation of data for loops going through the buffer. The higher the value the more values/pairs will be skipped. It shouldn't be set to value higher than 2. For smaller buffers (< 8192) it's set to 1, for larger ones it's set to 2 to minimize latency.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| _checkRms   | buf: Float32Array,<br/>defaultCorrelationSampleStep: uint = <1 or 2 depending on buffer size>                                                                                                                 | bool         | Calculate sum of squares of all the values in the buffer and returns true if the square sum divided by amount of elements is higher than value specified in the constructor: _this.rmsThreshold_.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
 
 ## DeviceHandler
 
-Main purpose of this class is interaction with _navigator.mediaDevices_ and for hat reason
+[File in GitHub](https://github.com/uLoyd/PitchDeterminer/blob/master/customModules/audioModules/audioHandlerComponents/DeviceHandler.js)  
+Main purpose of this class is interaction with _navigator.mediaDevices_ and for that reason
 it uses a private helper class _Device_.
+[Device](#Device) class instances returned from methods of this class
+are only the copies of actual stored objects to keep the data stored
+by the instance consistent regardless of user actions on obtained device data.
 
 | Method                  | Arguments                                                   | Return value                                                | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
 |-------------------------|-------------------------------------------------------------|-------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | constructor             | callback: function                                          | DeviceHandler                                               | Callback passed to the constructor will be called on every _ondevicechange_ event triggered from _navigator.mediaDevices_.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
-| deviceChangeEvent       | N/A                                                         | void                                                        | This method is called on every device change and is responsible for invoking the user callback passed previously to the constructor.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| async getFullDeviceList | N/A                                                         | Array[Device]                                               | Returns an array of devices (_Device_ class instances) available through _navigator_ that contains _MediaDeviceInfo_ as well as it's direction, input or output.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| async getDeviceList     | requestedDirection: Device.direction                        | Array[Device]                                               | Returns an array of devices in requested direction (_Device_ class instances) available through _navigator_ that contains _MediaDeviceInfo_ as well as it's direction, input or output. _Should be used with Device.direction.(input or output) to not use raw strings_                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| async getCurrentOrFirst | N/A                                                         | Object{<br/> &ensp;in: Device,<br/> &ensp;out: Device<br/>} | Returns a object containing a pair of devices - in (input) and out (output). If values _this.currentInput_ and _this.currentOutput_ are set than this devices will be the value in the object. In case current device is not set than a first available one in respective direction will be set up in place of the ones supposed to bo holded by the instance.                                                                                                                                                                                                                                                                                                                          |
-| async changeDevice      | direction: Device.direction,<br/>deviceId: Optional[string] | void                                                        | In this method _direction_ is a string stating the direction of the device that's going to be changed. If present than _this.current-direction-device_ will be set to the device found in device list with requested id, or undefined in case of id that was not found. In case of no id passed to the method the first available device in requested direction will be chosen. Lastly the user defined callback handling device change will be called to which current device list of all available devices wil be passed along with the current input and output devices hold by the instance itself. _Should be used with Device.direction.(input or output) to not use raw strings_ |
-| async changeInput       | deviceId: string                                            | void                                                        | Shorthand for _await deviceHandlerInstance.changeDevice('input', e)_                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| async changeOutput      | deviceId: string                                            | void                                                        | Shorthand for _await deviceHandlerInstance.changeDevice('output', e)_                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| async checkForInput     | N/A                                                         | bool                                                        | Returns boolean, true if there's at least one available input device and false if there's none.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| async navigatorInput    | N/A                                                         | Union[Object{ exact: string }, undefined]                   | Returns a constraint for navigator used in audio stream setup stating exact input device. The device will be _this.currentInput_ if set, or first available one. If no input devices are accessible _undefined_ will be returned.                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| async deviceChangeEvent | N/A                                                         | void                                                        | This method is called on every device change and is responsible for invoking the user callback passed previously to the constructor. It is called right after the invocation of updateDeviceList method.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| async updateDeviceList  | N/A                                                         | void                                                        | This method updates the list of cached audio devices. It is called at every "ondevicechange" event generated by the navigator.mediaDevices. The previous list is completely cleared before creating the new one.                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| getFullDeviceList       | N/A                                                         | Array[Device]                                               | Returns an array of devices (_Device_ class instances) available through _navigator_ that contains _MediaDeviceInfo_ as well as it's direction, input or output.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| getDeviceList           | requestedDirection: Device.direction                        | Array[Device]                                               | Returns an array of devices in requested direction (_Device_ class instances) available through _navigator_ that contains _MediaDeviceInfo_ as well as it's direction, input or output. _Should be used with Device.direction.(input or output) to not use raw strings_                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| getCurrentOrFirst       | N/A                                                         | Object{<br/> &ensp;in: Device,<br/> &ensp;out: Device<br/>} | Returns a object containing a pair of devices - in (input) and out (output). If values _this.currentInput_ and _this.currentOutput_ are set than this devices will be the value in the object. In case current device is not set than a first available one in respective direction will be set up in place of the ones supposed to bo holded by the instance.                                                                                                                                                                                                                                                                                                                          |
+| changeDevice            | direction: Device.direction,<br/>deviceId: Optional[string] | void                                                        | In this method _direction_ is a string stating the direction of the device that's going to be changed. If present than _this.current-direction-device_ will be set to the device found in device list with requested id, or undefined in case of id that was not found. In case of no id passed to the method the first available device in requested direction will be chosen. Lastly the user defined callback handling device change will be called to which current device list of all available devices wil be passed along with the current input and output devices hold by the instance itself. _Should be used with Device.direction.(input or output) to not use raw strings_ |
+| changeInput             | deviceId: string                                            | void                                                        | Shorthand for _await deviceHandlerInstance.changeDevice('input', e)_                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| changeOutput            | deviceId: string                                            | void                                                        | Shorthand for _await deviceHandlerInstance.changeDevice('output', e)_                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| checkForInput           | N/A                                                         | bool                                                        | Returns boolean, true if there's at least one available input device and false if there's none.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| navigatorInput          | N/A                                                         | Union[Object{ exact: string }, undefined]                   | Returns a constraint for navigator used in audio stream setup stating exact input device. The device will be _this.currentInput_ if set, or first available one. If no input devices are accessible _undefined_ will be returned.                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
 
 ### Device
 
-A class representing navigators mediaDevices. It has no methods, holding only
-values: _id_: device id, _label_: device label, and _dir_: device direction
-Array of instances of this class is returned from the _getDeviceList_ method of DeviceHandler.
+[File in GitHub](https://github.com/uLoyd/PitchDeterminer/blob/master/customModules/audioModules/audioHandlerComponents/Device.js)  
+A class representing navigators mediaDevices. It has no methods, holding only  
+values: _id_: device id, _label_: device label, and _dir_: device direction  
+Array of instances of this class is returned from the _getDeviceList_ method of DeviceHandler.  
 Along the device direction there are also two boolean flags related to it: _isOutput_ and _isInput_
 for more convenient array checks and filtering.  
+Class contains _copy_ method for more convenient deep copies.  
 For more convenient direction description instead of raw strings class contains a static
-object serving as enum which can be accessed as ```Device.direction.(input|output)```.
+object serving as enum which can be accessed as ```Device.direction.(input|output)```.  
+For more convenient device type description instead of raw strings class contains a static
+object serving as enum which can be accessed as ```Device.type.(audio|video)```, nonetheless only "audio"
+option is used/checked in the whole implementation.
 
 ## SoundStorage
 
-Class supposed to serve as a storage for outputs of the Correlation class holding
+[File in GitHub](https://github.com/uLoyd/PitchDeterminer/blob/master/customModules/audioModules/SoundStorage.js)  
+Class supposed to serve as a storage for outputs of the [Correlation](#Correlation) class holding
 methods helping correct sound frequency estimations in short periods of time.
 
 | Method      | Arguments                  | Return value | Description                                                                                                                                                                                                                                                                                                                                                                        |
@@ -308,7 +327,8 @@ methods helping correct sound frequency estimations in short periods of time.
 
 ## SoundStorageEvent
 
-This class has the same purpose as SoundStorage extending it
+[File in GitHub](https://github.com/uLoyd/PitchDeterminer/blob/master/customModules/audioModules/SoundStorageEvent.js)  
+This class has the same purpose as [SoundStorage](#SoundStorage) extending it
 with a difference of utilizing EventEmitter allowing more diverse interactions with the storage.
 
 | Method          | Arguments                                                                           | Return value                                                   | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
@@ -325,6 +345,7 @@ with a difference of utilizing EventEmitter allowing more diverse interactions w
 
 ## FrequencyMath
 
+[File in GitHub](https://github.com/uLoyd/PitchDeterminer/blob/master/customModules/audioModules/FrequencyMath.js)  
 Class responsible for frequency calculations, as well as translating
 those to musical notation. It operates based on frequency in Hz or a distance
 of a note from sound A4. Class performs calculations in a context of equal tempered
@@ -379,6 +400,7 @@ Distance of given sound from A4.
 
 ## AudioEvents
 
+[File in GitHub](https://github.com/uLoyd/PitchDeterminer/blob/master/customModules/audioModules/audioHandlerComponents/AudioEvents.js)  
 Class serving as an enum for events emitted from components.  
 The sole purpose of it is to diminish required changes in case of changes in  
 event string values, as well as more transparent place to find all the events.  
@@ -396,17 +418,37 @@ Members:
 - sampleLimit
 - sampleTarget
 
+## Default setup values
+
+[File in GitHub](https://github.com/uLoyd/PitchDeterminer/blob/master/customModules/audioModules/audioHandlerComponents/defaultAudioValues.js)  
+Fields needed to construct crucial objects:
+- [AudioSetup](#AudioSetup)
+- [Correlation](#Correlation)
+- Gain node [File in GitHub](https://github.com/uLoyd/PitchDeterminer/blob/master/customModules/audioModules/audioHandlerComponents/audioSetupComponents/Gain.js)
+- Analyser node [File in GitHub](https://github.com/uLoyd/PitchDeterminer/blob/master/customModules/audioModules/audioHandlerComponents/audioSetupComponents/Analyser.js)
+- Properties of [AudioHandler](#AudioHandler) and [AudioFileHandler](#AudioFileHandler) (buffer length: buflen, and curve algorithm: curveAlgorithm)
+
+if not specified by user are loaded from this file.
 
 # ChangeLog
+## v0.6.7
+- [DeviceHandler](#DeviceHandler) caches devices obtained through navigator in "cachedDevices_" property
+- [DeviceHandler](#DeviceHandler) no longer sets input/output device to undefined if its ID is not found 
+- Methods of [DeviceHandler](#DeviceHandler) returning [Device](#Device) lists and IDs now operate on copies of stored
+  objects to ensure consistency of stored data regardless of modifications performed on
+  returned objects
+- [Device](#Device) class has new method "copy" that creates a new identical instance of the object
+- [Correlation](#Correlation) now has the value "returnOnThreshold" set to true by default [(default audio values)](https://github.com/uLoyd/PitchDeterminer/blob/master/customModules/audioModules/audioHandlerComponents/defaultAudioValues.js)
+
 ## v0.6.6
 - ReadMe update
 
 ## v0.6.5
 
 - D-weighting algorithm has been removed as it was unreliable and unsupported by ISO
-- FrequencyMath has additional static constructor _symbolConstructor_ that can create a new
+- [FrequencyMath](#FrequencyMath) has additional static constructor _symbolConstructor_ that can create a new
   instance of the class simply by a string like "C4" passed to it as an argument.
-- _getMediaStream_ method of AudioHandler now doesn't accept custom constraint as it was unreliable,
+- _getMediaStream_ method of [AudioHandler](#AudioHandler) now doesn't accept custom constraint as it was unreliable,
   although it should be back in future
 
 ## v0.6.4
@@ -415,20 +457,20 @@ Members:
 ## v0.6.3
 
 - Shorter execution time of _perform_ method of _Correlation_ class
-- Shorter execution time of _getVolume_ method of _AudioHandler_ class
-- Slightly shorter execution time of _getWeightedVolume_ method of _AudioHandler_ class
-- _FTDFloat32(buflen: uint)_ method of _AudioSetup_ class now takes _this.buflen_ by default
-- _perform_ method of _Correlation_ class now takes additional argument defaultCorrelationSampleStep
+- Shorter execution time of _getVolume_ method of [AudioHandler](#AudioHandler) class
+- Slightly shorter execution time of _getWeightedVolume_ method of [AudioHandler](#AudioHandler) class
+- _FTDFloat32(buflen: uint)_ method of [AudioSetup](#AudioSetup) class now takes _this.buflen_ by default
+- _perform_ method of [Correlation](#Correlation) class now takes additional argument defaultCorrelationSampleStep
   that defaults to 1 (for smaller buffers < 8192) or 2 (for larger buffers >= 8192) to minimize latency.
   Larger buffers can still work the same way as smaller ones by **explicitly** passing value _1_ 
   as second argument to the method.
 
 ## v0.6.2
 
-- Added _distance_ class member to FrequencyMath to limit recalculation of this value
+- Added _distance_ class member to [FrequencyMath](#FrequencyMath) to limit recalculation of this value
   in other class methods 
-- Removed non static _getDistanceFromNote_ method as "distance" is now a class member
-- Renamed _getVolume_ method of AudioHandler class to _getWeightedVolume_.
-- Added _getVolume_ method to AudioHandler class that counts average of ByteFrequencyData stored 
+- Removed non static _getDistanceFromNote_ method from [FrequencyMath](#FrequencyMath) as "distance" is now a class member
+- Renamed _getVolume_ method of [AudioHandler](#AudioHandler) class to _getWeightedVolume_.
+- Added _getVolume_ method to [AudioHandler](#AudioHandler) class that counts average of ByteFrequencyData stored 
   in Analyser node and casts it into a double in <0, 1) range
 - getWeightedVolume returns Number instead of string
