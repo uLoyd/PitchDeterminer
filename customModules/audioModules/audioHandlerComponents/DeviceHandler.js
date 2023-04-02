@@ -6,6 +6,7 @@ class DeviceHandler {
   currentInput = null;
   currentOutput = null;
   deviceChangeCallback = () => {};
+  cachedDevices_ = [];
 
   constructor(callback) {
     if (callback) this.deviceChangeCallback = callback;
@@ -21,75 +22,87 @@ class DeviceHandler {
     }
   }
 
-  deviceChangeEvent() {
-    // console.log("Change of device occurred");
-
-    this.deviceChangeCallback();
-  }
-
-  async getFullDeviceList() {
-    const devArr = [];
-
+  async updateDeviceList() {
+    this.cachedDevices_ = [];
     const devices = await this.navigator.mediaDevices.enumerateDevices();
     devices.forEach((device) => {
       const [kind, type, direction] = device.kind.match(/(\w+)(input|output)/i);
-
-      if (type === "audio")
-        // Checks only audio input. No use for video
-        devArr.push(new Device(device, direction));
+      if (type === Device.type.audio)
+        this.cachedDevices_.push(new Device(device, direction));
     });
-
-    return devArr;
   }
 
-  async getDeviceList(requestedDirection) {
-    return (await this.getFullDeviceList()).filter(
-      (device) => device.dir === requestedDirection
+  async deviceChangeEvent() {
+    // console.log("Change of device occurred");
+    await this.updateDeviceList();
+    this.deviceChangeCallback(
+      this.getFullDeviceList(),
+      this.currentInput?.copy(),
+      this.currentOutput?.copy()
     );
   }
 
-  // Returns currently set i/o devices or first matching device from device list
-  async getCurrentOrFirst() {
-    const devices = await this.getFullDeviceList();
+  getFullDeviceList() {
+    return [...this.cachedDevices_].map((device) => device.copy());
+  }
 
+  getDeviceList(requestedDirection) {
+    return this.cachedDevices_
+      .filter((device) => device.dir === requestedDirection)
+      .map((device) => device.copy());
+  }
+
+  // Returns currently set i/o devices or first matching device from device list
+  getCurrentOrFirst() {
     return {
-      in: this.currentInput ?? devices.find((device) => device.isInput),
-      out: this.currentOutput ?? devices.find((device) => device.isOutput),
+      in:
+        this.currentInput ??
+        this.cachedDevices_.find((device) => device.isInput)?.copy(),
+      out:
+        this.currentOutput ??
+        this.cachedDevices_.find((device) => device.isOutput)?.copy(),
     };
   }
 
-  async changeDevice(direction, deviceId) {
-    const devList = await this.getDeviceList(direction);
-    const dev = devList.find((device) => device.id === (deviceId ?? device.id));
+  changeDevice(direction, deviceId) {
+    const devList = this.getDeviceList(direction);
+    const dev = devList
+      .find((device) => device.id === (deviceId ?? device.id))
+      ?.copy();
+
+    if (!dev) {
+      console.warn(
+        `No device with ID: ${deviceId} found in direction: ${direction}`
+      );
+      return;
+    }
 
     direction === Device.direction.input
       ? (this.currentInput = dev)
       : (this.currentOutput = dev);
 
     this.deviceChangeCallback(
-      await this.getFullDeviceList(),
+      this.getFullDeviceList(),
       this.currentInput,
       this.currentOutput
     );
   }
 
-  changeInput = async (deviceId) =>
-    await this.changeDevice(Device.direction.input, deviceId);
+  changeInput = (deviceId) =>
+    this.changeDevice(Device.direction.input, deviceId);
 
-  changeOutput = async (deviceId) =>
-    await this.changeDevice(Device.direction.output, deviceId);
+  changeOutput = (deviceId) =>
+    this.changeDevice(Device.direction.output, deviceId);
 
   // Returns bool. True - there's at least 1 input device available
-  async checkForInput() {
-    const devList = await this.getDeviceList(Device.direction.input);
-    console.log(await this.getFullDeviceList());
-
+  checkForInput() {
+    const devList = this.getDeviceList(Device.direction.input);
     return !!devList.length;
   }
 
   // Return constrain for setting up the stream
-  async navigatorInput() {
-    const device = await this.getCurrentOrFirst();
+  navigatorInput() {
+    const device = this.getCurrentOrFirst();
 
     return device.in
       ? {

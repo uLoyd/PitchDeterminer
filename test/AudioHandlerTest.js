@@ -140,6 +140,7 @@ describe("Audio Handler", () => {
     audio.deviceHandler = new DeviceHandler();
     audio.deviceHandler.navigator =
       NavigatorMock.setMockDevices(fakeDeviceList);
+    await audio.deviceHandler.updateDeviceList();
     let constraint = await audio.getMediaStream();
     assert.strictEqual(constraint.audio.deviceId.exact, fakeDeviceList[0].id);
     assert.strictEqual(constraint.video, false);

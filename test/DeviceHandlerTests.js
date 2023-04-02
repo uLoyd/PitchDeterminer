@@ -1,6 +1,7 @@
 const assert = require("assert");
 const assertion = require("./utilities/Assertion");
 const fakeDeviceList = require("./utilities/FakeDeviceList");
+const NavigatorMock = require("./utilities/NavigatorMock");
 const {
   Device,
   DeviceHandler,
@@ -34,61 +35,54 @@ describe(`DeviceHandler:`, () => {
   };
   let deviceHandler;
 
-  const fakeDeviceListFunc1 = function () {
-    return fakeDeviceList;
-  };
-  const fakeDeviceListFunc2 = function () {
-    return [];
-  };
-
-  beforeEach(() => {
+  beforeEach(async () => {
     controlVariable = false;
     deviceHandler = new DeviceHandler(handlerCallback);
-    deviceHandler.getFullDeviceList = fakeDeviceListFunc1;
+    deviceHandler.navigator = NavigatorMock.setMockDevices(fakeDeviceList);
+    await deviceHandler.updateDeviceList();
   });
 
-  it("Calling deviceChangeEvent dispatches callback", () => {
+  it("Calling deviceChangeEvent dispatches callback", async () => {
     assert.strictEqual(controlVariable, false);
-
-    deviceHandler.deviceChangeEvent();
+    await deviceHandler.deviceChangeEvent();
     assert.strictEqual(controlVariable, true);
   });
 
-  it("Returns list of devices", async () => {
-    const devList = await deviceHandler.getFullDeviceList();
+  it("Returns list of devices", () => {
+    const devList = deviceHandler.getFullDeviceList();
     assert.strictEqual(devList.length, fakeDeviceList.length);
   });
 
-  it("Returns list of input devices", async () => {
-    const devList = await deviceHandler.getDeviceList(Device.direction.input);
+  it("Returns list of input devices", () => {
+    const devList = deviceHandler.getDeviceList(Device.direction.input);
     assert.strictEqual(devList.length, 4);
   });
 
-  it("Returns list of output devices", async () => {
-    const devList = await deviceHandler.getDeviceList(Device.direction.output);
+  it("Returns list of output devices", () => {
+    const devList = deviceHandler.getDeviceList(Device.direction.output);
     assert.strictEqual(devList.length, 4);
   });
 
-  it("getCurrentOrFirst returns first device if none is set", async () => {
-    const current = await deviceHandler.getCurrentOrFirst();
+  it("getCurrentOrFirst returns first device if none is set", () => {
+    const current = deviceHandler.getCurrentOrFirst();
     assertion.iterableOfObjectsPropsEqual(current.in, fakeDeviceList[0]);
     assertion.iterableOfObjectsPropsEqual(current.out, fakeDeviceList[4]);
   });
 
-  it("getCurrentOrFirst returns current devices if those are set", async () => {
+  it("getCurrentOrFirst returns current devices if those are set", () => {
     deviceHandler.currentInput = fakeDeviceList[3];
     deviceHandler.currentOutput = fakeDeviceList[7];
-    const current = await deviceHandler.getCurrentOrFirst();
+    const current = deviceHandler.getCurrentOrFirst();
     assertion.iterableOfObjectsPropsEqual(current.in, fakeDeviceList[3]);
     assertion.iterableOfObjectsPropsEqual(current.out, fakeDeviceList[7]);
   });
 
-  it("changeDevice dispatches callback and sets correct device", async () => {
+  it("changeDevice dispatches callback and sets correct device", () => {
     assert.strictEqual(controlVariable, false);
 
     const fakeInput = fakeDeviceList[2];
-    await deviceHandler.changeInput(fakeInput.id);
-    const current1 = await deviceHandler.getCurrentOrFirst();
+    deviceHandler.changeInput(fakeInput.id);
+    const current1 = deviceHandler.getCurrentOrFirst();
 
     assertion.iterableOfObjectsPropsEqual(current1.in, fakeInput);
     assertion.iterableOfObjectsPropsEqual(current1.out, fakeDeviceList[4]);
@@ -98,33 +92,35 @@ describe(`DeviceHandler:`, () => {
     assert.strictEqual(controlVariable, false);
 
     const fakeOutput = fakeDeviceList[6];
-    await deviceHandler.changeOutput(fakeOutput.id);
-    const current2 = await deviceHandler.getCurrentOrFirst();
+    deviceHandler.changeOutput(fakeOutput.id);
+    const current2 = deviceHandler.getCurrentOrFirst();
 
     assertion.iterableOfObjectsPropsEqual(current2.in, fakeInput);
     assertion.iterableOfObjectsPropsEqual(current2.out, fakeOutput);
     assert.strictEqual(controlVariable, true);
   });
 
-  it("checkForInput returns true if there are input devices in list", async () => {
-    const actual = await deviceHandler.checkForInput();
+  it("checkForInput returns true if there are input devices in list", () => {
+    const actual = deviceHandler.checkForInput();
     assert.strictEqual(actual, true);
   });
 
   it("checkForInput returns false if there are no input devices in list", async () => {
-    deviceHandler.getFullDeviceList = fakeDeviceListFunc2;
-    const actual = await deviceHandler.checkForInput();
+    deviceHandler.navigator = NavigatorMock.setMockDevices([]);
+    await deviceHandler.updateDeviceList();
+    const actual = deviceHandler.checkForInput();
     assert.strictEqual(actual, false);
   });
 
-  it("navigatorInput creates object from input device if any exists", async () => {
-    const actual = await deviceHandler.navigatorInput();
+  it("navigatorInput creates object from input device if any exists", () => {
+    const actual = deviceHandler.navigatorInput();
     assert.strictEqual(actual.exact, fakeDeviceList[0].id);
   });
 
   it("navigatorInput returns undefined if no input device exists", async () => {
-    deviceHandler.getFullDeviceList = fakeDeviceListFunc2;
-    const actual = await deviceHandler.navigatorInput();
+    deviceHandler.navigator = NavigatorMock.setMockDevices([]);
+    await deviceHandler.updateDeviceList();
+    const actual = deviceHandler.navigatorInput();
     assert.strictEqual(actual, undefined);
   });
 
@@ -134,5 +130,40 @@ describe(`DeviceHandler:`, () => {
       originalHandler.getFullDeviceList,
       handlerCallback
     );
+  });
+
+  it("Changing devices returned from getFullDeviceList won't affect the actual cachedDevices", () => {
+    const originalDevice = deviceHandler.cachedDevices_[0];
+    assert.strictEqual(originalDevice.id, 1);
+    const deviceFromList = deviceHandler.getFullDeviceList()[0];
+    assert.strictEqual(deviceFromList.id, 1);
+
+    deviceFromList.id = 123;
+    assert.strictEqual(originalDevice.id, 1);
+    assert.strictEqual(deviceFromList.id, 123);
+  });
+
+  it("Changing devices returned from getDeviceList won't affect the actual cachedDevices", () => {
+    const originalDevice = deviceHandler.cachedDevices_[0];
+    assert.strictEqual(originalDevice.id, 1);
+    const deviceFromList = deviceHandler.getDeviceList(
+      Device.direction.input
+    )[0];
+    assert.strictEqual(deviceFromList.id, 1);
+
+    deviceFromList.id = 123;
+    assert.strictEqual(originalDevice.id, 1);
+    assert.strictEqual(deviceFromList.id, 123);
+  });
+
+  it("Changing device id returned from navigatorInput won't affect the actual cached device", () => {
+    const originalDevice = deviceHandler.cachedDevices_[0];
+    assert.strictEqual(originalDevice.id, 1);
+    const navigatorInput = deviceHandler.navigatorInput();
+    assert.strictEqual(navigatorInput.exact, 1);
+
+    navigatorInput.exact = 123;
+    assert.strictEqual(originalDevice.id, 1);
+    assert.strictEqual(navigatorInput.exact, 123);
   });
 });

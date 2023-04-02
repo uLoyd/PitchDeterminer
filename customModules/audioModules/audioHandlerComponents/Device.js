@@ -7,6 +7,11 @@ class Device {
     output: "output",
   };
 
+  static type = {
+    audio: "audio",
+    video: "video",
+  };
+
   constructor(id, label, dir) {
     if (typeof id === "object" && id !== null) {
       this.constructorForDeviceObject(id, label);
@@ -25,6 +30,10 @@ class Device {
     this.dir = dir;
     this.isInput = dir === Device.direction.input;
     this.isOutput = !this.isInput;
+  }
+
+  copy() {
+    return new Device(this.id, this.label, this.dir);
   }
 }
 

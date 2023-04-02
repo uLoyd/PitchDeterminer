@@ -61,7 +61,7 @@ class AudioHandler extends AudioSetup {
     // Constrain specifying audio device
     // if value here will be "undefined" then something's not right
     // but the stream will start up with default available device (await is a must)
-    const defaultAudioConstrain = await this.deviceHandler.navigatorInput();
+    const defaultAudioConstrain = this.deviceHandler.navigatorInput();
     const constraint = {
       audio: {
         deviceId: defaultAudioConstrain,
@@ -73,9 +73,11 @@ class AudioHandler extends AudioSetup {
   }
 
   async setupStream() {
+    if (!this.deviceHandler.cachedDevices_.length)
+      await this.deviceHandler.updateDeviceList();
     //console.log(await this.deviceHandler.getCurrentOrFirst());
     // Checking if there are any available input devices (await is a must)
-    if (!(await this.deviceHandler.checkForInput()))
+    if (!this.deviceHandler.checkForInput())
       throw "No input audio input devices available";
 
     // If stream was being restarted few times audioContext might remain in "closed" state
@@ -149,9 +151,12 @@ class AudioHandler extends AudioSetup {
   }
 
   async getDeviceList(direction) {
-    if (!direction) return await this.deviceHandler.getFullDeviceList();
+    if (!this.deviceHandler.cachedDevices_.length)
+      await this.deviceHandler.updateDeviceList();
 
-    return await this.deviceHandler.getDeviceList(direction);
+    return direction
+      ? this.deviceHandler.getDeviceList(direction)
+      : this.deviceHandler.getFullDeviceList();
   }
 
   async end() {
