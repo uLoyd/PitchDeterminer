@@ -7,30 +7,30 @@ const browserWindow = electron.BrowserWindow;
 let win;
 
 const createWindow = async () => {
-  win = new browserWindow({
-    width: 1800,
-    webPreferences: {
-      contextIsolation: false,
-      nodeIntegration: true,
-      nodeIntegrationInWorker: true,
-    },
-  });
+    win = new browserWindow({
+        width: 1800,
+        webPreferences: {
+            contextIsolation: false,
+            nodeIntegration: true,
+            nodeIntegrationInWorker: true,
+        },
+    });
 
-  await win.loadURL(path.join(__dirname, `./view/index.html`));
+    await win.loadURL(path.join(__dirname, `./view/index.html`));
 
-  win.webContents.openDevTools();
+    win.webContents.openDevTools();
 
-  win.on("closed", () => {
-    win = null;
-  });
+    win.on("closed", () => {
+        win = null;
+    });
 };
 
 app.on("ready", createWindow);
 
 app.on("window-all-closed", () => {
-  if (process.platform !== "darwin") app.quit();
+    if (process.platform !== "darwin") app.quit();
 });
 
 app.on("activate", async () => {
-  if (win === null) await createWindow();
+    if (win === null) await createWindow();
 });

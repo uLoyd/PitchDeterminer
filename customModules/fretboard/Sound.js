@@ -1,30 +1,30 @@
 const sounds = [
-  "A",
-  "A#",
-  "B",
-  "C",
-  "C#",
-  "D",
-  "D#",
-  "E",
-  "F",
-  "F#",
-  "G",
-  "G#",
+    "A",
+    "A#",
+    "B",
+    "C",
+    "C#",
+    "D",
+    "D#",
+    "E",
+    "F",
+    "F#",
+    "G",
+    "G#",
 ];
 const flats = [
-  null,
-  "Bb",
-  "Cb",
-  null,
-  "Db",
-  null,
-  "Eb",
-  "Fb",
-  null,
-  "Gb",
-  null,
-  "Ab",
+    null,
+    "Bb",
+    "Cb",
+    null,
+    "Db",
+    null,
+    "Eb",
+    "Fb",
+    null,
+    "Gb",
+    null,
+    "Ab",
 ];
 const A4 = 440; // Sound A in 4th octave by ISO standard is 440 Hz
 
@@ -46,112 +46,112 @@ exports.A4 = A4;
 */
 
 exports.Sound = class Sound {
-  static r = Math.pow(2, 1 / 12);
-  static logr = Math.log(Sound.r);
+    static r = Math.pow(2, 1 / 12);
+    static logr = Math.log(Sound.r);
 
-  constructor(soundSymbol, octave) {
-    const index = sounds.indexOf(soundSymbol);
-    this.sound = soundSymbol;
-    this.octave = parseFloat(octave);
-    this.flatNote = flats[index] ?? null;
-    this.flatOctave = this.flatNote
-      ? this.flatNote === "Cb"
-        ? this.octave + 1
-        : this.octave
-      : null;
-  }
-
-  static frequencyConstructor(frequency) {
-    const dist = Sound.getDistanceFromFrequency(frequency);
-    const note = Sound.getNoteFromDistance(dist);
-    const octave = Sound.getOctaveFromDistance(dist);
-
-    return new Sound(note, octave);
-  }
-
-  // Function returns amount of steps from the A4 note by passing the frequency in the parameter
-  static getDistanceFromFrequency(fx) {
-    const result = Math.log(fx / A4) / Sound.logr; // Formula to find "x" reversed from the "fx" finding formula
-    // fx = f0 * r ^ x
-    // x = ln(fx / f0) / ln(r)
-
-    //return (fx < 90 ? Math.floor(result) : Math.round(result)); // Rounds down the results if the frequency is low compensating lack of
-    // accuracy determining the low frequencies as the "distance" between
-    // notes gets smaller the lower the frequency. Accurate only from E2 up.
-    // Useful ONLY with buffer size ("buflen" variable) in AudioHandler under 2048
-    return Math.round(result);
-  }
-
-  // Distance relative to A4 (arguments defaults to "this" object)
-  getDistanceFromNote(note = this.sound, octave = this.octave) {
-    const basePos = sounds.indexOf(note);
-    const multiplyOctave = octave - 4; // minus 4 because we're counting from A4
-    let pos = 12 * multiplyOctave + basePos;
-    if (basePos > 2) pos -= 12; // offset made because in music the scale starts at C not A
-    return pos;
-  }
-
-  // Distance relative to A4 - returns only the sound symbol index without the octave
-  static getNoteFromDistance(step) {
-    let id = step > 11 || step < -11 ? step % 12 : step;
-    id = id < 0 ? 12 + id : id;
-
-    return Math.round(id);
-  }
-
-  // Distance relative to A4
-  getFrequencyFromDistance(distance = this.getDistanceFromNote()) {
-    return A4 * Math.pow(2, distance / 12); // Returns a perfect frequency of note x steps from A4
-  }
-
-  // Distance relative to A4
-  static getOctaveFromDistance(distance) {
-    let octaves = 4;
-
-    while (true) {
-      if (distance < -11) {
-        // Checking if offset is needed as scale starts at C and not A
-        --octaves;
-        distance += 12;
-      } else if (distance > 11) {
-        // Checking if offset is needed as scale starts at C and not A
-        ++octaves;
-        distance -= 12;
-      } else break;
+    constructor(soundSymbol, octave) {
+        const index = sounds.indexOf(soundSymbol);
+        this.sound = soundSymbol;
+        this.octave = parseFloat(octave);
+        this.flatNote = flats[index] ?? null;
+        this.flatOctave = this.flatNote
+            ? this.flatNote === "Cb"
+                ? this.octave + 1
+                : this.octave
+            : null;
     }
 
-    if (distance < -9) octaves--;
-    if (distance > 2) octaves++;
-    return octaves;
-  }
+    static frequencyConstructor(frequency) {
+        const dist = Sound.getDistanceFromFrequency(frequency);
+        const note = Sound.getNoteFromDistance(dist);
+        const octave = Sound.getOctaveFromDistance(dist);
 
-  // arguments are supposed to be instances of Sound class
-  distanceBetweenNotes(sound1 = new Sound("A", 4), sound2 = this) {
-    const dist1 = this.getDistanceFromNote(sound1.sound, sound1.octave);
-    const dist2 = this.getDistanceFromNote(sound2.sound, sound2.octave);
+        return new Sound(note, octave);
+    }
 
-    return dist1 - dist2;
-  }
+    // Function returns amount of steps from the A4 note by passing the frequency in the parameter
+    static getDistanceFromFrequency(fx) {
+        const result = Math.log(fx / A4) / Sound.logr; // Formula to find "x" reversed from the "fx" finding formula
+        // fx = f0 * r ^ x
+        // x = ln(fx / f0) / ln(r)
 
-  // compares sounds without octaves
-  soundDistanceForward(sound1 = new Sound("A", 4), sound2 = this) {
-    const id1 = sounds.indexOf(sound1.sound);
-    const id2 = sounds.indexOf(sound2.sound);
+        //return (fx < 90 ? Math.floor(result) : Math.round(result)); // Rounds down the results if the frequency is low compensating lack of
+        // accuracy determining the low frequencies as the "distance" between
+        // notes gets smaller the lower the frequency. Accurate only from E2 up.
+        // Useful ONLY with buffer size ("buflen" variable) in AudioHandler under 2048
+        return Math.round(result);
+    }
 
-    const res = id1 - id2;
+    // Distance relative to A4 (arguments defaults to "this" object)
+    getDistanceFromNote(note = this.sound, octave = this.octave) {
+        const basePos = sounds.indexOf(note);
+        const multiplyOctave = octave - 4; // minus 4 because we're counting from A4
+        let pos = 12 * multiplyOctave + basePos;
+        if (basePos > 2) pos -= 12; // offset made because in music the scale starts at C not A
+        return pos;
+    }
 
-    return res < 0 ? 12 + res : res;
-  }
+    // Distance relative to A4 - returns only the sound symbol index without the octave
+    static getNoteFromDistance(step) {
+        let id = step > 11 || step < -11 ? step % 12 : step;
+        id = id < 0 ? 12 + id : id;
 
-  static info(frequency) {
-    const dist = Sound.getDistanceFromFrequency(frequency);
+        return Math.round(id);
+    }
 
-    return {
-      distance: dist,
-      octave: Sound.getOctaveFromDistance(dist),
-      soundId: Sound.getNoteFromDistance(dist),
-    };
-  }
+    // Distance relative to A4
+    getFrequencyFromDistance(distance = this.getDistanceFromNote()) {
+        return A4 * Math.pow(2, distance / 12); // Returns a perfect frequency of note x steps from A4
+    }
 
-  toString = () => `${this.sound}${this.octave}`;
+    // Distance relative to A4
+    static getOctaveFromDistance(distance) {
+        let octaves = 4;
+
+        while (true) {
+            if (distance < -11) {
+                // Checking if offset is needed as scale starts at C and not A
+                --octaves;
+                distance += 12;
+            } else if (distance > 11) {
+                // Checking if offset is needed as scale starts at C and not A
+                ++octaves;
+                distance -= 12;
+            } else break;
+        }
+
+        if (distance < -9) octaves--;
+        if (distance > 2) octaves++;
+        return octaves;
+    }
+
+    // arguments are supposed to be instances of Sound class
+    distanceBetweenNotes(sound1 = new Sound("A", 4), sound2 = this) {
+        const dist1 = this.getDistanceFromNote(sound1.sound, sound1.octave);
+        const dist2 = this.getDistanceFromNote(sound2.sound, sound2.octave);
+
+        return dist1 - dist2;
+    }
+
+    // compares sounds without octaves
+    soundDistanceForward(sound1 = new Sound("A", 4), sound2 = this) {
+        const id1 = sounds.indexOf(sound1.sound);
+        const id2 = sounds.indexOf(sound2.sound);
+
+        const res = id1 - id2;
+
+        return res < 0 ? 12 + res : res;
+    }
+
+    static info(frequency) {
+        const dist = Sound.getDistanceFromFrequency(frequency);
+
+        return {
+            distance: dist,
+            octave: Sound.getOctaveFromDistance(dist),
+            soundId: Sound.getNoteFromDistance(dist),
+        };
+    }
+
+    toString = () => `${this.sound}${this.octave}`;
 };
