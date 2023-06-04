@@ -38,6 +38,7 @@ TODO right now:
 - [ ] Anything else that will pop up later
 
 ## ChangeLog:
+- [v0.6.8](#v068)
 - [v0.6.7](#v067)
 - [v0.6.6](#v066)
 - [v0.6.5](#v065)
