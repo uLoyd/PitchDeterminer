@@ -10,13 +10,30 @@ describe(`Utilities`, function () {
 
     it("convertToArrayBuffer for small data set returns ArrayBuffer", () => {
         const initialArray = [0, 1, 2, 3, 4];
-        const actual = utils.convertToArrayBuffer(Uint8Array, initialArray, 10);
+        const actual = utils.convertToArrayBuffer(
+            Uint8Array,
+            initialArray,
+            initialArray.length + 2
+        );
         assertContainers(actual, initialArray, ArrayBuffer);
     });
 
     it("convertToArrayBuffer for large data set returns ArrayBuffer", () => {
         const initialArray = [0, 1, 2, 3, 4];
-        const actual = utils.convertToArrayBuffer(Uint8Array, initialArray, 2);
+        const actual = utils.convertToArrayBuffer(
+            Uint8Array,
+            initialArray,
+            initialArray.length - 2
+        );
+        assertContainers(actual, initialArray, ArrayBuffer);
+    });
+
+    it("convertToArrayBuffer for small data set with default large size defined as 35000 returns ArrayBuffer", () => {
+        const initialArray = [0, 1, 2, 3, 4];
+        const actual = utils.convertToArrayBuffer(
+            Uint8Array,
+            initialArray
+        );
         assertContainers(actual, initialArray, ArrayBuffer);
     });
 

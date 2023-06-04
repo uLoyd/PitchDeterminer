@@ -3,6 +3,7 @@ const {
     AudioHandler,
     Gain,
 } = require("../customModules/audioModules");
+const NavigatorMock = require("./utilities/NavigatorMock");
 const testData = require("./data/AudioHandlerInitData");
 const assert = require("assert");
 const assertion = require("./utilities/Assertion");
@@ -17,6 +18,7 @@ describe("AudioSetup", () => {
             general: testData[0].params.general,
             gainNode: new Gain(testData[0].params.gainSettings),
             analyserNode: analyser,
+            navigator: NavigatorMock
         });
     });
 

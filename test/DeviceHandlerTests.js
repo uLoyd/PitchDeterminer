@@ -41,8 +41,8 @@ describe(`DeviceHandler:`, () => {
 
     beforeEach(async () => {
         controlVariable = false;
-        deviceHandler = new DeviceHandler(handlerCallback);
-        deviceHandler.navigator = NavigatorMock.setMockDevices(fakeDeviceList);
+        deviceHandler = new DeviceHandler(handlerCallback, NavigatorMock);
+        deviceHandler.navigator.setMockDevices(fakeDeviceList);
         await deviceHandler.updateDeviceList();
     });
 
@@ -69,16 +69,22 @@ describe(`DeviceHandler:`, () => {
 
     it("getCurrentOrFirst returns first device if none is set", () => {
         const current = deviceHandler.getCurrentOrFirst();
-        assertion.iterableOfObjectsPropsEqual(current.in, fakeDeviceList[0]);
-        assertion.iterableOfObjectsPropsEqual(current.out, fakeDeviceList[4]);
+        assertion.iterableOfObjectsPropsEqual(current.input, fakeDeviceList[0]);
+        assertion.iterableOfObjectsPropsEqual(
+            current.output,
+            fakeDeviceList[4]
+        );
     });
 
     it("getCurrentOrFirst returns current devices if those are set", () => {
         deviceHandler.currentInput = fakeDeviceList[3];
         deviceHandler.currentOutput = fakeDeviceList[7];
         const current = deviceHandler.getCurrentOrFirst();
-        assertion.iterableOfObjectsPropsEqual(current.in, fakeDeviceList[3]);
-        assertion.iterableOfObjectsPropsEqual(current.out, fakeDeviceList[7]);
+        assertion.iterableOfObjectsPropsEqual(current.input, fakeDeviceList[3]);
+        assertion.iterableOfObjectsPropsEqual(
+            current.output,
+            fakeDeviceList[7]
+        );
     });
 
     it("changeDevice dispatches callback and sets correct device", () => {
@@ -88,8 +94,11 @@ describe(`DeviceHandler:`, () => {
         deviceHandler.changeInput(fakeInput.id);
         const current1 = deviceHandler.getCurrentOrFirst();
 
-        assertion.iterableOfObjectsPropsEqual(current1.in, fakeInput);
-        assertion.iterableOfObjectsPropsEqual(current1.out, fakeDeviceList[4]);
+        assertion.iterableOfObjectsPropsEqual(current1.input, fakeInput);
+        assertion.iterableOfObjectsPropsEqual(
+            current1.output,
+            fakeDeviceList[4]
+        );
         assert.strictEqual(controlVariable, true);
 
         controlVariable = false;
@@ -99,8 +108,8 @@ describe(`DeviceHandler:`, () => {
         deviceHandler.changeOutput(fakeOutput.id);
         const current2 = deviceHandler.getCurrentOrFirst();
 
-        assertion.iterableOfObjectsPropsEqual(current2.in, fakeInput);
-        assertion.iterableOfObjectsPropsEqual(current2.out, fakeOutput);
+        assertion.iterableOfObjectsPropsEqual(current2.input, fakeInput);
+        assertion.iterableOfObjectsPropsEqual(current2.output, fakeOutput);
         assert.strictEqual(controlVariable, true);
     });
 
@@ -126,14 +135,6 @@ describe(`DeviceHandler:`, () => {
         await deviceHandler.updateDeviceList();
         const actual = deviceHandler.navigatorInput();
         assert.strictEqual(actual, undefined);
-    });
-
-    it("Not mocked getFullDeviceList will throw due to lack of navigator", async () => {
-        const originalHandler = new DeviceHandler(handlerCallback);
-        await assertion.willThrow(
-            originalHandler.getFullDeviceList,
-            handlerCallback
-        );
     });
 
     it("Changing devices returned from getFullDeviceList won't affect the actual cachedDevices", () => {
@@ -169,5 +170,21 @@ describe(`DeviceHandler:`, () => {
         navigatorInput.exact = 123;
         assert.strictEqual(originalDevice.id, 1);
         assert.strictEqual(navigatorInput.exact, 123);
+    });
+
+    it("New device handler without navigator and not accessible window will throw", () => {
+        const deviceHandlerCreator = (args) => { return new DeviceHandler(...args); };
+        assertion.willThrow(deviceHandlerCreator, []);
+    })
+
+    it("changeDevice won't change device if given ID is not found", () => {
+        const initialDevices = deviceHandler.getCurrentOrFirst();
+        const actualInput = initialDevices.input.copy();
+        const actualOutput = initialDevices.output.copy();
+        deviceHandler.changeDevice(Device.direction.input, "Non existent ID");
+        deviceHandler.changeDevice(Device.direction.output, "Non existent ID");
+        const dataAfterChange = deviceHandler.getCurrentOrFirst();
+        assertion.iterableOfObjectsPropsEqual([actualInput], [dataAfterChange.input]);
+        assertion.iterableOfObjectsPropsEqual([actualOutput], [dataAfterChange.output]);
     });
 });

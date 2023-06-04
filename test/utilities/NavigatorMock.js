@@ -1,3 +1,7 @@
+const {
+    NavigatorInputConstraint,
+} = require("../../customModules/audioModules");
+
 module.exports = {
     setMockDevices: function (devices) {
         this.mediaDevices._devices = devices.map((dev) => {

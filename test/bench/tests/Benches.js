@@ -6,10 +6,13 @@ const {
     AudioHandler,
     Correlation,
     FrequencyMath,
+    Aweight,
 } = require("../../../customModules/audioModules/index");
 const testData = require("../../data/AudioHandlerInitData")[0];
 const audioBufForCorrelation = require("../data/buffer.json");
 require("web-audio-test-api");
+
+const weight = new Aweight();
 
 const audio = new AudioHandler({
     general: testData.params.general,
@@ -74,6 +77,10 @@ function runFq() {
     return new FrequencyMath(64.9);
 }
 
+function runWeight() {
+    for (let i = 0; i < 200; ++i) weight.getDivider(i);
+}
+
 module.exports = [
     {
         name: "AudioHandler::getWeightedVolume",
@@ -109,5 +116,10 @@ module.exports = [
         name: "FQ",
         runAmount: 10000,
         run: runFq,
+    },
+    {
+        name: "Aweight::getDivider",
+        runAmount: 1000,
+        run: runWeight,
     },
 ];

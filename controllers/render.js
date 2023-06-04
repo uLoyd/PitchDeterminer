@@ -74,6 +74,7 @@ window.onload = async () => {
     }
 
     async function changeInput(id) {
+        console.log("qwe id ", id, arguments)
         mic.changeInput(id);
 
         // "Have you tried turning it off and on again?"
@@ -82,7 +83,8 @@ window.onload = async () => {
         tun.clear();
         console.log("Restarting with new settings");
         await mic.setupStream();
-        console.log(mic);
+        test.updateDeviceList(mic);
+        console.log(id);
     }
 
     async function changeOutput(id, force) {
@@ -123,7 +125,13 @@ window.onload = async () => {
 
     // audioHandleTest instance - shows data in window
     const test = new audioTest(changeDevice, speakerToggleEvent);
-    test.elements.micBut.element.onclick = mic.setupStream.bind(mic);
+
+    const wrap = () => {
+        mic.setupStream();
+        test.updateDeviceList(mic);
+    };
+
+    test.elements.micBut.element.onclick = wrap;
 
     const tun = new tuner();
 
@@ -149,7 +157,8 @@ window.onload = async () => {
         const { micBut, speakerBut } = test.elements;
         test.buttonToggle(micBut, false);
         test.buttonToggle(speakerBut, false);
-        test.elements.micBut.element.onclick = evt.setupStream.bind(evt);
+        const wrap = () => { evt.setupStream(); test.updateDeviceList(mic); };
+        test.elements.micBut.element.onclick = wrap;
         test.speakerEnabled = false;
         test.clearData();
         tun.clear();

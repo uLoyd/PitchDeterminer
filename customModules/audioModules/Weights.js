@@ -1,13 +1,12 @@
 "use strict";
 
 class Weighting {
-    constructor(power, of, underRoot) {
-        this.dividend = Math.pow(12194, 2);
-        this.dividerF1 = Math.pow(20.6, 2);
+    static dividend = Math.pow(12194, 2);
+    static dividerF1 = Math.pow(20.6, 2);
+
+    constructor(power, of, underRoot = []) {
         this.of = of;
-
-        if (underRoot) this.underRoot = underRoot.map((x) => Math.pow(x, 2));
-
+        this.underRoot = underRoot.map((x) => Math.pow(x, 2));
         this.dividendFrequencyPower = power;
 
         const offsetWeight = this.rawWeight(1000);
@@ -17,25 +16,20 @@ class Weighting {
     getDividend(frequency) {
         return (
             this.of *
-            this.dividend *
+            Weighting.dividend *
             Math.pow(frequency, this.dividendFrequencyPower)
         );
     }
 
     getDivider(frequency) {
         const f2 = Math.pow(frequency, 2);
-        let result = (this.dividerF1 + f2) * (this.dividend + f2);
+        const result = (Weighting.dividerF1 + f2) * (Weighting.dividend + f2);
+        let root = 1;
 
-        if (this.underRoot) {
-            let root = 1;
-            this.underRoot.forEach((entry) => {
-                root *= entry + f2;
-            });
+        for (let i = 0; i < this.underRoot.length; ++i)
+            root *= this.underRoot[i] + f2;
 
-            result *= Math.sqrt(root);
-        }
-
-        return result;
+        return result * Math.sqrt(root);
     }
 
     rawWeight(frequency, accuracy = 0) {

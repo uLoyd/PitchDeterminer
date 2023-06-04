@@ -59,7 +59,8 @@ class audioHandleTest {
     }
 
     async updateDeviceList(evt) {
-        const devArr = await evt.deviceHandler.getFullDeviceList();
+        await evt.deviceHandler.updateDeviceList();
+        const devArr = evt.deviceHandler.getFullDeviceList();
         const currentInput = evt.deviceHandler.currentInput;
         const currentOutput = evt.deviceHandler.currentOutput;
 

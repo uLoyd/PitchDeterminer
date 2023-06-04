@@ -7,12 +7,10 @@ class SoundStorageEvent extends SoundStorage {
         super(bias);
         this.sampleLimit = sampleLimit;
         this.sampleTarget = sampleTarget;
-        this.lastFrequency = null;
     }
 
     add(fx) {
         if (this.freqArr.length >= this.sampleLimit) {
-            this.lastFrequency = fx;
             this.emit(AudioEvents.sampleLimit, this);
             return;
         } else if (this.freqArr.length === this.sampleTarget) {
@@ -72,17 +70,6 @@ class SoundStorageEvent extends SoundStorage {
         );
 
         return Math.sqrt(value);
-    }
-
-    emptyData() {
-        super.emptyData();
-
-        if (this.lastFrequency) {
-            //this.add(this.lastFrequency);
-            this.lastFrequency = null;
-        }
-
-        return this;
     }
 
     basicDetermine = super.determine;

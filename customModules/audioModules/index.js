@@ -1,5 +1,6 @@
 module.exports.utils = require("./utilities/utilities");
 module.exports.AudioEvents = require("./audioHandlerComponents/AudioEvents");
+module.exports.NavigatorInputConstraint = require("./audioHandlerComponents/NavigatorInputConstraint");
 module.exports.Weights = require("./Weights").Weights;
 module.exports.Aweight = require("./Weights").Aweight;
 module.exports.Bweight = require("./Weights").Bweight;

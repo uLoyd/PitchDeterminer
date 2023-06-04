@@ -1,5 +1,6 @@
 const assert = require("assert");
 const assertion = require("./utilities/Assertion");
+const NavigatorMock = require("./utilities/NavigatorMock");
 const {
     Analyser,
     Gain,
@@ -33,6 +34,7 @@ describe(`Audio File Handler`, function () {
                 general: testData.params.general,
                 gainNode: new Gain(testData.params.gainSettings),
                 analyserNode: new Analyser(testData.params.analyserSettings),
+                navigator: NavigatorMock
             },
             "notExistingFile.wav"
         );

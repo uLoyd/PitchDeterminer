@@ -1,4 +1,5 @@
 const assert = require("assert");
+const NavigatorMock = require("./utilities/NavigatorMock");
 const {
     Analyser,
     Gain,
@@ -29,6 +30,7 @@ testData.forEach(async (data) => {
                 general: data.params.general,
                 gainNode: new Gain(data.params.gainSettings),
                 analyserNode: new Analyser(data.params.analyserSettings),
+                navigator: NavigatorMock
             });
         });
 

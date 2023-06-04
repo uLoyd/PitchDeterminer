@@ -2,24 +2,19 @@
 
 const { Device } = require("../index");
 
+// Wrapped in function as otherwise it'd throw in test env due to lack of window object
 class DeviceHandler {
     currentInput = null;
     currentOutput = null;
     deviceChangeCallback = () => {};
     cachedDevices_ = [];
 
-    constructor(callback) {
+    constructor(callback, navigator) {
         if (callback) this.deviceChangeCallback = callback;
 
-        try {
-            this.navigator = navigator;
-            this.navigator.mediaDevices.ondevicechange =
-                this.deviceChangeEvent.bind(this);
-        } catch (e) {
-            console.error(
-                `Problem with window.navigator.mediaDevices.ondevicechange event:\n${e}`
-            );
-        }
+        const getNavigator_ = () =>{ return window ? window?.navigator : null; }
+        this.navigator = navigator ?? getNavigator_();
+        this.navigator.mediaDevices.ondevicechange = this.deviceChangeEvent.bind(this);
     }
 
     async updateDeviceList() {
@@ -56,12 +51,12 @@ class DeviceHandler {
     // Returns currently set i/o devices or first matching device from device list
     getCurrentOrFirst() {
         return {
-            in:
-                this.currentInput ??
-                this.cachedDevices_.find((device) => device.isInput)?.copy(),
-            out:
-                this.currentOutput ??
-                this.cachedDevices_.find((device) => device.isOutput)?.copy(),
+            input: this.currentInput
+                ? this.currentInput.copy()
+                : this.cachedDevices_.find((device) => device.isInput)?.copy(),
+            output: this.currentOutput
+                ? this.currentOutput.copy()
+                : this.cachedDevices_.find((device) => device.isOutput)?.copy(),
         };
     }
 
@@ -84,8 +79,8 @@ class DeviceHandler {
 
         this.deviceChangeCallback(
             this.getFullDeviceList(),
-            this.currentInput,
-            this.currentOutput
+            this.currentInput?.copy(),
+            this.currentOutput?.copy()
         );
     }
 
@@ -105,9 +100,9 @@ class DeviceHandler {
     navigatorInput() {
         const device = this.getCurrentOrFirst();
 
-        return device.in
+        return device.input
             ? {
-                  exact: device.in.id,
+                  exact: device.input.id,
               }
             : undefined;
     }

@@ -33,17 +33,16 @@ describe("Audio Handler", () => {
         return audio.getVolume(0);
     };
 
-    const navigatorMock = NavigatorMock.setMockDevices(fakeDeviceList);
-
     beforeEach(() => {
         audio = new AudioHandler({
             general: testData[0].params.general,
             gainNode: new Gain(testData[0].params.gainSettings),
             analyserNode: new Analyser(testData[0].params.analyserSettings),
+            navigator: NavigatorMock
         });
 
-        audio.navigator = navigatorMock;
-        audio.deviceHandler.navigator = navigatorMock;
+        audio.navigator.setMockDevices(fakeDeviceList);
+        audio.deviceHandler.navigator.setMockDevices(fakeDeviceList);
     });
 
     it("Audio handler exists", () => assert.ok(audio));
@@ -137,9 +136,6 @@ describe("Audio Handler", () => {
         const fakeDeviceList = [new Device(1, "test1", Device.direction.input)];
 
         audio.navigator = NavigatorMock.setMockDevices(fakeDeviceList);
-        audio.deviceHandler = new DeviceHandler();
-        audio.deviceHandler.navigator =
-            NavigatorMock.setMockDevices(fakeDeviceList);
         await audio.deviceHandler.updateDeviceList();
         let constraint = await audio.getMediaStream();
         assert.strictEqual(
@@ -151,11 +147,6 @@ describe("Audio Handler", () => {
 
     it("Audio handler should call navigator.mediaDevices.getUserMedia with undefined from Device handler if input device is not present", async () => {
         audio.navigator = NavigatorMock.setMockDevices([]);
-        audio.deviceHandler = new DeviceHandler();
-        audio.deviceHandler.navigator = NavigatorMock.setMockDevices([]);
-        console.log(
-            audio.deviceHandler.navigator.mediaDevices.enumerateDevices()
-        );
         let constraint = await audio.getMediaStream();
         assert.strictEqual(constraint.audio.deviceId, undefined);
         assert.strictEqual(constraint.video, false);
@@ -164,9 +155,6 @@ describe("Audio Handler", () => {
     it("Audio handler will emit SetupDone event after setupStream call", async () => {
         const fakeDeviceList = [new Device(1, "test1", Device.direction.input)];
         audio.navigator = NavigatorMock.setMockDevices(fakeDeviceList);
-        audio.deviceHandler = new DeviceHandler();
-        audio.deviceHandler.navigator =
-            NavigatorMock.setMockDevices(fakeDeviceList);
         audio.audioContext.createMediaStreamSource = () => {};
         audio.audioContext.createScriptProcessor = () => {};
         audio.streamSetup = () => {};
@@ -224,7 +212,7 @@ describe("Audio Handler", () => {
         assert.ok(audio.running);
     });
 
-    it("AUdio Handler will call Correlation.perform on correlate call", () => {
+    it("Audio Handler will call Correlation.perform on correlate call", () => {
         let callFlag = false;
         audio.FTDFloat32 = () => {};
         audio.correlation = {
@@ -234,5 +222,12 @@ describe("Audio Handler", () => {
         };
         audio.correlate();
         assert.ok(callFlag);
+    });
+
+    it("New audio handler without navigator and not accessible window will throw", () => {
+        const audioHandlerCreator = (args) => { return new AudioHandler(...args); };
+        assertion.willThrow(
+            audioHandlerCreator,
+            [{general: testData[0].params.general, gainNode: new Gain(testData[0].params.gainSettings), analyserNode: new Analyser(testData[0].params.analyserSettings)}]);
     });
 });

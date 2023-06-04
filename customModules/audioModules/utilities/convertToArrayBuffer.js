@@ -1,6 +1,6 @@
 "use strict";
 
-function convertLargeContainer(Type, data, dataLength) {
+function _convertLargeContainer(Type, data, dataLength) {
     const ab = new ArrayBuffer(dataLength);
     let view = new Type(ab);
 
@@ -9,14 +9,12 @@ function convertLargeContainer(Type, data, dataLength) {
     return ab;
 }
 
-function convertToArrayBuffer(Type, data, maxSmallContainerSize) {
+function convertToArrayBuffer(Type, data, maxSmallContainerSize = 35000) {
     const dataLength = data.length;
 
-    if (dataLength <= maxSmallContainerSize) {
-        return new Type(data).buffer;
-    }
+    if (dataLength <= maxSmallContainerSize) return new Type(data).buffer;
 
-    return convertLargeContainer(Type, data, dataLength);
+    return _convertLargeContainer(Type, data, dataLength);
 }
 
 module.exports = convertToArrayBuffer;
