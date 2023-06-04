@@ -74,7 +74,6 @@ window.onload = async () => {
     }
 
     async function changeInput(id) {
-        console.log("qwe id ", id, arguments)
         mic.changeInput(id);
 
         // "Have you tried turning it off and on again?"
