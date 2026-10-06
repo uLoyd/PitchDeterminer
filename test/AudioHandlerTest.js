@@ -38,7 +38,7 @@ describe("Audio Handler", () => {
             general: testData[0].params.general,
             gainNode: new Gain(testData[0].params.gainSettings),
             analyserNode: new Analyser(testData[0].params.analyserSettings),
-            navigator: NavigatorMock
+            navigator: NavigatorMock,
         });
 
         audio.navigator.setMockDevices(fakeDeviceList);
@@ -82,17 +82,17 @@ describe("Audio Handler", () => {
 
     it("Audio handler will try to pause if state is set to running", async () => {
         audio.running = true;
-        await assertion.willThrow(audio.pause, []);
+        await assertion.willThrow(audio.pause.bind(audio), []);
     });
 
     it("Audio handler will try to end stream if state is set to running", async () => {
         audio.running = true;
-        await assertion.willThrow(audio.end, []);
+        await assertion.willThrow(audio.end.bind(audio), []);
     });
 
     it("Audio handler will try to resume stream if state is not set to running", async () => {
         audio.running = false;
-        await assertion.willThrow(audio.resume, []);
+        await assertion.willThrow(audio.resume.bind(audio), []);
     });
 
     it("Audio handler will not try to resume stream if state is set to running", async () => {
@@ -103,7 +103,7 @@ describe("Audio Handler", () => {
 
     it("Audio handler will throw during stream setup if there's no available input device", async () => {
         audio.deviceHandler.navigator = NavigatorMock.setMockDevices([]);
-        await assertion.willThrow(audio.setupStream, []);
+        await assertion.willThrow(audio.setupStream.bind(audio), []);
     });
 
     it("Audio handler getVolume will return 1 for data with all values set to 0", () => {
@@ -225,9 +225,14 @@ describe("Audio Handler", () => {
     });
 
     it("New audio handler without navigator and not accessible window will throw", () => {
-        const audioHandlerCreator = (args) => { return new AudioHandler(...args); };
-        assertion.willThrow(
-            audioHandlerCreator,
-            [{general: testData[0].params.general, gainNode: new Gain(testData[0].params.gainSettings), analyserNode: new Analyser(testData[0].params.analyserSettings)}]);
+        const audioHandlerCreator = (arg) => {
+            return new AudioHandler(arg);
+        };
+        assertion.willThrow(audioHandlerCreator, [
+            {
+                gainNode: new Gain(testData[0].params.gainSettings),
+                analyserNode: new Analyser(testData[0].params.analyserSettings),
+            },
+        ]);
     });
 });

@@ -23,7 +23,7 @@ class htmlElement {
 class audioHandleTest {
     changeDevice = () => {};
 
-    constructor(changeDevice, speakerToggleEvent) {
+    constructor(changeDevice, speakerToggleEvent, synthToggleEvent = () => {}) {
         this.changeDevice = changeDevice;
 
         this.elements = {
@@ -33,13 +33,20 @@ class audioHandleTest {
             audioOut: new htmlElement("audioOut"),
             micBut: new htmlElement("micBut"),
             speakerBut: new htmlElement("speakerBut"),
+            synthBut: new htmlElement("synthBut"),
         };
 
         this.speakerEnabled = false;
+        this.synthEnabled = false;
 
         this.elements.speakerBut.element.addEventListener("click", () => {
             this.speakerEnabled = !this.speakerEnabled;
             speakerToggleEvent();
+        });
+
+        this.elements.synthBut.element.addEventListener("click", () => {
+            this.synthEnabled = !this.synthEnabled;
+            synthToggleEvent();
         });
 
         return this;

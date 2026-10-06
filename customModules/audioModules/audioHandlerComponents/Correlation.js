@@ -24,9 +24,18 @@ class Correlation {
 
     _checkRms(buf, correlationSampleStep) {
         let rms = 0;
-        for (let i = 0; i < this.buflen; i += correlationSampleStep)
-            rms += Math.pow(buf[i], 2);
-        return rms !== 0 && Math.sqrt(rms / this.buflen) >= this.rmsThreshold;
+        let sampleCount = 0;
+
+        for (let i = 0; i < this.buflen; i += correlationSampleStep) {
+            rms += buf[i] * buf[i];
+            sampleCount++;
+        }
+
+        return (
+            rms !== 0 &&
+            sampleCount > 0 &&
+            Math.sqrt(rms / sampleCount) >= this.rmsThreshold
+        );
     }
 
     _getShift(offset) {
@@ -37,9 +46,10 @@ class Correlation {
     }
 
     perform(buf, correlationSampleStep = this.defaultCorrelationSampleStep) {
-        if (!this._checkRms(buf, correlationSampleStep))
+        if (!this._checkRms(buf, correlationSampleStep)) {
             // not enough signal power
             return -1;
+        }
 
         let best_offset = -1,
             best_correlation = 0,
@@ -47,15 +57,20 @@ class Correlation {
 
         for (let offset = 1; offset < this.maxSamples; ++offset) {
             let correlation = 0;
+            let sampleCount = 0;
 
             for (
                 let begin = 0;
                 begin < this.maxSamples;
                 begin += correlationSampleStep
-            )
+            ) {
                 correlation += Math.abs(buf[begin] - buf[begin + offset]);
+                sampleCount++;
+            }
 
-            correlation = 1 - correlation / this.maxSamples;
+            if (sampleCount === 0) continue;
+
+            correlation = 1 - correlation / sampleCount;
             this._correlations[offset] = correlation;
 
             if (
@@ -69,8 +84,9 @@ class Correlation {
                     if (
                         this.returnOnThreshold &&
                         best_correlation > this.correlationThreshold
-                    )
+                    ) {
                         return this.sampleRate / best_offset;
+                    }
                 } else {
                     return (
                         this.sampleRate /

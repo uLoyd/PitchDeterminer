@@ -12,9 +12,12 @@ class DeviceHandler {
     constructor(callback, navigator) {
         if (callback) this.deviceChangeCallback = callback;
 
-        const getNavigator_ = () =>{ return window ? window?.navigator : null; }
+        const getNavigator_ = () => {
+            return window ? window?.navigator : null;
+        };
         this.navigator = navigator ?? getNavigator_();
-        this.navigator.mediaDevices.ondevicechange = this.deviceChangeEvent.bind(this);
+        this.navigator.mediaDevices.ondevicechange =
+            this.deviceChangeEvent.bind(this);
     }
 
     async updateDeviceList() {

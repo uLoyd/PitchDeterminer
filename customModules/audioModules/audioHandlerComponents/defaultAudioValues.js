@@ -1,3 +1,5 @@
+"use strict";
+
 const { Aweight } = require("../index");
 
 const defaultAudioValues = {
@@ -23,6 +25,7 @@ const defaultAudioValues = {
         buflen: 8192, // Going lower than 2048 results in really low accuracy in determining frequencies
     },
 };
+Object.freeze(defaultAudioValues);
 
 module.exports.all = defaultAudioValues;
 module.exports.audioSetup = defaultAudioValues.audioSetup;

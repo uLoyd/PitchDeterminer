@@ -30,10 +30,7 @@ describe(`Utilities`, function () {
 
     it("convertToArrayBuffer for small data set with default large size defined as 35000 returns ArrayBuffer", () => {
         const initialArray = [0, 1, 2, 3, 4];
-        const actual = utils.convertToArrayBuffer(
-            Uint8Array,
-            initialArray
-        );
+        const actual = utils.convertToArrayBuffer(Uint8Array, initialArray);
         assertContainers(actual, initialArray, ArrayBuffer);
     });
 

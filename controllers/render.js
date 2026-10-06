@@ -4,6 +4,8 @@ const {
     AudioFileHandler,
     AudioEvents,
     SoundStorageEvent,
+    Synth,
+    Track,
 } = require("../customModules/audioModules/index");
 
 const audioTest = require("./audioHandleTest"),
@@ -110,6 +112,7 @@ window.onload = async () => {
     async function speakerToggleEvent() {
         const { speakerBut } = test.elements;
         const audio = document.querySelector("audio");
+
         if (test.speakerEnabled && mic.running) {
             test.buttonToggle(speakerBut, true);
             return (audio.srcObject = mic.stream);
@@ -119,11 +122,117 @@ window.onload = async () => {
         audio.srcObject = null;
     }
 
+    async function synthToggleEvent() {
+        const { synthBut } = test.elements;
+        const audio = document.querySelector("audio");
+        test.buttonToggle(synthBut, false);
+
+        if (test.synthEnabled) {
+            console.log("setting synth");
+            track.start();
+            synth.setSrcObject(audio);
+            loop();
+        } else {
+            console.log("unsetting synth");
+            track.stop();
+            audio.srcObject = null;
+            track.panic();
+        }
+    }
+
     // audioHandler instance
     let mic = new AudioHandler();
 
+    // -------- synth ---------
+    const synthHandler = new AudioHandler();
+
+    const synth = new Synth(synthHandler, {
+        waveform: "sawtooth",
+        attack: 0.01,
+        release: 0.1,
+        masterVolume: 0.5,
+    });
+
+    const track = new Track({
+        bpm: 113,
+        timeSignature: "4/4",
+        synth,
+    });
+
+    const chords = [
+        ["C4", "E4", "G4"],
+        ["A3", "C4", "E4"],
+        ["F3", "A3", "C4"],
+        ["G3", "B3", "D4"],
+    ];
+
+    const melody = [
+        ["A4", "1/4"],
+        ["C5", "1/4"],
+        ["D5", "1/4"],
+        ["E5", "1/4"],
+
+        ["E5", "1/4"],
+        ["D5", "1/4"],
+        ["C5", "1/4"],
+        ["A4", "1/4"],
+
+        ["A4", "1/4"],
+        ["C5", "1/4"],
+        ["E5", "1/4"],
+        ["G5", "1/4"],
+
+        ["E5", "1/2"],
+        ["D5", "1/4"],
+        ["C5", "1/4"],
+
+        ["D5", "1/4"],
+        ["E5", "1/4"],
+        ["G5", "1/4"],
+        ["A5", "1/4"],
+
+        ["G5", "1/4"],
+        ["E5", "1/4"],
+        ["D5", "1/4"],
+        ["C5", "1/4"],
+
+        ["A4", "1/4"],
+        ["C5", "1/4"],
+        ["D5", "1/4"],
+        ["F5", "1/4"],
+
+        ["E5", "1/2"],
+        ["D5", "1/4"],
+        ["A4", "1/4"],
+    ];
+
+    async function playBar(chord) {
+        await track.playChord(chord, "whole");
+    }
+
+    async function loop() {
+        while (true) {
+            for (let i = 0; i < chords.length; i++) {
+                track.playChord(chords[i], "whole");
+
+                const start = i * 4;
+                const end = Math.min(start + 4, melody.length);
+
+                for (let j = start; j < end; j++) {
+                    const [note, duration] = melody[j];
+                    await track.playNote(note, duration);
+                }
+            }
+        }
+    }
+    // -------- synth ---------
+
     // audioHandleTest instance - shows data in window
-    const test = new audioTest(changeDevice, speakerToggleEvent);
+    const test = new audioTest(
+        changeDevice,
+        speakerToggleEvent,
+        synthToggleEvent
+    );
 
     const wrap = () => {
         mic.setupStream();
@@ -156,7 +265,10 @@ window.onload = async () => {
         const { micBut, speakerBut } = test.elements;
         test.buttonToggle(micBut, false);
         test.buttonToggle(speakerBut, false);
-        const wrap = () => { evt.setupStream(); test.updateDeviceList(mic); };
+        const wrap = () => {
+            evt.setupStream();
+            test.updateDeviceList(mic);
+        };
         test.elements.micBut.element.onclick = wrap;
         test.speakerEnabled = false;
         test.clearData();

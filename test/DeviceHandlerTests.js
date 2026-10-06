@@ -32,6 +32,16 @@ DeviceTestData.forEach((deviceData) => {
     });
 });
 
+describe(`Device enum test`, () => {
+    it("changing direction input value should throw", async () => {
+        const rename = () => {
+            Device.direction.input = 1;
+            console.log(Device.direction.input);
+        };
+        assertion.willThrow(rename, []); // willThrow doesn't work
+    });
+});
+
 describe(`DeviceHandler:`, () => {
     let controlVariable = false;
     let handlerCallback = function () {
@@ -173,9 +183,11 @@ describe(`DeviceHandler:`, () => {
     });
 
     it("New device handler without navigator and not accessible window will throw", () => {
-        const deviceHandlerCreator = (args) => { return new DeviceHandler(...args); };
+        const deviceHandlerCreator = () => {
+            return new DeviceHandler();
+        };
         assertion.willThrow(deviceHandlerCreator, []);
-    })
+    });
 
     it("changeDevice won't change device if given ID is not found", () => {
         const initialDevices = deviceHandler.getCurrentOrFirst();
@@ -184,7 +196,13 @@ describe(`DeviceHandler:`, () => {
         deviceHandler.changeDevice(Device.direction.input, "Non existent ID");
         deviceHandler.changeDevice(Device.direction.output, "Non existent ID");
         const dataAfterChange = deviceHandler.getCurrentOrFirst();
-        assertion.iterableOfObjectsPropsEqual([actualInput], [dataAfterChange.input]);
-        assertion.iterableOfObjectsPropsEqual([actualOutput], [dataAfterChange.output]);
+        assertion.iterableOfObjectsPropsEqual(
+            [actualInput],
+            [dataAfterChange.input]
+        );
+        assertion.iterableOfObjectsPropsEqual(
+            [actualOutput],
+            [dataAfterChange.output]
+        );
     });
 });

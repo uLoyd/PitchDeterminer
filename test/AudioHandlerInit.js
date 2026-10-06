@@ -30,7 +30,7 @@ testData.forEach(async (data) => {
                 general: data.params.general,
                 gainNode: new Gain(data.params.gainSettings),
                 analyserNode: new Analyser(data.params.analyserSettings),
-                navigator: NavigatorMock
+                navigator: NavigatorMock,
             });
         });
 

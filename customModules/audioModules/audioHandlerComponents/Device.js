@@ -37,4 +37,7 @@ class Device {
     }
 }
 
+Object.freeze(Device.direction);
+Object.freeze(Device.type);
+
 module.exports = Device;

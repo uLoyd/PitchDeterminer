@@ -18,7 +18,7 @@ describe("AudioSetup", () => {
             general: testData[0].params.general,
             gainNode: new Gain(testData[0].params.gainSettings),
             analyserNode: analyser,
-            navigator: NavigatorMock
+            navigator: NavigatorMock,
         });
     });
 

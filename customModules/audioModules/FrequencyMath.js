@@ -135,7 +135,7 @@ class FrequencyMath {
 
         while (Math.abs(distance) > 11) {
             octave += direction;
-            distance += -direction * 12; // minus direction! important
+            distance -= direction * 12;
         }
 
         return distance < -9 || distance > 2 ? octave + direction : octave;

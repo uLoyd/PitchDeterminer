@@ -2,6 +2,7 @@ const electron = require("electron");
 const path = require("path");
 
 const app = electron.app;
+console.log(require("electron"));
 const browserWindow = electron.BrowserWindow;
 
 let win;

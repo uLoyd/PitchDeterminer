@@ -216,12 +216,17 @@ const assertion = {
         params,
         errMsg = `${callback} did not throw an exception`
     ) {
+        let throwOccured = false;
         try {
-            await callback(...params);
-            assert.ok(false, errMsg);
+            if (params && params.length) await callback(...params);
+            else await callback();
         } catch (e) {
-            assert.ok(true);
+            throwOccured = true;
+            console.log("QWE", params, e);
         }
+
+        console.log(throwOccured);
+        assert.ok(throwOccured, errMsg);
     },
 
     willThrowWithMessage: async function (
@@ -230,15 +235,17 @@ const assertion = {
         errorMessage,
         errMsg = `${callback} did not throw an exception, or the error message doesn't include: ${errorMessage}`
     ) {
+        let receivedError = "";
         try {
             await callback(...params);
         } catch (e) {
-            assert.strictEqual(
-                e.message.includes(errorMessage),
-                true,
-                errMsg + `\nActual error message: ${e}`
-            );
+            receivedError = e;
         }
+        assert.strictEqual(
+            receivedError.message.includes(errorMessage),
+            true,
+            errMsg + `\nActual error message: ${receivedError}`
+        );
     },
 
     newCallObj: (expectation, errMsg) => {

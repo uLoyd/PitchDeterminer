@@ -34,7 +34,7 @@ describe(`Audio File Handler`, function () {
                 general: testData.params.general,
                 gainNode: new Gain(testData.params.gainSettings),
                 analyserNode: new Analyser(testData.params.analyserSettings),
-                navigator: NavigatorMock
+                navigator: NavigatorMock,
             },
             "notExistingFile.wav"
         );
