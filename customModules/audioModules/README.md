@@ -498,6 +498,112 @@ Members:
 | static parseDuration | spec: Union[string, number, Object],<br>overrides: Optional[Object] | Object | Parses duration and returns its base value, label, dot information, tuplet information, resulting `wholeNotes` value. Supports numeric whole-note fractions, note-value names, fractions, dotted and double/triple dotted values, tuplets, ratio notation and `bar`/`measure`. |
 | static noteLabel | note: Union[string, number, Object] | string | If string's the argument returns the same thing. Otherwise its basically `FrequencyMath::toString` |
 
+#### Example of playing something:
+```javascript
+const { AudioHandler, Synth, Track } = require("audio-works");
+
+// audioHandler instance
+let mic = new AudioHandler();
+let runLoop = false;
+
+// -------- synth ---------
+const synthHandler = new AudioHandler();
+
+const synth = new Synth(synthHandler, {
+    waveform: "sawtooth",
+    attack: 0.01,
+    release: 0.1,
+    masterVolume: 0.5,
+});
+
+const synth2 = new Synth(synthHandler, {
+    waveform: "sawtooth",
+    attack: 0.01,
+    release: 0.1,
+    masterVolume: 0.5,
+});
+
+const track = new Track({
+    bpm: 113,
+    timeSignature: "4/4",
+    synths: [synth, synth2]
+});
+
+const chords = [
+    ["C4", "E4", "G4"],
+    ["A3", "C4", "E4"],
+    ["F3", "A3", "C4"],
+    ["G3", "B3", "D4"],
+];
+
+const melody = [
+    ["A4", "1/4"],
+    ["C5", "1/4"],
+    ["D5", "1/4"],
+    ["E5", "1/4"],
+
+    ["E5", "1/4"],
+    ["D5", "1/4"],
+    ["C5", "1/4"],
+    ["A4", "1/4"],
+
+    ["A4", "1/4"],
+    ["C5", "1/4"],
+    ["E5", "1/4"],
+    ["G5", "1/4"],
+
+    ["E5", "1/2"],
+    ["D5", "1/4"],
+    ["C5", "1/4"],
+
+    ["D5", "1/4"],
+    ["E5", "1/4"],
+    ["G5", "1/4"],
+    ["A5", "1/4"],
+
+    ["G5", "1/4"],
+    ["E5", "1/4"],
+    ["D5", "1/4"],
+    ["C5", "1/4"],
+
+    ["A4", "1/4"],
+    ["C5", "1/4"],
+    ["D5", "1/4"],
+    ["F5", "1/4"],
+
+    ["E5", "1/2"],
+    ["D5", "1/4"],
+    ["A4", "1/4"],
+];
+
+async function loop() {
+    let chordInd = 0;
+    let soundInd = 0;
+
+    while (runLoop) {
+        track.playChord(chords[chordInd++], "whole", {synth: synth});
+        chordInd = chordInd >= chords.length ? 0 : chordInd;
+        const [note, duration] = melody[soundInd++];
+        soundInd = soundInd >= melody.length ? 0 : soundInd;
+        await track.playNote(note, duration, {synth: synth2});
+    }
+}
+
+function stop() {
+  runLoop = false;
+  track.panic();
+}
+
+function run() {
+  const audio = document.querySelector("audio"); // assuming here you already got some audio element present
+  runLoop = true;
+  track.start();
+  synth.setSrcObject(audio);
+  loop();
+  setTimeout(stop, 2000);
+}
+```
+
 ## Default setup values
 
 [File in GitHub](https://github.com/uLoyd/PitchDeterminer/blob/master/customModules/audioModules/audioHandlerComponents/defaultAudioValues.js)  

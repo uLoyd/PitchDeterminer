@@ -128,20 +128,22 @@ window.onload = async () => {
         test.buttonToggle(synthBut, false);
 
         if (test.synthEnabled) {
+            runLoop = true;
             console.log("setting synth");
             track.start();
             synth.setSrcObject(audio);
             loop();
         } else {
+            runLoop = false;
             console.log("unsetting synth");
-            track.stop();
-            audio.srcObject = null;
             track.panic();
+            audio.srcObject = null;
         }
     }
 
     // audioHandler instance
     let mic = new AudioHandler();
+    let runLoop = false;
 
     // -------- synth ---------
     const synthHandler = new AudioHandler();
@@ -153,10 +155,17 @@ window.onload = async () => {
         masterVolume: 0.5,
     });
 
+    const synth2 = new Synth(synthHandler, {
+        waveform: "sawtooth",
+        attack: 0.01,
+        release: 0.1,
+        masterVolume: 0.5,
+    });
+
     const track = new Track({
         bpm: 113,
         timeSignature: "4/4",
-        synth,
+        synths: [synth, synth2]
     });
 
     const chords = [
@@ -206,23 +215,16 @@ window.onload = async () => {
         ["A4", "1/4"],
     ];
 
-    async function playBar(chord) {
-        await track.playChord(chord, "whole");
-    }
-
     async function loop() {
-        while (true) {
-            for (let i = 0; i < chords.length; i++) {
-                track.playChord(chords[i], "whole");
+        let chordInd = 0;
+        let soundInd = 0;
 
-                const start = i * 4;
-                const end = Math.min(start + 4, melody.length);
-
-                for (let j = start; j < end; j++) {
-                    const [note, duration] = melody[j];
-                    await track.playNote(note, duration);
-                }
-            }
+        while (runLoop) {
+            track.playChord(chords[chordInd++], "whole", {synth: synth});
+            chordInd = chordInd >= chords.length ? 0 : chordInd;
+            const [note, duration] = melody[soundInd++];
+            soundInd = soundInd >= melody.length ? 0 : soundInd;
+            await track.playNote(note, duration, {synth: synth2});
         }
     }
     // -------- synth ---------

@@ -46,11 +46,13 @@ const makeClock = () => {
 describe("Track", () => {
     let clock;
     let synth;
+    let synth2;
     let track;
 
     beforeEach(() => {
         clock = makeClock();
         synth = makeSynth();
+        synth2 = makeSynth();
         track = new Track({
             bpm: 120,
             timeSignature: "4/4",
@@ -433,6 +435,7 @@ describe("Track", () => {
 
     it("dispose stops transport, clears synths and listeners", () => {
         track.addSynth(synth);
+        track.addSynth(synth2);
         track.start();
         track.on(AudioEvents.trackStart, () => {});
 
@@ -442,5 +445,6 @@ describe("Track", () => {
         assert.strictEqual(track.getSynths().length, 0);
         assert.strictEqual(track.listenerCount(AudioEvents.trackStart), 0);
         assert.strictEqual(synth.calls.panic.length, 1);
+        assert.strictEqual(synth2.calls.panic.length, 1);
     });
 });
