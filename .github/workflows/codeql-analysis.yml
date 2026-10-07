@@ -1,16 +1,17 @@
-name: "CodeQL"
+name: "CodeQL Analysis"
 
 on:
   push:
-    branches: [ master ]
+    branches: [ "master", "main" ]
   pull_request:
-    branches: [ master ]
+    branches: [ "master", "main" ]
   schedule:
-    - cron: '40 23 * * 0,2,4,6'
+    - cron: '0 19 * * *'
+  workflow_dispatch:
 
 jobs:
   analyze:
-    name: Analyze
+    name: Analyze (${{ matrix.language }})
     runs-on: ubuntu-latest
     permissions:
       actions: read
@@ -20,7 +21,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        language: [ 'javascript' ]
+        language: [ 'javascript-typescript' ]
 
     steps:
     - name: Checkout repository
@@ -30,9 +31,6 @@ jobs:
       uses: github/codeql-action/init@v3
       with:
         languages: ${{ matrix.language }}
-
-    - name: Autobuild
-      uses: github/codeql-action/autobuild@v3
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v3
