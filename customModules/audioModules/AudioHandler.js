@@ -9,7 +9,6 @@ const {
     ScriptProcessor,
     AudioEvents,
     NavigatorInputConstraint,
-    FrequencyMath,
 } = require("./index");
 const { fillDefaults } = require("./utilities/utilities");
 
@@ -186,131 +185,6 @@ class AudioHandler extends AudioSetup {
         await this.streamResume();
         this.running = true;
         this.emit(AudioEvents.streamResume, this);
-    }
-
-    // ---------------------------------------------------- yolo
-    initSynth() {
-        this.srcObject = null;
-        this.synthDestination = null;
-        this.synthVoices = new Map();
-        this.synthWaveform = "sawtooth";
-
-        this.selfCheckAudioContext();
-
-        if (!this.synthDestination) {
-            this.synthDestination =
-                this.audioContext.createMediaStreamDestination();
-
-            // Expose the generated audio as a MediaStream.
-            this.srcObject = this.synthDestination.stream;
-
-            // Route the analyser output into the generated stream.
-            // Correlation reads from this same analyser.
-            this.analyser.node.connect(this.synthDestination);
-        }
-
-        return this.srcObject;
-    }
-
-    async synthNoteOn(note, octave, velocity = 0.7) {
-        this.selfCheckAudioContext();
-
-        if (!this.synthDestination) {
-            this.initSynth();
-        }
-
-        await this.audioContext.resume();
-
-        const key = `${note}${octave}`;
-
-        // Replace an already-playing voice for this key.
-        this.synthNoteOff(note, octave);
-
-        const frequency = FrequencyMath.soundConstructor(
-            note,
-            octave
-        ).initialFrequency;
-
-        const oscillator = this.audioContext.createOscillator();
-
-        const envelope = this.audioContext.createGain();
-
-        const now = this.audioContext.currentTime;
-        const safeVelocity = Math.max(0, Math.min(1, velocity));
-
-        oscillator.type = this.synthWaveform;
-        oscillator.frequency.setValueAtTime(frequency, now);
-
-        envelope.gain.setValueAtTime(0.0001, now);
-        envelope.gain.linearRampToValueAtTime(
-            Math.max(0.0001, safeVelocity),
-            now + 0.01
-        );
-
-        // The analyser receives the synth signal.
-        // Its output feeds both the existing analysis path
-        // and the synthesizer's MediaStream destination.
-        oscillator.connect(envelope);
-        envelope.connect(this.analyser.node);
-
-        const voice = { oscillator, envelope };
-        this.synthVoices.set(key, voice);
-
-        oscillator.onended = () => {
-            if (this.synthVoices.get(key) === voice) {
-                this.synthVoices.delete(key);
-            }
-
-            oscillator.disconnect();
-            envelope.disconnect();
-        };
-
-        oscillator.start(now);
-
-        return { note, octave, frequency };
-    }
-
-    synthNoteOff(note, octave) {
-        const key = `${note}${octave}`;
-        const voice = this.synthVoices.get(key);
-
-        if (!voice) return;
-
-        this.synthVoices.delete(key);
-
-        const now = this.audioContext.currentTime;
-        const release = 0.12;
-        const gain = voice.envelope.gain;
-
-        gain.cancelScheduledValues(now);
-        gain.setValueAtTime(gain.value, now);
-        gain.linearRampToValueAtTime(0.0001, now + release);
-
-        voice.oscillator.stop(now + release + 0.02);
-    }
-
-    stopAllSynthVoices() {
-        for (const key of [...this.synthVoices.keys()]) {
-            const match = key.match(/^(.+)(-?\d+)$/);
-
-            if (match) {
-                this.synthNoteOff(match[1], Number(match[2]));
-            }
-        }
-    }
-
-    setSynthWaveform(type) {
-        const supported = ["sine", "square", "sawtooth", "triangle"];
-
-        if (!supported.includes(type)) {
-            throw new RangeError(`Unsupported waveform: ${type}`);
-        }
-
-        this.synthWaveform = type;
-
-        for (const voice of this.synthVoices.values()) {
-            voice.oscillator.type = type;
-        }
     }
 }
 

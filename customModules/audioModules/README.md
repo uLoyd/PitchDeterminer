@@ -38,6 +38,7 @@ TODO right now:
 - [ ] Anything else that will pop up later
 
 ## ChangeLog:
+- [v0.6.9](#v069) 👀
 - [v0.6.8](#v068)
 - [v0.6.7](#v067)
 - [v0.6.6](#v066)
@@ -57,6 +58,8 @@ TODO right now:
 - [SoundStorageEvent](#SoundStorageEvent)
 - [FrequencyMath](#FrequencyMath)
 - [AudioEvents](#AudioEvents)
+- [Synth](#Synth)
+- [Track](#Track)
 
 ## Test coverage
 - [coverage](#Current-test-coverage)
@@ -421,6 +424,79 @@ Members:
 - streamResume
 - sampleLimit
 - sampleTarget
+- trackStart
+- trackStop
+- trackBeat
+- trackNoteOn
+- trackNoteOff
+- synthReady
+- synthNoteOn
+- synthNoteOff
+- synthVoiceEnd
+
+### Synth
+
+`Synth` extends `EventEmitter`. A synthesizer using oscillator from `AudioContext` retrieved from `AudioHandler`. Provides note playback, and relevant controls (detuning, volume, output devices, attack, release).
+
+| Method | Arguments | Return value | Description |
+| --- | --- | --- | --- |
+| constructor | audioHandler: AudioHandler or AudioFileHandler,<br>options: Optional[Object] | Synth | Receives an initialized AudioHandler or AudioFileHandler instance and optional synthesizer settings. Available options are `waveform: string`, `velocity: double <0, 1>`, `attack: double`, `release: double`, `retriggerRelease: double`, `detune: double`, `masterVolume: double <0, 1>`, `maxVoices: uint`, `monitor: bool`, `includeMic: bool` and `eager: bool`. Waveform can be `sine`, `square`, `sawtooth` or `triangle`. By default the synthesizer uses: waveform = `sawtooth`, velocity = `0.7`, attack = `0.01`, release = `0.12`, retrigger release = `0.03`, detune = 0, masterVolume = `1`, maxVoices = `16`, monitor = `true`, includeMic = `true`, eager = `false` |
+| initSynth | N/A | Synth | Initializes synth audio graph using the AudioContext from AudioHandler. Creates the MediaStream destination, gain nodes, connects the synthesizer output to the destination. When `includeMic` is enabled, the AudioHandler analyser output is connected to the synthesizer MediaStream. If the AudioHandler changes its AudioContext, the synthesizer graph is rebuilt. Emits `synthReady` after initialization. |
+| async noteOn | note: Union[string, number, FrequencyMath],<br>velocity: double = this.defaultVelocity | Synth | Starts a new oscillator voice for the specified note. If a voice for the same note already exists it is released using the retrigger release time. The oldest voice is released when the `maxVoices` limit is reached. Emits `synthNoteOn` |
+| noteOff | note: Union[string, number, FrequencyMath] | Synth | Releases the active voice for the passed sound. Emits `synthNoteOff` |
+| async play | note: Union[string, number, FrequencyMath],<br>duration: double = 0.5,<br>velocity: double = this.defaultVelocity | Synth | Starts the specified note and schedules `noteOff` after the duration in seconds. Bascially fire and forget. |
+| stopAllVoices | release: double = this.release | Synth | Releases all active voices with the specified release time. |
+| panic | N/A | Synth | Immediately stops all voices without release tails. |
+| setWaveform | type: string | Synth | Changes the used waveform. The waveform must be one of: [`sine`, `square`, `sawtooth`, `triangle`]. Existing oscillators are changed to the new waveform. |
+| setMasterVolume | volume: double <0, 1> | Synth | Changes the `masterVolume`. New value is applied to the gain node. |
+| setMonitor | enabled: bool | Synth | Toggles local monitoring output through the AudioContext destination. |
+| setDetune | cents: double | Synth | Set oscillator detuning in cents. Updates existing oscillators. |
+| setSrcObject | audioObject: HTMLMediaElement,<br>options: Optional[Object] | Synth | Initializes the synth and assigns its MediaStream to the `srcObject` property of the `audioObject`. Optional `{monitor: bool}` controls local monitoring. |
+| getStream | N/A | MediaStream | Synth's MediaStream. |
+| activeVoiceCount | N/A | uint | Number of active voices. |
+| getActiveNotes | N/A | Array[string] | Array of active notes ("A5", "C#3", ...etc). |
+| getVoice | note: Union[string, number, FrequencyMath] | Object or null | `{ note, distance, frequency, startedAt, released }`, or `null` if not found |
+| dispose | N/A | Synth | Stops all voices, tears down the audio graph and removes all registered event listeners. |
+
+### Track
+
+`Track` extends `EventEmitter`. Handles timing and sequencing of `Synth` objects it stores. Tempo and time-signature handling, duration parsing, transport control and queued note playback.
+
+| Method | Arguments | Return value | Description |
+| --- | --- | --- | --- |
+| constructor | options: Optional[Object] | Track | Creates a Track using the timing and synth settings. Options: `bpm: double`, `tempo: double`, `timeSignature: Union[string, Array, Object]`, `meter: Union[string, Array, Object]`, `signature: Union[string, Array, Object]`, `beatUnit: Union[string, number]`, `synth: Synth`, `synths: Array[Synth]`, `velocity: double <0, 1>`, `lookahead: double (miliseconds)` and `clock: function`. `tempo` and `meter` are aliases for `bpm` and `timeSignature`. The default tempo = `120`, time signature = `4/4`, beat unit is the time-signature denominator = 4 (quarter note), velocity = `0.7`, lookahead = `20` |
+| addSynth | synth: Synth | Track | Adds a `Synth` object to the Track. |
+| removeSynth | synth: Synth | Track | Removes the specified `Synth` |
+| hasSynth | synth: Synth | bool | Returns true if the specific synth is held by the Track. |
+| getSynths | N/A | Array[Synth] | Returns a new array of all synths held by the Track. |
+| clearSynths | options: Optional[Object] | Track | Removes all synths from the Track. Stops the synths first unless `options = {stop = false}` |
+| getTempo | N/A | double | Returns the tempo in beats per minute. |
+| setTempo | bpm: double | Track | Changes the Track tempo. Queued events and the transport position are rescaled. |
+| getTimeSignature | N/A | Object{</br>`numerator: int`,</br>`denominator: int`</br>} | Returns object with time signature |
+| setTimeSignature | timeSignature: Union[string, Array, Object],<br>options: Optional[Object] | Track | Changes the time signature and beat unit. Existing queued events are rescaled. The optional `beatUnit` setting changes the beat unit used for duration and timing calculations. |
+| getBeatUnit | N/A | Object | Returns `{ divisor: int }` |
+| setLookahead | milliseconds: double | Track | Changes the scheduler lookahead interval, reschedules the transport timer. |
+| getSecondsPerWholeNote | N/A | double | Number of seconds one whole note takes for the set tempo/beat-unit. |
+| getBeatLength | N/A | double | Returns the length of one beat as a fraction of a whole note. Basically your metronome tick. |
+| getBeatDuration | N/A | double | Returns the duration of one beat in seconds. |
+| getBarLength | N/A | double | Returns the length of one bar as a fraction of a whole note. |
+| getBarDuration | N/A | double | Returns the duration of one bar in seconds. |
+| getWholeNotes | duration: Union[string, number, Object],<br>options: Optional[Object] | double | Converts a duration into a fraction of a whole note. Supports note-value names, fractions, dotted values, tuplets, ratio notation and bar/measure durations.</br>Duration valid object keys `{"value", "duration", "note", "length"}`</br>Option object valid keys: `{"dots": dotted notes, "tuplet": tuplets, "inTimeOf"}` |
+| getDuration | duration: Union[string, number, Object],<br>options: Optional[Object] | double | Converts a duration into seconds using `this.getWholeNotes` with arguments passed to it, and multiplied by `this.getSecondsPerWholeNote` |
+| start | N/A | Track | Emits `trackStart`, begins scheduling queued events and beat events. |
+| stop | N/A | Track | Stops all active notes. Preserves the current transport position for later continuation. Emits `trackStop`. |
+| reset | N/A | Track | Resets the transport timing reference to the current clock value. |
+| isRunning | N/A | bool | Returns `this.running` |
+| playNote | note: Union[string, number, FrequencyMath, Array[Union[string, number, FrequencyMath]]],<br>duration: Union[string, number, Object] = `"quarter"`,<br>options: Optional[Object] | Promise[Track] | Plays one or more notes through all attached synths for the specified musical duration. Options: `{velocity: double`, `synth: Synth`, `dots: uint`, `tuplet: uint`, `inTimeOf: uint}`. When `synth` is present, playback is sent only to that synth. |
+| playChord | notes: Array[Union[string, number, FrequencyMath]],<br>duration: Union[string, number, Object] = `"quarter"`,<br>options: Optional[Object] | Promise[Track] | Plays all notes in the array simultaneously for the specified duration. Proxy for `playNote`, accepts the same duration and options arguments. |
+| rest | duration: Union[string, number, Object] = `"quarter"`,<br>options: Optional[Object] | Promise[Track] | Adds a silence duration. Same options as for `this.getWholeNotes` which is used by `this.getDuration` |
+| stopNote | note: Union[string, number, FrequencyMath, Array[Union[string, number, FrequencyMath]]] | Track | Releases the note/notes on all synths held by the Track. |
+| stopAll | release: double | Track | Cancels all queued events and releases all active voices on synths using using the release value. |
+| panic | N/A | Track | Cancels all queued events and immediately silences all synths without release tails. |
+| dispose | N/A | Track | Stops the Track if running, cancels all queued events, silences attached synths, removes all synths & event listeners. |
+| static parseTimeSignature | timeSignature: Union[string, Array, Object] | Object | Parses a time signature and returns an object `{ numerator: int, denominator: int }`. String values use the `"numerator/denominator"` format, arrays `[numerator, denominator]`, and objects that use keys: `[numerator,denominator, beats, unit]`. |
+| static parseDuration | spec: Union[string, number, Object],<br>overrides: Optional[Object] | Object | Parses duration and returns its base value, label, dot information, tuplet information, resulting `wholeNotes` value. Supports numeric whole-note fractions, note-value names, fractions, dotted and double/triple dotted values, tuplets, ratio notation and `bar`/`measure`. |
+| static noteLabel | note: Union[string, number, Object] | string | If string's the argument returns the same thing. Otherwise its basically `FrequencyMath::toString` |
 
 ## Default setup values
 
@@ -435,39 +511,49 @@ Fields needed to construct crucial objects:
 if not specified by user are loaded from this file.
 
 ## Current test coverage
+File                                                      | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s
+----------------------------------------------------------|---------|----------|---------|---------|-----------------
+All files                                                 |   93.85 |    81.02 |      93 |   95.16 |
+ audioModules                                             |   92.62 |    79.69 |   92.39 |   94.19 |
+  AudioFileHandler.js                                     |   85.71 |       90 |      80 |   85.71 | 16-17,64-65
+  AudioHandler.js                                         |   96.39 |       80 |   81.25 |   98.67 | 50
+  FrequencyMath.js                                        |     100 |      100 |     100 |     100 |
+  SoundStorage.js                                         |     100 |      100 |     100 |     100 |
+  SoundStorageEvent.js                                    |   91.43 |    83.33 |     100 |   93.94 | 14-15
+  Synth.js                                                |   91.12 |    76.11 |   84.62 |   94.79 | 179-184,327,362-363,407,415
+  Track.js                                                |   90.48 |    77.24 |   95.52 |   91.25 | 76-82,97,100-107,115,124,134,145,155,159,216,312-314,482,540,548-552,659,684,703,716,735-736,832
+  Weights.js                                              |     100 |      100 |     100 |     100 |
+  index.js                                                |     100 |      100 |     100 |     100 |
+ audioModules/audioHandlerComponents                      |   97.46 |    83.33 |   93.02 |   97.91 |
+  AudioEvents.js                                          |     100 |      100 |     100 |     100 |
+  AudioSetup.js                                           |   97.37 |    66.67 |   92.31 |    97.3 | 49
+  Correlation.js                                          |   91.49 |    86.36 |      75 |   93.18 | 42,91,104
+  Device.js                                               |     100 |      100 |     100 |     100 |
+  DeviceHandler.js                                        |     100 |       80 |      95 |     100 | 16,29,69
+  NavigatorInputConstraint.js                             |     100 |      100 |     100 |     100 |
+  defaultAudioValues.js                                   |     100 |      100 |     100 |     100 |
+ audioModules/audioHandlerComponents/audioSetupComponents |     100 |      100 |     100 |     100 |
+  Analyser.js                                             |     100 |      100 |     100 |     100 |
+  Gain.js                                                 |     100 |      100 |     100 |     100 |
+  IAudioNode.js                                           |     100 |      100 |     100 |     100 |
+  MediaStreamSource.js                                    |     100 |      100 |     100 |     100 |
+  ScriptProcessor.js                                      |     100 |      100 |     100 |     100 |
+ audioModules/utilities                                   |     100 |      100 |     100 |     100 |
+  convertToArrayBuffer.js                                 |     100 |      100 |     100 |     100 |
+  fillDefaults.js                                         |     100 |      100 |     100 |     100 |
+  utilities.js                                            |     100 |      100 |     100 |     100 |
 
-| File                                                     | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s |
-|----------------------------------------------------------|---------|----------|---------|---------|-------------------|
-| All files                                                | 97.04   | 88.24    | 93.43   | 97.91   |                   |
-| audioModules                                             | 95.82   | 88.3     | 92.31   | 97.05   |                   |
-| AudioFileHandler.js                                      | 85.71   | 90       | 80      | 85.71   | 16-17,64-65       |      
-| AudioHandler.js                                          | 93.98   | 72       | 75      | 97.3    | 48,77             |            
-| FrequencyMath.js                                         | 100     | 100      | 100     | 100     |                   |
-| SoundStorage.js                                          | 100     | 100      | 100     | 100     |                   |
-| SoundStorageEvent.js                                     | 91.43   | 83.33    | 100     | 93.94   | 14-15             |            
-| Weights.js                                               | 100     | 100      | 100     | 100     |                   |
-| index.js                                                 | 100     | 100      | 100     | 100     |                   |
-| audioModules/audioHandlerComponents                      | 98.13   | 82.35    | 93.02   | 98.7    |                   |
-| AudioEvents.js                                           | 100     | 100      | 100     | 100     |                   |
-| AudioSetup.js                                            | 97.37   | 66.67    | 92.31   | 97.3    | 49                |               
-| Correlation.js                                           | 97.56   | 94.74    | 100     | 97.44   | 88                |               
-| Device.js                                                | 100     | 100      | 100     | 100     |                   |
-| DeviceHandler.js                                         | 97.73   | 70       | 90      | 100     | 13-26,66          |         
-| NavigatorInputConstraint.js                              | 100     | 100      | 100     | 100     |                   |
-| defaultAudioValues.js                                    | 100     | 100      | 100     | 100     |                   |
-| audioModules/audioHandlerComponents/audioSetupComponents | 100     | 100      | 100     | 100     |                   |
-| Analyser.js                                              | 100     | 100      | 100     | 100     |                   |
-| Gain.js                                                  | 100     | 100      | 100     | 100     |                   |
-| IAudioNode.js                                            | 100     | 100      | 100     | 100     |                   |
-| MediaStreamSource.js                                     | 100     | 100      | 100     | 100     |                   |
-| ScriptProcessor.js                                       | 100     | 100      | 100     | 100     |                   |
-| audioModules/utilities                                   | 100     | 100      | 100     | 100     |                   |
-| convertToArrayBuffer.js                                  | 100     | 100      | 100     | 100     |                   |
-| fillDefaults.js                                          | 100     | 100      | 100     | 100     |                   |
-| utilities.js                                             | 100     | 100      | 100     | 100     |                   |
 
 
 # ChangeLog
+## v0.6.9
+![noice](https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExdDNnaDYwN2NzZDhpODBnbm52b3NybHBpY24wZmkzNmU2N2s0Z3Y3YyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/yJFeycRK2DB4c/giphy.gif)
+- Unfortunately I still have not peacfully passed away in my sleep
+- And nodejs versions went up by a lot throughout the years ngl
+- Added [Synth](#Synth) that's basically a web-audio-api oscillator with a bunch of spaghetti on top
+- Added [Track](#Track) that's a bunch of spaghetti handling the synth spaghetti
+- Minor changes to correlation algorithm that you won't see
+
 ## v0.6.8
 - [SoundStorageEvent](#SoundStorageEvent) Uses base class _empty_ method instead of custom implementation
 - _convertToArrayBuffer_ function from utils has default value _maxSmallContainerSize_ set to 35000
